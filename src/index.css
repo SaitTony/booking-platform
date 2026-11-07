@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #26251f;
+  background: #f7f5f1;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-optical-sizing: auto;
+  font-weight: 400;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+a { color: inherit; }
+
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 24px 28px;
+  background:
+    radial-gradient(ellipse at 12% 12%, rgba(221, 211, 190, .35), transparent 35%),
+    radial-gradient(ellipse at 90% 85%, rgba(207, 215, 199, .32), transparent 34%),
+    #f7f5f1;
+}
+.welcome-card {
+  width: min(100%, 720px);
+  padding: clamp(32px, 7vw, 72px);
+  border: 1px solid rgba(75, 70, 58, .10);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 24px 80px rgba(45, 40, 30, .06);
+}
+.eyebrow {
+  color: #85806f;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+h1 {
+  margin: 22px 0 18px;
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(36px, 7vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -.055em;
+  font-weight: 700;
+}
+.lead { max-width: 510px; color: #68665e; font-size: 17px; line-height: 1.7; }
+.muted { color: #77746b; line-height: 1.7; }
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 34px 0 30px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #f4f2ec;
+  color: #625f55;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.notice-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: #9b9b75; }
+.text-link { display: inline-flex; gap: 10px; align-items: center; color: #48483d; font-weight: 600; text-decoration: none; }
+.text-link:hover { color: #89835f; }
+footer { margin-top: 28px; color: #969187; font-size: 12px; }
+@media (max-width: 520px) {
+  .page-shell { padding: 20px 14px; }
+  .welcome-card { border-radius: 22px; }
+  .lead { font-size: 15px; }
+}
