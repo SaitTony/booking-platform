@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Перенаправление…</title>
+    <script>
+      // Keep clean URLs such as /booking-platform/anna on GitHub Pages.
+      const base = '/booking-platform'
+      const requested = window.location.pathname + window.location.search + window.location.hash
+      sessionStorage.setItem('spa-redirect', requested)
+      window.location.replace(base + '/')
+    </script>
+  </head>
+  <body></body>
+</html>
