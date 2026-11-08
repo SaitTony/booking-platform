@@ -19,7 +19,7 @@ type Account = Profile & { company_members?: Member[] }
 function makeSlug(value: string) {
   const map: Record<string,string> = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'i',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}
   return value.toLowerCase().split('').map(char=>map[char] ?? char).join('').normalize('NFKD')
-    .replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+    .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
 }
 const roleLabel = (profile: Account) => {
   if (profile.platform_role === 'owner') return 'Owner'
@@ -64,6 +64,8 @@ export default function AdminApp() {
       .eq('id', user.id).maybeSingle()
     if (profileError) setError(profileError.message)
     setProfile(data as Profile | null)
+    const membership=(data as Profile | null)?.company_members?.[0]
+    if(membership){setPageCompanyId(membership.company_id);if(membership.role==='admin')setPageKind('company')}
     setSessionReady(true)
   }
 
