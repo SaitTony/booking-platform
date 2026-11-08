@@ -188,3 +188,56 @@
 .master-avatar img,.mini-avatar img,.team-image img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
 
 .home-title span{display:block}.home-title span+span{color:var(--accent)}
+
+
+/* Midnight blue theme for the administrative workspace */
+.admin-shell{
+  --page:#071426;
+  --surface:#0d1e35;
+  --soft:#142b47;
+  --ink:#e8f0ff;
+  --text:#e8f0ff;
+  --muted:#9aafca;
+  --line:#29415f;
+  --accent:#5688c7;
+  --accent-hover:#6b9bd8;
+  background:radial-gradient(ellipse at 15% 0%,#17365b 0%,transparent 42%),var(--page);
+  color:var(--ink);
+}
+.admin-shell .admin-card,
+.admin-shell .admin-account{
+  background:linear-gradient(145deg,#102540,#0b1b30);
+  border-color:var(--line);
+  box-shadow:0 14px 38px rgba(0,0,0,.22);
+}
+.admin-shell .admin-field input,
+.admin-shell .admin-field select,
+.admin-shell .workspace-hour-row input[type=time]{
+  background:#09192d;
+  border-color:#345171;
+  color:var(--ink);
+}
+.admin-shell .admin-field input::placeholder{color:#7189a8}
+.admin-shell .admin-field input:focus,
+.admin-shell .admin-field select:focus,
+.admin-shell .workspace-hour-row input[type=time]:focus{
+  outline:2px solid #6b9bd8;
+  outline-offset:1px;
+}
+.admin-shell .primary-button{background:var(--accent);color:#f7faff}
+.admin-shell .primary-button:hover{background:var(--accent-hover)}
+.admin-shell .secondary-button{
+  background:#142b47;
+  border:1px solid #345171;
+  color:#dce9fb;
+}
+.admin-shell .secondary-button:hover{background:#1b385a;border-color:#5688c7}
+.admin-shell .admin-role{background:#193452;color:#c5d8f0}
+.admin-shell .admin-notice{background:#123b35;color:#a9ead2;border:1px solid #28675a}
+.admin-shell .admin-error{background:#48252d;color:#ffc5cb;border:1px solid #7d3c4a}
+.admin-shell .admin-section-head>span{color:var(--muted)}
+.admin-shell .admin-account>div span{color:var(--muted)}
+.admin-shell .eyebrow{color:#91add0}
+.admin-shell .workspace-hour-row{border-color:var(--line)}
+.admin-shell .workspace-hour-row label{color:var(--muted)}
+.admin-shell a{color:#8db8ed}
