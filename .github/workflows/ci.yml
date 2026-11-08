@@ -40,6 +40,9 @@ jobs:
       - name: Check migration status
         run: supabase migration list --local
 
+      - name: Run database functional tests
+        run: supabase test db --local
+
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
