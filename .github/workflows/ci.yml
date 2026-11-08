@@ -1,0 +1,76 @@
+name: Validate Booking Space
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Avoid pulling multiple disposable Supabase stacks for the same branch at once.
+concurrency:
+  group: booking-space-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-backend-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Report dependency vulnerabilities
+        run: |
+          npm audit --json > /tmp/npm-audit.json || true
+          node -e "const a=require('/tmp/npm-audit.json'); for (const [name,v] of Object.entries(a.vulnerabilities || {})) console.log(JSON.stringify({name,severity:v.severity,isDirect:v.isDirect,range:v.range,fixAvailable:v.fixAvailable,via:v.via.map(x=>typeof x==='string'?x:{title:x.title,url:x.url,range:x.range})}))"
+
+      - name: TypeScript and Vite build
+        run: npm run build
+
+      - name: Install pinned Supabase CLI
+        id: setup-supabase
+        run: |
+          curl --fail --show-error --location --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 20 -o /tmp/supabase.tar.gz https://github.com/supabase/cli/releases/download/v3.0.0/supabase_3.0.0_linux_amd64.tar.gz
+          cp /tmp/supabase.tar.gz /tmp/supabase_3.0.0_linux_amd64.tar.gz
+          curl --fail --show-error --location --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 20 -o /tmp/supabase-checksums.txt https://github.com/supabase/cli/releases/download/v3.0.0/checksums.txt
+          grep 'supabase_3.0.0_linux_amd64.tar.gz' /tmp/supabase-checksums.txt | (cd /tmp && sha256sum -c -)
+          tar -xzf /tmp/supabase.tar.gz -C /tmp
+          sudo install /tmp/supabase /usr/local/bin/supabase
+          supabase --version
+
+      - name: Start disposable local Supabase stack
+        run: supabase start
+
+      - name: Apply every migration to the disposable local database
+        run: supabase db reset
+
+      - name: Check migration status
+        run: supabase migration list
+
+      - name: Run database functional tests
+        run: supabase test db
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type-check Edge Functions
+        run: |
+          deno check supabase/functions/create-user/index.ts
+          deno check supabase/functions/assign-user-role/index.ts
+          deno check supabase/functions/change-password/index.ts
+          deno check supabase/functions/owner-reset-access/index.ts
+
+      - name: Stop disposable local Supabase stack
+        if: always() && steps.setup-supabase.outcome == 'success'
+        run: supabase stop --no-backup
