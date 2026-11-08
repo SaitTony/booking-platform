@@ -207,10 +207,10 @@ export default function AdminApp() {
   </form></main>
 
   if (profile.disabled_at) return <main className="admin-shell"><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу Booking Space.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
-  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell"><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase.auth.signOut()}>Выйти</button></section></main>
+  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell"><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell"><section className="admin-wide">
-    <header className="admin-top"><div><span className="eyebrow">BOOKING SPACE</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button" onClick={()=>void supabase.auth.signOut()}>Выйти</button></header>
+    <header className="admin-top"><div><span className="eyebrow">BOOKING SPACE</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
     {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ ДОСТУПОМ</span><h2>Пользователи</h2></div><span>{accounts.length} учётных записей</span></div>
