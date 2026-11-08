@@ -37,7 +37,7 @@ drop function public.complete_password_change();
 -- edit ordinary page content and activation state within their scope.
 create or replace function public.guard_master_owner_fields()
 returns trigger language plpgsql set search_path = ''
-as $
+as $$
 declare
   v_actor_id uuid;
 begin
@@ -60,7 +60,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists masters_owner_fields_guard on public.masters;
 create trigger masters_owner_fields_guard
