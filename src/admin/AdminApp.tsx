@@ -264,6 +264,8 @@ export default function AdminApp() {
         <span className="admin-role">{roleLabel(account)}</span>
         {account.force_password_change && <span className="admin-role">Требуется смена пароля</span>}
       </article>)}</div>
+      <CompanySettings isOwner companyId={undefined}/>
+      <StaffWorkspace profile={profile}/>
     </> : profile.company_members?.some(member=>member.role==='admin') ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ КОМПАНИЕЙ</span><h2>Страницы мастеров</h2></div></div>
       <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
