@@ -209,16 +209,14 @@ export default function AdminApp() {
 
   const [phoneForCreate, setPhoneForCreate] = useState('')
 
-  if (!isSupabaseConfigured || !supabase) {
-    return <main className="admin-shell"><section className="admin-card"><h1>Панель управления</h1><p>Supabase ещё не подключён. Добавьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в настройки окружения frontend.</p></section></main>
-  }
-  if (!sessionReady) return <main className="admin-shell"><section className="admin-card">Загрузка…</section></main>
+  if (!sessionReady && supabase) return <main className="admin-shell"><section className="admin-card">Загрузка…</section></main>
   if (!profile) return <main className="admin-shell"><form className="admin-card" onSubmit={signIn}>
-    <span className="eyebrow">УПРАВЛЕНИЕ · ADMIN</span><h1>Вход в систему</h1>
+    <span className="eyebrow">АДМИНИСТРИРОВАНИЕ</span><h1>Вход в панель управления</h1>
     <label className="admin-field">Номер телефона<input type="tel" autoComplete="tel" placeholder="+358…" value={phone} onChange={e=>setPhone(e.target.value)} required /></label>
     <label className="admin-field">Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
+    {!isSupabaseConfigured && <p className="admin-error">Авторизация пока не подключена. Для входа необходимо настроить соединение с базой данных.</p>}
     {error && <p className="admin-error">{error}</p>}
-    <button className="primary-button full-button" disabled={busy}>{busy?'Входим…':'Войти'}</button>
+    <button className="primary-button full-button" disabled={busy || !supabase}>{busy?'Входим…':'Войти'}</button>
   </form></main>
 
   if (profile.force_password_change) return <main className="admin-shell"><form className="admin-card" onSubmit={changePassword}>
