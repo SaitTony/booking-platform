@@ -27,16 +27,19 @@ Deno.serve(async (req) => {
       return json({ error: "Отключение учётной записи Owner запрещено" }, 403);
     }
 
-    const { error: authError } = await admin.auth.admin.updateUserById(userId, {
-      ban_duration: disabled ? "876000h" : "0s",
-    });
-    if (authError) throw authError;
-
     const { error: profileError } = await admin
       .from("profiles")
       .update({ disabled_at: disabled ? new Date().toISOString() : null })
       .eq("id", userId);
     if (profileError) throw profileError;
+
+    const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+      ban_duration: disabled ? "876000h" : "0s",
+    });
+    if (authError) {
+      await admin.from("profiles").update({ disabled_at: disabled ? null : new Date().toISOString() }).eq("id", userId);
+      throw authError;
+    }
 
     return json({ success: true, disabled });
   } catch (error) {
