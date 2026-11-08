@@ -27,6 +27,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
   const [pageName,setPageName]=useState('')
   const [pageDescription,setPageDescription]=useState('')
   const [photoUrl,setPhotoUrl]=useState('')
+  const [timezone,setTimezone]=useState('Europe/Helsinki')
   const [theme,setTheme]=useState('natural')
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState('')
@@ -53,7 +54,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
       supabase.from('working_hours').select('id,weekday,opens_at,closes_at,is_day_off').eq('master_id',id).order('weekday'),
       supabase.from('bookings').select('id,starts_at,ends_at,status,service_name_snapshot,price_snapshot,client_name_snapshot,client_phone_snapshot').eq('master_id',id).order('starts_at',{ascending:false}).limit(50),
       supabase.from('clients').select('id,full_name,phone_e164').order('full_name').limit(100),
-      supabase.from('masters').select('display_name,public_description,photo_url,theme').eq('id',id).single(),
+      supabase.from('masters').select('display_name,public_description,photo_url,theme,timezone').eq('id',id).single(),
     ])
     for(const result of [serviceResult,hourResult,bookingResult,clientResult,masterResult])if(result.error){setError(result.error.message);return}
     setServices((serviceResult.data??[]) as Service[])
@@ -63,6 +64,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     setPageName(masterResult.data?.display_name??'')
     setPageDescription(masterResult.data?.public_description??'')
     setPhotoUrl(masterResult.data?.photo_url??'')
+    setTimezone(masterResult.data?.timezone??'Europe/Helsinki')
     setTheme(masterResult.data?.theme?.id??'natural')
   }
 
@@ -116,7 +118,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     if(!supabase||!masterId)return
     setBusy(true);setError('')
     const current=masters.find(m=>m.id===masterId)
-    const payload:Record<string,unknown>={display_name:pageName.trim(),public_description:pageDescription,photo_url:photoUrl.trim()||null}
+    const payload:Record<string,unknown>={display_name:pageName.trim(),public_description:pageDescription,photo_url:photoUrl.trim()||null,timezone}
     if(current?.kind==='individual')payload.theme={id:theme}
     const {error:updateError}=await supabase.from('masters').update(payload).eq('id',masterId)
     if(updateError)setError(updateError.message)
@@ -145,7 +147,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     {canEdit&&<form className="admin-card workspace-section" onSubmit={savePage}><h3>Страница мастера</h3>
       <label className="admin-field">Имя<input value={pageName} onChange={e=>setPageName(e.target.value)} required /></label>
       <label className="admin-field">Описание<textarea value={pageDescription} onChange={e=>setPageDescription(e.target.value)} rows={3}/></label>
-      <label className="admin-field">Ссылка на фотографию<input value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)} placeholder="https://…"/></label>
+      <label className="admin-field">Ссылка на фотографию<input value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)} placeholder="https://…"/></label>\n      <label className="admin-field">Часовой пояс (IANA)<input value={timezone} onChange={e=>setTimezone(e.target.value)} placeholder="Europe/Helsinki" required/></label>
       {profile.platform_role==='master_pro'&&<label className="admin-field">Цветовая тема<select value={theme} onChange={e=>setTheme(e.target.value)}><option value="natural">Natural</option><option value="graphite">Graphite</option><option value="sand">Sand</option><option value="green">Deep Green</option><option value="blue">Midnight Blue</option><option value="dark">Dark</option></select></label>}
       <button className="primary-button" disabled={busy}>Сохранить страницу</button>
     </form>}
