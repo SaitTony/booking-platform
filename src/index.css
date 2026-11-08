@@ -564,3 +564,109 @@
   .admin-shell .admin-modal{padding:25px 18px 19px}
   .admin-shell .accordion-meta{max-width:42%;white-space:normal;text-align:right}
 }
+
+
+/* Admin dashboard — larger typography and sidebar workspace */
+.admin-shell{
+  padding:30px 28px 64px;
+  font-size:16px;
+}
+.admin-shell .admin-wide{width:min(1440px,100%)}
+.admin-shell .admin-branding h1{font-size:clamp(28px,3.2vw,38px);line-height:1.2}
+.admin-shell .admin-branding p{font-size:15px}
+.admin-shell .eyebrow{font-size:13px}
+.admin-shell .admin-stats{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;
+  margin:24px 0 26px;
+}
+.admin-shell .admin-stat-card{
+  display:flex;flex-direction:column;gap:7px;min-height:116px;padding:19px 21px;
+  border:1px solid #e0e8f1;border-radius:16px;background:rgba(255,255,255,.94);
+  box-shadow:0 5px 18px rgba(35,58,86,.045);
+}
+.admin-shell .admin-stat-card span{font-size:14px;font-weight:700;color:#536a84}
+.admin-shell .admin-stat-card strong{font:700 30px/1.1 Manrope,sans-serif;color:#243d59}
+.admin-shell .admin-stat-card small{font-size:13px;color:#8292a5}
+.admin-shell .admin-workspace-layout{
+  display:grid;grid-template-columns:244px minmax(0,1fr);align-items:start;gap:22px;margin-top:18px;
+}
+.admin-shell .admin-sidebar{
+  position:sticky;top:20px;display:flex;flex-direction:column;gap:7px;padding:16px;
+  border:1px solid #e0e8f1;border-radius:17px;background:rgba(255,255,255,.94);
+  box-shadow:0 5px 18px rgba(35,58,86,.045);
+}
+.admin-shell .admin-sidebar-label{padding:5px 11px 9px;font-size:12px;font-weight:800;letter-spacing:.12em;color:#8798aa}
+.admin-shell .admin-sidebar button{
+  display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:10px 12px;
+  border:1px solid transparent;border-radius:11px;background:transparent;text-align:left;
+  color:#526a84;font-size:15px;font-weight:650;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+}
+.admin-shell .admin-sidebar button span{display:grid;place-items:center;width:25px;height:25px;color:#7892ae;font-size:19px}
+.admin-shell .admin-sidebar button:hover{background:#f4f7fb;border-color:#e7edf4}
+.admin-shell .admin-sidebar button.active{background:#edf3f9;border-color:#dce7f2;color:#2f5279}
+.admin-shell .admin-sidebar button.active span{color:#527ba4}
+.admin-shell .admin-main-content{min-width:0}
+.admin-shell .admin-overview,.admin-shell .admin-panel-section{
+  border:1px solid #e0e8f1;border-radius:17px;background:rgba(255,255,255,.96);
+  box-shadow:0 5px 18px rgba(35,58,86,.045);
+}
+.admin-shell .admin-overview{padding:28px;display:grid;gap:24px}
+.admin-shell .admin-overview h2{margin:8px 0;color:#243d59;font:700 25px/1.25 Manrope,sans-serif}
+.admin-shell .admin-overview p{margin:0;color:#72849a;font-size:16px;line-height:1.6}
+.admin-shell .admin-overview-links{display:grid;gap:10px}
+.admin-shell .admin-overview-links button{
+  display:flex;justify-content:space-between;align-items:center;min-height:54px;padding:13px 16px;
+  border:1px solid #e2eaf2;border-radius:11px;background:#f9fbfd;color:#385674;
+  text-align:left;font-size:15px;font-weight:650;cursor:pointer;
+}
+.admin-shell .admin-overview-links button:hover{background:#f0f5fa;border-color:#cbd9e8}
+.admin-shell .admin-overview-links button span{font-size:20px;color:#7892ae}
+.admin-shell .admin-panel-section{margin:0;overflow:visible}
+.admin-shell .admin-panel-heading{
+  display:flex;align-items:center;justify-content:space-between;gap:15px;
+  padding:22px 24px;border-bottom:1px solid #e8eef4;
+}
+.admin-shell .admin-panel-heading h2{margin:0;color:#263f5b;font:700 23px/1.25 Manrope,sans-serif}
+.admin-shell .admin-panel-section>.accordion-content{padding:20px;gap:16px}
+.admin-shell .admin-panel-section .admin-subaccordion>summary{font-size:14px;min-height:54px}
+.admin-shell .admin-panel-section .admin-company-item>summary{font-size:15px;min-height:56px}
+.admin-shell .admin-field{font-size:14px;gap:8px}
+.admin-shell .admin-field input,.admin-shell .admin-field select,.admin-shell .admin-field textarea,
+.admin-shell .workspace-hour-row input[type=time]{min-height:48px;padding:11px 13px;font-size:15px}
+.admin-shell .primary-button{min-height:46px;padding:12px 18px;font-size:14px}
+.admin-shell .secondary-button{min-height:42px;padding:10px 14px;font-size:13px}
+.admin-shell .admin-card h3,.admin-shell .workspace-section h3{font-size:18px}
+.admin-shell .admin-card p{font-size:15px}
+.admin-shell .admin-account{padding:15px 17px}
+.admin-shell .admin-account>div strong{font-size:15px}
+.admin-shell .admin-account>div span{font-size:13px}
+.admin-shell .admin-role{font-size:12px;padding:6px 10px}
+.admin-shell .admin-action-card{min-height:96px;padding:18px}
+.admin-shell .admin-action-card strong{font-size:15px}
+.admin-shell .admin-action-card small{font-size:13px}
+.admin-shell .admin-modal h2{font-size:25px}
+.admin-shell .admin-modal-intro{font-size:14px}
+.admin-shell .admin-notice,.admin-shell .admin-error{font-size:15px}
+.admin-shell .accordion-meta{font-size:12px}
+@media(max-width:900px){
+  .admin-shell .admin-workspace-layout{grid-template-columns:205px minmax(0,1fr);gap:15px}
+  .admin-shell .admin-sidebar{padding:11px}
+  .admin-shell .admin-sidebar button{font-size:13px;padding:9px}
+}
+@media(max-width:680px){
+  .admin-shell{padding:18px 12px 40px}
+  .admin-shell .admin-stats{grid-template-columns:1fr;gap:10px;margin:17px 0}
+  .admin-shell .admin-stat-card{min-height:88px;padding:14px 16px}
+  .admin-shell .admin-stat-card strong{font-size:26px}
+  .admin-shell .admin-workspace-layout{grid-template-columns:1fr;gap:13px}
+  .admin-shell .admin-sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .admin-shell .admin-sidebar-label{grid-column:1/-1}
+  .admin-shell .admin-sidebar button{min-height:45px;font-size:13px}
+  .admin-shell .admin-overview{padding:19px}
+  .admin-shell .admin-overview h2{font-size:22px}
+  .admin-shell .admin-overview p{font-size:14px}
+  .admin-shell .admin-panel-heading{padding:17px}
+  .admin-shell .admin-panel-heading h2{font-size:20px}
+  .admin-shell .admin-panel-section>.accordion-content{padding:12px}
+  .admin-shell .admin-branding h1{font-size:24px}
+}
