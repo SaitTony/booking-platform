@@ -58,10 +58,10 @@ The database migrations have not been applied to the live Supabase project and E
 
 ## Free local validation (recommended before touching the hosted project)
 
-The repository CI now validates the backend without creating a paid Supabase branch:
+The repository CI pins Supabase CLI v3.0.0 and validates the backend without creating a paid Supabase branch:
 
 1. GitHub Actions starts a disposable local Supabase stack on its free GitHub-hosted runner.
-2. `supabase db reset --local` applies every migration from a clean local database.
+2. `supabase db reset` applies every migration from a clean local database.
 3. The workflow checks migration status, runs the pgTAP functional database tests, and type-checks all four Edge Functions with Deno.
 4. The local stack is stopped after the job. It is not your hosted `booking-space` project and does not create an hourly Supabase branch.
 
@@ -71,9 +71,9 @@ You can run the same checks on your own computer for free after installing Docke
 npm install
 npm run build
 supabase start
-supabase db reset --local
-supabase migration list --local
-supabase test db --local
+supabase db reset
+supabase migration list
+supabase test db
 deno check supabase/functions/create-user/index.ts
 deno check supabase/functions/assign-user-role/index.ts
 deno check supabase/functions/change-password/index.ts
