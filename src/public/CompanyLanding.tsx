@@ -33,7 +33,7 @@ export default function CompanyLanding() {
 
   if(!isSupabaseConfigured)return <main className="home-shell"><div className="home-card"><h1>Supabase не подключён</h1></div></main>
   if(loading)return <main className="booking-shell"><div className="admin-card">Загрузка…</div></main>
-  if(error||!company)return <main className="booking-shell"><div className="admin-card"><h1>Компания недоступна</h1><p>{error}</p><Link to="/">На главную</Link></div></main>
+  if(error||!company)return <main className="booking-shell"><div className="admin-card"><h1>Компания недоступна</h1><p>{error}</p></div></main>
 
   return <main className="booking-shell" data-theme={company.theme?.id??'natural'}>
     <header className="topbar"><span className="brand" aria-hidden="true"><span className="brand-mark">✦</span></span><span className="demo-label"><i/> ОНЛАЙН-ЗАПИСЬ</span></header>
