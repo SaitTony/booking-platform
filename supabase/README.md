@@ -37,7 +37,7 @@ where phone_e164 = '+358XXXXXXXXX';
 ```
 
 4. Verify exactly one row was updated. If zero or more than one row is reported, stop and investigate.
-5. Sign in at `/booking-platform/admin` using that phone and password.
+5. Sign in at `/workflows/admin` using that phone and password.
 
 Never create an endpoint that lets a user promote their own account to Owner.
 
@@ -45,7 +45,7 @@ Never create an endpoint that lets a user promote their own account to Owner.
 
 Copy `.env.example` to a local `.env` for development and set:
 - `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY` (or the project's publishable key)
+- `VITE_SUPABASE_PUBLISHABLE_KEY` (or the project's publishable key)
 
 For GitHub Pages builds, add repository Actions secrets with those same names and expose them to the Vite build step. The anon/publishable key is designed for frontend use and is protected by RLS. Do not use the service role key.
 
@@ -53,7 +53,7 @@ For GitHub Pages builds, add repository Actions secrets with those same names an
 
 The initial schema, access-control helpers, booking RPCs, public company/booking pages, staff sign-in, first-login password change, Owner account creation, role assignment, Owner-initiated temporary password reset, company and master page management, service and schedule editing, booking/client workspaces, and role-scoped operational views are present in this branch.
 
-The database migrations have not been applied to the live Supabase project and Edge Functions have not been deployed. Automated local database smoke tests are being added for role scoping, the five-page company limit, availability, booking validation, client identity, and booking overlap. Real-user end-to-end testing is still required before production use. Remaining product gaps include photo upload to Supabase Storage, slug-change redirects, PWA support, and an editable booking-rules/settings interface.
+The six core database migrations and the security function-grant migration have been applied to the hosted Supabase project. The four Edge Functions are deployed with JWT verification enabled. Automated local database smoke tests cover role scoping, the five-page company limit, availability, booking validation, client identity, and booking overlap. Phone sign-in settings and the first Owner bootstrap still require the Dashboard steps below. Real-user end-to-end testing is required before production use. Remaining product gaps include photo upload to Supabase Storage, slug-change redirects, PWA support, and an editable booking-rules/settings interface.
 
 
 ## Free local validation (recommended before touching the hosted project)
