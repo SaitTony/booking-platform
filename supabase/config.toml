@@ -1,0 +1,10 @@
+project_id = "booking-space"
+
+[functions.create-user]
+verify_jwt = false
+
+[functions.reset-password]
+verify_jwt = false
+
+[functions.assign-user-role]
+verify_jwt = false
