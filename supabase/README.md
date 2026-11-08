@@ -51,9 +51,9 @@ For GitHub Pages builds, add repository Actions secrets with those same names an
 
 ## Current implementation status
 
-The initial schema, access-control helpers, booking RPCs, public company/booking pages, staff sign-in, first-login password change, Owner account creation, role assignment, and Owner-initiated temporary password reset are present in this branch.
+The initial schema, access-control helpers, booking RPCs, public company/booking pages, staff sign-in, first-login password change, Owner account creation, role assignment, Owner-initiated temporary password reset, company and master page management, service and schedule editing, booking/client workspaces, and role-scoped operational views are present in this branch.
 
-The database migrations have not been applied to the live Supabase project, Edge Functions have not been deployed, and real-user end-to-end testing has not yet been completed. Additional administrative workflows (service and schedule editing, full booking/client workspaces, page/theme editing and operational checks) remain to be completed before production use.
+The database migrations have not been applied to the live Supabase project and Edge Functions have not been deployed. Automated local database smoke tests are being added for role scoping, the five-page company limit, availability, booking validation, client identity, and booking overlap. Real-user end-to-end testing is still required before production use. Remaining product gaps include photo upload to Supabase Storage, slug-change redirects, PWA support, and an editable booking-rules/settings interface.
 
 
 ## Free local validation (recommended before touching the hosted project)
@@ -62,17 +62,18 @@ The repository CI now validates the backend without creating a paid Supabase bra
 
 1. GitHub Actions starts a disposable local Supabase stack on its free GitHub-hosted runner.
 2. `supabase db reset --local` applies every migration from a clean local database.
-3. The workflow checks migration status and type-checks all four Edge Functions with Deno.
+3. The workflow checks migration status, runs the pgTAP functional database tests, and type-checks all four Edge Functions with Deno.
 4. The local stack is stopped after the job. It is not your hosted `booking-space` project and does not create an hourly Supabase branch.
 
 You can run the same checks on your own computer for free after installing Docker Desktop, the Supabase CLI and Deno:
 
 ```bash
-npm ci
+npm install
 npm run build
 supabase start
 supabase db reset --local
 supabase migration list --local
+supabase test db --local
 deno check supabase/functions/create-user/index.ts
 deno check supabase/functions/assign-user-role/index.ts
 deno check supabase/functions/change-password/index.ts
