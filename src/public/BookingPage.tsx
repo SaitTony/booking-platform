@@ -123,9 +123,9 @@ export default function BookingPage({ individual = false }: { individual?: boole
     setSaving(false)
   }
 
-  if(!isSupabaseConfigured || !supabase)return <main className="booking-shell"><header className="topbar"><Link to="/" className="brand"><span className="brand-mark" aria-hidden="true">✦</span></Link></header><section className="admin-card"><h1>Подключение онлайн-записи</h1><p>Для загрузки реальных страниц необходимо настроить подключение к базе данных.</p></section></main>
+  if(!isSupabaseConfigured || !supabase)return <main className="booking-shell"><header className="topbar"><span className="brand" aria-hidden="true"><span className="brand-mark">✦</span></span></header><section className="admin-card"><h1>Подключение онлайн-записи</h1><p>Для загрузки реальных страниц необходимо настроить подключение к базе данных.</p></section></main>
   if(loading)return <main className="booking-shell"><div className="admin-card">Загрузка страницы…</div></main>
-  if(error && !master)return <main className="booking-shell"><div className="admin-card"><h1>Не удалось открыть страницу</h1><p>{error}</p><Link to="/">На главную</Link></div></main>
+  if(error && !master)return <main className="booking-shell"><div className="admin-card"><h1>Не удалось открыть страницу</h1><p>{error}</p></div></main>
   if(bookingId)return <main className="booking-shell"><section className="success-card"><div className="success-icon">✓</div><span className="eyebrow">ЗАПИСЬ ПОДТВЕРЖДЕНА</span><h1>Вы записаны!</h1><p>Спасибо, {clientName}. Запись сохранена.</p><p className="demo-note">Номер записи: {bookingId}</p></section></main>
   if(!master)return null
 
