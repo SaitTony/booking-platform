@@ -19,6 +19,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
   const [bookings,setBookings]=useState<Booking[]>([])
   const [clients,setClients]=useState<{id:string;full_name:string;phone_e164:string}[]>([])
   const [newService,setNewService]=useState({name:'',description:'',duration:'60',price:'0'})
+  const [editingServiceId,setEditingServiceId]=useState('')
   const [exceptionDate,setExceptionDate]=useState('')
   const [pageName,setPageName]=useState('')
   const [pageDescription,setPageDescription]=useState('')
@@ -69,12 +70,12 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     event.preventDefault()
     if(!supabase||!masterId)return
     setBusy(true);setError('');setNotice('')
-    const {error:insertError}=await supabase.from('services').insert({
-      master_id:masterId,name:newService.name.trim(),description:newService.description,
-      duration:Number(newService.duration),price:Number(newService.price),is_active:true,
-    })
-    if(insertError)setError(insertError.message)
-    else{setNotice('Услуга добавлена.');setNewService({name:'',description:'',duration:'60',price:'0'});await loadMasterData(masterId)}
+    const payload={name:newService.name.trim(),description:newService.description,duration:Number(newService.duration),price:Number(newService.price)}
+    const result=editingServiceId
+      ? await supabase.from('services').update(payload).eq('id',editingServiceId)
+      : await supabase.from('services').insert({...payload,master_id:masterId,is_active:true})
+    if(result.error)setError(result.error.message)
+    else{setNotice(editingServiceId?'Услуга обновлена.':'Услуга добавлена.');setEditingServiceId('');setNewService({name:'',description:'',duration:'60',price:'0'});await loadMasterData(masterId)}
     setBusy(false)
   }
 
@@ -151,9 +152,9 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
         <label className="admin-field">Описание<input value={newService.description} onChange={e=>setNewService({...newService,description:e.target.value})}/></label>
         <label className="admin-field">Длительность, мин<input type="number" min="1" max="720" value={newService.duration} onChange={e=>setNewService({...newService,duration:e.target.value})}/></label>
         <label className="admin-field">Цена<input type="number" min="0" step="0.01" value={newService.price} onChange={e=>setNewService({...newService,price:e.target.value})}/></label>
-        <button className="primary-button" disabled={busy}>Добавить услугу</button>
+        <button className="primary-button" disabled={busy}>{editingServiceId?'Сохранить изменения':'Добавить услугу'}</button>{editingServiceId&&<button type="button" className="secondary-button" onClick={()=>{setEditingServiceId('');setNewService({name:'',description:'',duration:'60',price:'0'})}}>Отмена</button>}
       </form>
-      <div className="admin-account-list">{services.map(service=><article className="admin-account" key={service.id}><div><strong>{service.name}</strong><span>{service.duration} мин. · {new Intl.NumberFormat('ru-RU').format(service.price)} ₽</span></div><button className="secondary-button" onClick={()=>void toggleService(service)}>{service.is_active?'Отключить':'Включить'}</button></article>)}</div>
+      <div className="admin-account-list">{services.map(service=><article className="admin-account" key={service.id}><div><strong>{service.name}</strong><span>{service.duration} мин. · {new Intl.NumberFormat('ru-RU').format(service.price)} ₽</span></div><button className="secondary-button" onClick={()=>{setEditingServiceId(service.id);setNewService({name:service.name,description:service.description,duration:String(service.duration),price:String(service.price)})}}>Редактировать</button><button className="secondary-button" onClick={()=>void toggleService(service)}>{service.is_active?'Отключить':'Включить'}</button></article>)}</div>
     </section>}
     {canEdit&&<section className="admin-card workspace-section"><h3>Рабочее расписание</h3>
       <div className="workspace-hours">{weekdays.map((day,index)=>{const row=hours.find(h=>h.weekday===index);return <HoursRow key={index} label={day} row={row} disabled={busy} onSave={(opens,closes,off)=>void saveHours(index,opens,closes,off,row?.id)}/>})}</div>
