@@ -1,6 +1,5 @@
 import BookingPage from './public/BookingPage'
 import CompanyLanding from './public/CompanyLanding'
-import { isSupabaseConfigured } from './lib/supabase'
 import AdminApp from './admin/AdminApp'
 import { useEffect, useState } from 'react'
 import { Link, Route, Routes, useLocation, useParams } from 'react-router-dom'
