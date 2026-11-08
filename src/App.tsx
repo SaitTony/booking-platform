@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Route, Routes, useLocation, useParams } from 'react-router-dom'
 
-type Theme = 'natural' | 'graphite' | 'sand' | 'green' | 'blue'
+type Theme = 'natural' | 'graphite' | 'sand' | 'green' | 'blue' | 'dark'
 type Role = 'owner' | 'admin' | 'master_pro' | 'master'
 const palettes: {id:Theme;name:string;desc:string}[] = [
   {id:'natural',name:'Natural',desc:'Спокойный природный'},
@@ -9,6 +9,7 @@ const palettes: {id:Theme;name:string;desc:string}[] = [
   {id:'sand',name:'Sand',desc:'Тёплый премиум'},
   {id:'green',name:'Deep Green',desc:'Современный салон'},
   {id:'blue',name:'Midnight Blue',desc:'Технологичный'},
+  {id:'dark',name:'Dark',desc:'Тёмная тема'},
 ]
 const masters = [
   {slug:'anna',name:'Анна Смирнова',role:'Топ-мастер',desc:'Специализируется на индивидуальном подходе и внимании к деталям.',initial:'А'},
