@@ -1,4 +1,4 @@
-name: Validate Booking Space
+name: Validate Workflows
 
 on:
   push:
@@ -70,6 +70,7 @@ jobs:
           deno check supabase/functions/assign-user-role/index.ts
           deno check supabase/functions/change-password/index.ts
           deno check supabase/functions/owner-reset-access/index.ts
+          deno check supabase/functions/owner-set-account-status/index.ts
 
       - name: Stop disposable local Supabase stack
         if: always() && steps.setup-supabase.outcome == 'success'
