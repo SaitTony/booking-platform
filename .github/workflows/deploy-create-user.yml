@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - "supabase/functions/create-user/**"
       - "supabase/functions/owner-set-account-status/**"
       - ".github/workflows/deploy-create-user.yml"
 
