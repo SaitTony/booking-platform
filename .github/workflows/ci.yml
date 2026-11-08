@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# Avoid pulling multiple disposable Supabase stacks for the same branch at once.
+concurrency:
+  group: booking-space-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   build-and-backend-validation:
     runs-on: ubuntu-latest
@@ -27,6 +32,7 @@ jobs:
         run: npm run build
 
       - name: Setup Supabase CLI
+        id: setup-supabase
         uses: supabase/setup-cli@v1
         with:
           version: latest
@@ -56,5 +62,5 @@ jobs:
           deno check supabase/functions/owner-reset-access/index.ts
 
       - name: Stop disposable local Supabase stack
-        if: always()
+        if: always() && steps.setup-supabase.outcome == 'success'
         run: supabase stop --no-backup
