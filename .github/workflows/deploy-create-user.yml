@@ -29,4 +29,4 @@ jobs:
           fi
 
       - name: Deploy create-user function
-        run: supabase functions deploy create-user --project-ref "$SUPABASE_PROJECT_ID"
+        run: supabase functions deploy create-user --project-ref "$SUPABASE_PROJECT_ID" --yes
