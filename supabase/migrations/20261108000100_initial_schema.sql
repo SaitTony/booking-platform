@@ -144,14 +144,141 @@ create table public.booking_status_history (
 
 create function public.handle_new_auth_user()
 returns trigger language plpgsql security definer set search_path = ''
+as $
+declare
+  v_name text;
+  v_phone text;
+begin
+  v_name := nullif(trim(new.raw_user_meta_data->>'full_name'), '');
+  v_phone := coalesce(new.phone, new.raw_user_meta_data->>'phone_e164');
+  if v_name is null or v_phone is null then
+    raise exception 'Для учётной записи обязательны имя и номер телефона';
+  end if;
+  if v_phone !~ '^\\+[1-9][0-9]{7,14}
+create trigger on_auth_user_created after insert on auth.users
+for each row execute procedure public.handle_new_auth_user();
+
+create function public.is_owner()
+returns boolean language sql stable security definer set search_path = ''
+as $$
+  select exists(select 1 from public.profiles p where p.id = auth.uid()
+    and p.platform_role = 'owner' and p.disabled_at is null and not p.force_password_change);
+$$;
+
+create function public.can_manage_master(p_master_id uuid)
+returns boolean language sql stable security definer set search_path = ''
+as $$
+  select public.is_owner()
+  or exists(select 1 from public.masters m join public.profiles p on p.id = auth.uid()
+    where m.id = p_master_id and m.profile_id = p.id and p.platform_role = 'master_pro'
+      and p.disabled_at is null and not p.force_password_change)
+  or exists(select 1 from public.masters m join public.company_members cm on cm.company_id = m.company_id
+    where m.id = p_master_id and cm.profile_id = auth.uid() and cm.role = 'admin');
+$$;
+
+create function public.can_view_master(p_master_id uuid)
+returns boolean language sql stable security definer set search_path = ''
+as $$
+  select public.can_manage_master(p_master_id)
+  or exists(select 1 from public.company_members cm
+    where cm.master_id = p_master_id and cm.profile_id = auth.uid() and cm.role = 'master');
+$$;
+
+create function public.is_company_admin(p_company_id uuid)
+returns boolean language sql stable security definer set search_path = ''
+as $$
+  select public.is_owner() or exists(select 1 from public.company_members cm
+    where cm.company_id = p_company_id and cm.profile_id = auth.uid() and cm.role = 'admin');
+$$;
+
+create function public.complete_password_change()
+returns void language plpgsql security definer set search_path = ''
 as $$
 begin
-  insert into public.profiles(id, full_name, phone_e164)
-  values (new.id, coalesce(nullif(trim(new.raw_user_meta_data->>'full_name'), ''), 'Новый пользователь'),
-          coalesce(new.phone, new.raw_user_meta_data->>'phone_e164'));
-  return new;
+  if auth.uid() is null then raise exception 'Необходима авторизация'; end if;
+  update public.profiles set force_password_change = false, updated_at = now() where id = auth.uid();
 end;
 $$;
+revoke all on function public.complete_password_change() from public;
+grant execute on function public.complete_password_change() to authenticated;
+
+alter table public.profiles enable row level security;
+alter table public.companies enable row level security;
+alter table public.masters enable row level security;
+alter table public.company_members enable row level security;
+alter table public.clients enable row level security;
+alter table public.services enable row level security;
+alter table public.working_hours enable row level security;
+alter table public.schedule_exceptions enable row level security;
+alter table public.bookings enable row level security;
+alter table public.booking_settings enable row level security;
+alter table public.booking_status_history enable row level security;
+
+create policy profiles_read_self_owner on public.profiles for select to authenticated
+using (id = auth.uid() or public.is_owner());
+create policy companies_public_read on public.companies for select to anon, authenticated using (is_active);
+create policy companies_admin_update on public.companies for update to authenticated
+using (public.is_company_admin(id)) with check (public.is_company_admin(id));
+create policy masters_public_read on public.masters for select to anon, authenticated
+using (is_active and archived_at is null and (company_id is null or exists
+  (select 1 from public.companies c where c.id = company_id and c.is_active)));
+create policy masters_manager_write on public.masters for all to authenticated
+using (public.can_manage_master(id) or (company_id is not null and public.is_company_admin(company_id)))
+with check (public.can_manage_master(id) or (company_id is not null and public.is_company_admin(company_id)));
+create policy company_members_scoped_read on public.company_members for select to authenticated
+using (public.is_owner() or profile_id = auth.uid() or public.is_company_admin(company_id));
+create policy clients_scoped_read on public.clients for select to authenticated
+using (public.is_owner() or exists(select 1 from public.bookings b
+  where b.client_id = id and public.can_view_master(b.master_id)));
+create policy services_public_read on public.services for select to anon, authenticated
+using (is_active and exists(select 1 from public.masters m where m.id = master_id and m.is_active and m.archived_at is null));
+create policy services_manager_write on public.services for all to authenticated
+using (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)))
+with check (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)));
+create policy working_hours_public_read on public.working_hours for select to anon, authenticated
+using (exists(select 1 from public.masters m where m.id = master_id and m.is_active and m.archived_at is null));
+create policy working_hours_manager_write on public.working_hours for all to authenticated
+using (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)))
+with check (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)));
+create policy exceptions_public_read on public.schedule_exceptions for select to anon, authenticated
+using (exists(select 1 from public.masters m where m.id = master_id and m.is_active and m.archived_at is null));
+create policy exceptions_manager_write on public.schedule_exceptions for all to authenticated
+using (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)))
+with check (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)));
+create policy bookings_scoped_read on public.bookings for select to authenticated
+using (public.is_owner() or public.can_view_master(master_id));
+create policy bookings_manager_update on public.bookings for update to authenticated
+using (public.is_owner() or public.can_manage_master(master_id))
+with check (public.is_owner() or public.can_manage_master(master_id));
+create policy settings_scoped_read on public.booking_settings for select to authenticated
+using (public.can_view_master(master_id));
+create policy settings_manager_write on public.booking_settings for all to authenticated
+using (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)))
+with check (public.can_manage_master(master_id) or exists(select 1 from public.masters m
+  where m.id = master_id and m.company_id is not null and public.is_company_admin(m.company_id)));
+create policy booking_history_scoped_read on public.booking_status_history for select to authenticated
+using (exists(select 1 from public.bookings b where b.id = booking_id
+  and (public.is_owner() or public.can_view_master(b.master_id))));
+
+grant usage on schema public to anon, authenticated;
+grant select on public.companies, public.masters, public.services, public.working_hours, public.schedule_exceptions to anon, authenticated;
+grant select on public.profiles, public.company_members, public.clients, public.bookings,
+  public.booking_settings, public.booking_status_history to authenticated;
+ then
+    raise exception 'Номер телефона должен быть в формате E.164';
+  end if;
+  insert into public.profiles(id, full_name, phone_e164)
+  values (new.id, v_name, v_phone);
+  return new;
+end;
+$;
 create trigger on_auth_user_created after insert on auth.users
 for each row execute procedure public.handle_new_auth_user();
 
