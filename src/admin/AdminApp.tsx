@@ -324,7 +324,7 @@ export default function AdminApp() {
                     </section>
                     <StaffWorkspace profile={profile} kindFilter="company" companyIdFilter={company.id}/>
                   </div>
-                </section>}
+                </details>
               })}
               {!companies.length&&<p className="admin-empty">Компаний пока нет. Создайте первую во вкладке «Создать».</p>}
             </div>
@@ -336,7 +336,7 @@ export default function AdminApp() {
             </div>
           </details>
         </div>
-      </details>
+      </section>}
 
       {activeSection==='masterPro' && <section className="admin-accordion admin-panel-section">
         <header className="admin-panel-heading"><h2>Master_pro</h2><span className="accordion-count">{masterPages.filter(page=>page.kind==='individual').length}</span></header>
@@ -359,7 +359,7 @@ export default function AdminApp() {
                       </form>}
                     </section>
                   </div>
-                </section>}
+                </details>
               })}
               <StaffWorkspace profile={profile} kindFilter="individual"/>
             </div>
@@ -371,7 +371,7 @@ export default function AdminApp() {
             </div>
           </details>
         </div>
-      </details>
+      </section>}
         </div>
       </div>
     </> : profile.company_members?.some(member=>member.role==='admin') ? <>
