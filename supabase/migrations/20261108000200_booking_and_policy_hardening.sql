@@ -68,7 +68,8 @@ create or replace function public.create_booking(
   p_service_id uuid,
   p_starts_at timestamptz,
   p_client_name text,
-  p_client_phone_e164 text
+  p_client_phone_e164 text,
+  p_rules_accepted boolean
 )
 returns uuid language plpgsql security definer set search_path = ''
 as $$
@@ -136,6 +137,7 @@ begin
     raise exception 'Выбранное время вне рабочего расписания';
   end if;
 
+  if not coalesce(p_rules_accepted, false) then raise exception 'Необходимо подтвердить ознакомление с правилами записи'; end if;
   if nullif(trim(p_client_name), '') is null then raise exception 'Укажите имя'; end if;
   if p_client_phone_e164 !~ '^\+[1-9][0-9]{7,14}$' then raise exception 'Телефон должен быть в формате E.164'; end if;
 
@@ -158,7 +160,7 @@ begin
   return v_id;
 end;
 $$;
-revoke all on function public.create_booking(uuid,uuid,timestamptz,text,text) from public;
+revoke all on function public.create_booking(uuid,uuid,timestamptz,text,text,boolean) from public;
 grant execute on function public.create_booking(uuid,uuid,timestamptz,text,text) to anon, authenticated;
 
 create or replace function public.cancel_booking(p_booking_id uuid)
