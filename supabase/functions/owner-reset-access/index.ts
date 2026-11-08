@@ -6,8 +6,8 @@ Deno.serve(async (req) => {
     const { admin, anon } = clients();
     await requireOwner(req, admin, anon);
     const { targetUserId, newTemporaryPassword } = await req.json();
-    if (typeof targetUserId !== "string" || typeof newTemporaryPassword !== "string" || newTemporaryPassword.length < 10) {
-      return json({ error: "Укажите пользователя и временный пароль длиной от 10 символов" }, 400);
+    if (typeof targetUserId !== "string" || typeof newTemporaryPassword !== "string" || newTemporaryPassword.length < 6) {
+      return json({ error: "Укажите пользователя и временный пароль длиной от 6 символов" }, 400);
     }
     const { error } = await admin.auth.admin.updateUserById(targetUserId, { password: newTemporaryPassword });
     if (error) throw error;
