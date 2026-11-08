@@ -128,12 +128,13 @@ begin
     select opens_at, closes_at into v_open, v_close
     from public.working_hours
     where master_id = p_master_id and weekday = v_weekday and not is_day_off
-      and v_local::time >= opens_at
-      and (v_local + make_interval(mins => v_service.duration))::time <= closes_at
+      and v_local >= v_local::date + opens_at
+      and v_local + make_interval(mins => v_service.duration) <= v_local::date + closes_at
     order by opens_at limit 1;
   end if;
-  if v_open is null or v_local::time < v_open
-     or (v_local + make_interval(mins => v_service.duration))::time > v_close then
+  if v_open is null
+     or v_local < v_local::date + v_open
+     or v_local + make_interval(mins => v_service.duration) > v_local::date + v_close then
     raise exception 'Выбранное время вне рабочего расписания';
   end if;
   if floor(extract(epoch from (v_local - (v_local::date + v_open))) / 60)::integer
