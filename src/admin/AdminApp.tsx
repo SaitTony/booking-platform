@@ -157,7 +157,7 @@ export default function AdminApp() {
     setBusy(true);setError('');setNotice('')
     const {error:resetError}=await supabase.functions.invoke('owner-reset-access',{body:{targetUserId:resetUserId,newTemporaryPassword:resetTemporaryPassword}})
     if(resetError)setError(resetError.message)
-    else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetTemporaryPassword('');await loadAccounts()}
+    else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetTemporaryPassword('');setActiveModal(null);await loadAccounts()}
     setBusy(false)
   }
 
