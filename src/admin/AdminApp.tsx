@@ -373,7 +373,7 @@ export default function AdminApp() {
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
           <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
           <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required/></label>
-          <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать учётную запись'}</button>
+          <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
         {activeModal==='reset'&&<form onSubmit={resetUserAccess}>
           <h2 id="admin-modal-title">Сбросить пароль</h2><p className="admin-modal-intro">Сотрудник получит временный пароль и должен будет сменить его при следующем входе.</p>
