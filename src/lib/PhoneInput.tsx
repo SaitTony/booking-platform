@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes } from 'react'
+import type { ChangeEvent, InputHTMLAttributes } from 'react'
 
 type PhoneInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'> & {
   value: string
@@ -7,7 +7,7 @@ type PhoneInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'on
 
 /** Russian phone input stored canonically as +7 followed by exactly 10 digits. */
 export default function PhoneInput({ value, onChange, onFocus, ...props }: PhoneInputProps) {
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const raw = event.target.value
     const digits = raw.replace(/\D/g, '')
 
