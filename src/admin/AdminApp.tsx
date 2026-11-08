@@ -159,7 +159,7 @@ export default function AdminApp() {
     setBusy(true);setError('');setNotice('')
     const {error:resetError}=await supabase.functions.invoke('owner-reset-access',{body:{targetUserId:resetUserId,newTemporaryPassword:resetTemporaryPassword}})
     if(resetError)setError(resetError.message)
-    else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetTemporaryPassword('');setActiveModal(null);await loadAccounts()}
+    else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetTemporaryPassword('000000');setActiveModal(null);await loadAccounts()}
     setBusy(false)
   }
 
@@ -281,8 +281,8 @@ export default function AdminApp() {
         <header className="admin-panel-heading"><h2>Учётные записи</h2><span className="accordion-count">{accounts.length}</span></header>
         <div className="accordion-content">
           <div className="admin-action-grid">
-            <button className="admin-action-card" onClick={()=>setActiveModal('account')}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ для сотрудника</small></button>
-            <button className="admin-action-card" onClick={()=>setActiveModal('reset')}><span className="admin-action-icon">↻</span><strong>Сбросить пароль</strong><small>Выдать новый временный пароль</small></button>
+            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ для сотрудника</small></button>
+            <button className="admin-action-card" onClick={()=>{setResetTemporaryPassword('000000');setResetUserId('');setActiveModal('reset')}}><span className="admin-action-icon">↻</span><strong>Сбросить пароль</strong><small>Выдать новый временный пароль</small></button>
           </div>
           <div className="admin-account-list">{accounts.map(account=><article className="admin-account" key={account.id}>
             <div><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span></div>
