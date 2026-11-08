@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Route, Routes, useParams } from 'react-router-dom'
+import { Link, Route, Routes, useLocation, useParams } from 'react-router-dom'
 
 type Theme = 'natural' | 'graphite' | 'sand' | 'green' | 'blue'
 type Role = 'owner' | 'admin' | 'master_pro' | 'master'
@@ -52,7 +52,9 @@ export default function App(){
  const [role,setRole]=useState<Role>('owner')
  const [personalTheme,setPersonalTheme]=useState<Theme>(()=>(localStorage.getItem('demo-personal-theme') as Theme)||'natural')
  const [companyTheme,setCompanyTheme]=useState<Theme>(()=>(localStorage.getItem('demo-company-theme') as Theme)||'natural')
+ const location=useLocation()
+ const activeTheme=location.pathname.startsWith('/pro/')?personalTheme:companyTheme
  useEffect(()=>{localStorage.setItem('demo-personal-theme',personalTheme)},[personalTheme])
  useEffect(()=>{localStorage.setItem('demo-company-theme',companyTheme)},[companyTheme])
- return <div className="app-root" data-theme="natural"><Routes><Route path="/" element={<Home/>}/><Route path="/pro/:slug" element={<MasterPage companyMode={false} theme={personalTheme} role={role} setRole={setRole} setTheme={setPersonalTheme}/>}/><Route path="/:companySlug/:masterSlug" element={<MasterPage companyMode theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="/:companySlug" element={<Company theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="*" element={<NotFound/>}/></Routes></div>
+ return <div className="app-root" data-theme={activeTheme}><Routes><Route path="/" element={<Home/>}/><Route path="/pro/:slug" element={<MasterPage companyMode={false} theme={personalTheme} role={role} setRole={setRole} setTheme={setPersonalTheme}/>}/><Route path="/:companySlug/:masterSlug" element={<MasterPage companyMode theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="/:companySlug" element={<Company theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="*" element={<NotFound/>}/></Routes></div>
 }
