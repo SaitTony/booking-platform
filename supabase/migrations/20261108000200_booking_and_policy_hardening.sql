@@ -161,7 +161,7 @@ begin
 end;
 $$;
 revoke all on function public.create_booking(uuid,uuid,timestamptz,text,text,boolean) from public;
-grant execute on function public.create_booking(uuid,uuid,timestamptz,text,text) to anon, authenticated;
+grant execute on function public.create_booking(uuid,uuid,timestamptz,text,text,boolean) to anon, authenticated;
 
 create or replace function public.cancel_booking(p_booking_id uuid)
 returns void language plpgsql security definer set search_path = ''
