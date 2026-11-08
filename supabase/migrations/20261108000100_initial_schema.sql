@@ -154,7 +154,7 @@ begin
   if v_name is null or v_phone is null then
     raise exception 'Для учётной записи обязательны имя и номер телефона';
   end if;
-  if v_phone !~ '^\\+[1-9][0-9]{7,14}
+  if v_phone !~ '^\+[1-9][0-9]{7,14}
 create trigger on_auth_user_created after insert on auth.users
 for each row execute procedure public.handle_new_auth_user();
 
