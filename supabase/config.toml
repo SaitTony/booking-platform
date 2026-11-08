@@ -1,13 +1,13 @@
-project_id = "booking-space"
+project_id = "cetcxttaqtberrntsntr"
 
 [functions.create-user]
-verify_jwt = false
+verify_jwt = true
 
 [functions.assign-user-role]
-verify_jwt = false
+verify_jwt = true
 
 [functions.change-password]
-verify_jwt = false
+verify_jwt = true
 
 [functions.owner-reset-access]
-verify_jwt = false
+verify_jwt = true

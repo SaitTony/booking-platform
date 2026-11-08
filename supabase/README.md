@@ -5,7 +5,7 @@ The frontend is hosted on GitHub Pages. Supabase provides Auth, PostgreSQL, Edge
 ## Before applying migrations
 
 1. Open the intended Supabase project and verify its region and project URL.
-2. In Authentication > Providers, enable Phone sign-in. Password sign-in is used with the phone identifier; public self-registration must remain disabled.
+2. In Authentication > Sign In / Providers, enable Email sign-in and disable Phone sign-in. Disable email confirmations for this staff-only password workflow; public self-registration must remain disabled.
 3. Do not enable anonymous account creation. Staff accounts are created only by the Owner Edge Function.
 4. Review the SQL migration files in `supabase/migrations` in ascending filename order. Run them in the Supabase SQL Editor only after reviewing the target project. Do not run them twice.
 5. Configure Edge Function secrets. Supabase normally supplies the project URL and service role key to Edge Functions; verify the names exist:
@@ -25,19 +25,19 @@ All functions verify the caller's access token and check the Owner role server-s
 
 The first Owner must be provisioned through a trusted administrative session, not through a public endpoint.
 
-1. In Supabase Dashboard > Authentication > Users, add the first user with the Owner's phone number and a strong password. Set user metadata `full_name` to the Owner's name and confirm the phone number in the dashboard.
-2. The database trigger creates a profile with the safe `pending` role.
-3. In SQL Editor, replace the placeholder with the Owner's exact E.164 phone and run this one-time statement:
+1. In Supabase Dashboard > Authentication > Users, create a user with the Owner's email and a strong temporary password. Enable **Auto Confirm User**. In User Metadata, set `full_name` and `phone_e164` (E.164 format, e.g. `+358XXXXXXXXX`).
+2. The database trigger creates a profile with the safe `pending` role and stores the email and contact phone.
+3. In SQL Editor, replace the placeholder with the Owner's exact email and run this one-time statement:
 
 ```sql
 update public.profiles
-set platform_role = 'owner',
-    force_password_change = false
-where phone_e164 = '+358XXXXXXXXX';
+set platform_role = 'owner'
+where lower(email) = lower('owner@example.com')
+returning id, full_name, email, phone_e164, platform_role, force_password_change;
 ```
 
-4. Verify exactly one row was updated. If zero or more than one row is reported, stop and investigate.
-5. Sign in at `/booking-platform/admin` using that phone and password.
+4. Verify exactly one row was returned and `force_password_change` is `true`. If zero or more than one row is returned, stop and investigate.
+5. Sign in at `/workflows/admin` using that email and temporary password. The first login will require a password change; after changing it, the Owner permissions become active.
 
 Never create an endpoint that lets a user promote their own account to Owner.
 
@@ -45,7 +45,7 @@ Never create an endpoint that lets a user promote their own account to Owner.
 
 Copy `.env.example` to a local `.env` for development and set:
 - `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY` (or the project's publishable key)
+- `VITE_SUPABASE_PUBLISHABLE_KEY` (or the project's publishable key)
 
 For GitHub Pages builds, add repository Actions secrets with those same names and expose them to the Vite build step. The anon/publishable key is designed for frontend use and is protected by RLS. Do not use the service role key.
 
@@ -53,7 +53,7 @@ For GitHub Pages builds, add repository Actions secrets with those same names an
 
 The initial schema, access-control helpers, booking RPCs, public company/booking pages, staff sign-in, first-login password change, Owner account creation, role assignment, Owner-initiated temporary password reset, company and master page management, service and schedule editing, booking/client workspaces, and role-scoped operational views are present in this branch.
 
-The database migrations have not been applied to the live Supabase project and Edge Functions have not been deployed. Automated local database smoke tests are being added for role scoping, the five-page company limit, availability, booking validation, client identity, and booking overlap. Real-user end-to-end testing is still required before production use. Remaining product gaps include photo upload to Supabase Storage, slug-change redirects, PWA support, and an editable booking-rules/settings interface.
+The six core database migrations and security function-grant migration are applied to the hosted Supabase project. The email-auth migration is included in this branch and must be applied after its checks pass. The four Edge Functions are deployed with JWT verification enabled. Automated local database smoke tests cover role scoping, the five-page company limit, availability, booking validation, client identity, and booking overlap. Email sign-in settings and the first Owner bootstrap still require the Dashboard steps below. Real-user end-to-end testing is required before production use. Remaining product gaps include photo upload to Supabase Storage, slug-change redirects, PWA support, and an editable booking-rules/settings interface.
 
 
 ## Free local validation (recommended before touching the hosted project)

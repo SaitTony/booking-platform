@@ -8,18 +8,19 @@ Deno.serve(async (req) => {
     await requireOwner(req, admin, anon);
     const body = await req.json();
     const fullName = String(body.fullName ?? "").trim();
+    const email = String(body.email ?? "").trim().toLowerCase();
     const phone = String(body.phone ?? "").trim();
     const temporaryPassword = String(body.temporaryPassword ?? "");
-    if (!fullName || !/^\+[1-9]\d{7,14}$/.test(phone) || temporaryPassword.length < 10) {
-      return json({ error: "Укажите имя, телефон в формате E.164 и временный пароль длиной от 10 символов" }, 400);
+    if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\+[1-9]\d{7,14}$/.test(phone) || temporaryPassword.length < 10) {
+      return json({ error: "Укажите имя, корректный email, телефон в формате E.164 и временный пароль длиной от 10 символов" }, 400);
     }
     const { data, error } = await admin.auth.admin.createUser({
-      phone, password: temporaryPassword, phone_confirm: true,
-      user_metadata: { full_name: fullName },
+      email, password: temporaryPassword, email_confirm: true,
+      user_metadata: { full_name: fullName, phone_e164: phone },
     });
     if (error) throw error;
     const { error: profileError } = await admin.from("profiles").update({
-      full_name: fullName, phone_e164: phone, platform_role: "pending", force_password_change: true,
+      full_name: fullName, email, phone_e164: phone, platform_role: "pending", force_password_change: true,
     }).eq("id", data.user.id);
     if (profileError) {
       await admin.auth.admin.deleteUser(data.user.id);

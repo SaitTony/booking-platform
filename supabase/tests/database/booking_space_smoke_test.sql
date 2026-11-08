@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(29);
+select extensions.plan(32);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -10,14 +10,14 @@ insert into auth.users (
   phone, phone_confirmed_at, raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at
 ) values
-  ('10000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234567', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Owner"}', now(), now()),
-  ('10000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234568', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Admin"}', now(), now()),
-  ('10000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234569', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Master"}', now(), now()),
-  ('10000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234570', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Pro"}', now(), now());
+  ('10000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'owner@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Owner","phone_e164":"+358401234567"}', now(), now()),
+  ('10000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'admin@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Admin","phone_e164":"+358401234568"}', now(), now()),
+  ('10000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'master@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Master","phone_e164":"+358401234569"}', now(), now()),
+  ('10000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'pro@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Pro","phone_e164":"+358401234570"}', now(), now());
 
 update public.profiles
 set platform_role = 'owner', force_password_change = false
@@ -77,6 +77,16 @@ values ('30000000-0000-4000-8000-000000000001'),
 
 -- Schema and role helper checks.
 select extensions.has_table('public', 'profiles', 'profiles table exists');
+select extensions.has_column('public', 'profiles', 'email', 'profiles table stores the staff email identifier');
+select extensions.ok(
+  exists(select 1 from pg_indexes where schemaname = 'public' and indexname = 'profiles_email_lower_uq'
+    and indexdef ilike 'CREATE UNIQUE INDEX%'),
+  'Staff email is protected by a case-insensitive unique index'
+);
+select extensions.ok(
+  (select email = lower(email) from public.profiles where id = '10000000-0000-4000-8000-000000000001'),
+  'Auth trigger stores normalized lowercase email in the profile'
+);
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
