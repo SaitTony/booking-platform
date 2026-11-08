@@ -11,7 +11,7 @@ type Booking = { id:string; starts_at:string; ends_at:string; status:string; ser
 
 const weekdays=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота']
 
-export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
+export default function StaffWorkspace({profile,kindFilter,companyIdFilter}:{profile:StaffProfile;kindFilter?:'individual'|'company';companyIdFilter?:string}) {
   const [masters,setMasters]=useState<Master[]>([])
   const [masterId,setMasterId]=useState('')
   const [services,setServices]=useState<Service[]>([])
@@ -38,6 +38,8 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
   async function loadMasters(){
     if(!supabase)return
     let query=supabase.from('masters').select('id,display_name,slug,kind,company_id,public_description,photo_url,timezone,theme,is_active,archived_at').is('archived_at',null)
+    if(kindFilter)query=query.eq('kind',kindFilter)
+    if(companyIdFilter)query=query.eq('company_id',companyIdFilter)
     if(profile.platform_role==='master_pro')query=query.eq('profile_id',profile.id)
     else if(profile.company_members?.some(m=>m.role==='master'))query=query.eq('id',profile.company_members.find(m=>m.role==='master')?.master_id??'')
     else if(profile.company_members?.some(m=>m.role==='admin'))query=query.eq('company_id',profile.company_members.find(m=>m.role==='admin')?.company_id??'')
