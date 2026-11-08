@@ -95,3 +95,41 @@
   .company-about p{font-size:13px}
   .page-footer{font-size:12px;padding:14px 0 18px}
 }
+
+
+/* Desktop typography refinement for the highlighted booking and company areas */
+@media(min-width:900px){
+  .theme-head .eyebrow{font-size:12px}
+  .theme-head strong{font-size:20px}
+  .role-select{font-size:14px}
+  .role-select select{font-size:14px;padding:9px 12px}
+  .theme-option b{font-size:14px}
+  .theme-option small{font-size:12px}
+  .demo-note,.permission-note{font-size:12px;line-height:1.55}
+
+  .service-card{gap:15px;padding:17px 20px}
+  .service-info strong{font-size:18px}
+  .service-info small{font-size:14px;line-height:1.45}
+  .service-info em{font-size:13px}
+  .service-card>b{font-size:16px}
+  .service-radio{width:20px;height:20px;font-size:12px}
+
+  .aside-card{padding:21px}
+  .aside-card>.eyebrow{font-size:12px}
+  .aside-master{gap:12px;margin:20px 0}
+  .mini-avatar{width:42px;height:42px}
+  .aside-master strong{font-size:15px}
+  .aside-master small{font-size:13px}
+  .aside-detail{font-size:14px;line-height:1.45;margin:14px 0}
+  .aside-total{font-size:15px;margin:16px 0}
+  .aside-total strong{font-size:24px}
+
+  .team-copy{padding:18px}
+  .team-copy>span{font-size:12px}
+  .team-copy strong{font-size:21px}
+  .team-copy p{font-size:15px;line-height:1.55}
+  .team-copy b{font-size:14px}
+  .company-about{max-width:820px}
+  .company-about h3{font-size:23px}
+  .company-about p{font-size:15px;line-height:1.6}
+}
