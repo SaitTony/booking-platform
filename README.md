@@ -1,4 +1,4 @@
-# Booking Platform
+# Booking Space
 
 Платформа онлайн-записи к мастерам.
 
@@ -22,9 +22,9 @@ npm run preview
 ```
 
 ## Публикация
-GitHub Actions собирает проект и публикует папку `dist` в GitHub Pages после push в ветку `main`.
+GitHub Actions собирает проект и публикует папку `dist` в GitHub Pages после push в ветки `main` и `feature/full-platform-implementation`.
 
-Для репозитория `SaitTony/booking-platform` базовый путь приложения — `/booking-platform/`. В репозитории откройте **Settings → Pages → Build and deployment → Source → GitHub Actions**.
+Для репозитория `SaitTony/workflows` базовый путь приложения — `/workflows/`. В репозитории откройте **Settings → Pages → Build and deployment → Source → GitHub Actions**.
 
 ## Маршруты
 - `/` — стартовая страница
