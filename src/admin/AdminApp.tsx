@@ -32,6 +32,7 @@ const roleLabel = (profile: Account) => {
 }
 
 export default function AdminApp() {
+  const [activeModal, setActiveModal] = useState<'account'|'reset'|'company'|'masterPro'|null>(null)
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [email, setEmail] = useState('')
@@ -180,7 +181,7 @@ export default function AdminApp() {
     setBusy(true);setError('');setNotice('')
     const {error:createError}=await supabase.from('companies').insert({name:companyName.trim(),slug:companySlug.trim(),description:companyDescription})
     if(createError)setError(createError.message)
-    else{setNotice('Компания создана.');setCompanyName('');setCompanySlug('');setCompanyDescription('');await loadDirectories()}
+    else{setNotice('Компания создана.');setCompanyName('');setCompanySlug('');setCompanyDescription('');setActiveModal(null);await loadDirectories()}
     setBusy(false)
   }
 
@@ -192,7 +193,7 @@ export default function AdminApp() {
     const payload={kind:pageKind,company_id:pageKind==='company'?pageCompanyId:null,display_name:pageName.trim(),slug:pageSlug.trim(),public_description:pageDescription}
     const {error:createError}=await supabase.from('masters').insert(payload)
     if(createError)setError(createError.message)
-    else{setNotice('Страница мастера создана. Учётную запись можно связать с ней после создания пользователя.');setPageName('');setPageSlug('');setPageDescription('');await loadDirectories()}
+    else{setNotice('Страница мастера создана. Учётную запись можно связать с ней после создания пользователя.');setPageName('');setPageSlug('');setPageDescription('');setActiveModal(null);await loadDirectories()}
     setBusy(false)
   }
 
@@ -218,7 +219,7 @@ export default function AdminApp() {
     if (createError) setError(createError.message)
     else {
       setNotice('Учётная запись создана. Теперь назначьте пользователю роль и свяжите его со страницей.')
-      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('')
+      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword(''); setActiveModal(null)
       await loadAccounts()
     }
     setBusy(false)
@@ -254,20 +255,10 @@ export default function AdminApp() {
       <details className="admin-accordion">
         <summary><span>Учётные записи</span><span className="accordion-count">{accounts.length}</span></summary>
         <div className="accordion-content">
-          <form className="admin-card admin-create-form" onSubmit={createAccount}>
-            <h3>Создать учётную запись</h3>
-            <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required /></label>
-            <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required /></label>
-            <label className="admin-field">Контактный номер телефона<input type="tel" placeholder="+358…" value={phoneForCreate} onChange={e=>setPhoneForCreate(e.target.value)} required /></label>
-            <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required /></label>
-            <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать учётную запись'}</button>
-          </form>
-          <form className="admin-card admin-create-form" onSubmit={resetUserAccess}>
-            <h3>Сбросить пароль</h3>
-            <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
-            <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={10} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required /></label>
-            <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
-          </form>
+          <div className="admin-action-grid">
+            <button className="admin-action-card" onClick={()=>setActiveModal('account')}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ для сотрудника</small></button>
+            <button className="admin-action-card" onClick={()=>setActiveModal('reset')}><span className="admin-action-icon">↻</span><strong>Сбросить пароль</strong><small>Выдать новый временный пароль</small></button>
+          </div>
           <div className="admin-account-list">{accounts.map(account=><article className="admin-account" key={account.id}>
             <div><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span></div>
             <span className="admin-role">{roleLabel(account)}</span>
@@ -316,13 +307,7 @@ export default function AdminApp() {
           <details className="admin-subaccordion">
             <summary>Создать</summary>
             <div className="accordion-content">
-              <form className="admin-card admin-create-form" onSubmit={createCompany}>
-                <h3>Создать компанию</h3>
-                <label className="admin-field">Название компании<input value={companyName} onChange={e=>{setCompanyName(e.target.value);setCompanySlug(makeSlug(e.target.value))}} required /></label>
-                <label className="admin-field">Адрес страницы (slug)<input value={companySlug} onChange={e=>setCompanySlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
-                <label className="admin-field">Описание<input value={companyDescription} onChange={e=>setCompanyDescription(e.target.value)} /></label>
-                <button className="primary-button" disabled={busy}>Создать компанию</button>
-              </form>
+              <button className="admin-action-card admin-action-card-wide" onClick={()=>setActiveModal('company')}><span className="admin-action-icon">＋</span><strong>Создать компанию</strong><small>Добавить новую компанию и подготовить её публичную страницу</small></button>
             </div>
           </details>
         </div>
@@ -357,13 +342,7 @@ export default function AdminApp() {
           <details className="admin-subaccordion">
             <summary>Создать</summary>
             <div className="accordion-content">
-              <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
-                <h3>Создать индивидуальную страницу Master_pro</h3>
-                <label className="admin-field">Имя мастера<input value={pageName} onChange={e=>{setPageKind('individual');setPageName(e.target.value);setPageSlug(makeSlug(e.target.value))}} required /></label>
-                <label className="admin-field">Адрес страницы (slug)<input value={pageSlug} onChange={e=>setPageSlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
-                <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
-                <button className="primary-button" disabled={busy}>Создать страницу Master_pro</button>
-              </form>
+              <button className="admin-action-card admin-action-card-wide" onClick={()=>{setPageKind('individual');setActiveModal('masterPro')}}><span className="admin-action-icon">＋</span><strong>Создать страницу Master_pro</strong><small>Новая индивидуальная страница специалиста</small></button>
             </div>
           </details>
         </div>
@@ -382,5 +361,39 @@ export default function AdminApp() {
       <CompanySettings isOwner={false} companyId={pageCompanyId}/>
       <StaffWorkspace profile={profile}/>
     </> : <StaffWorkspace profile={profile}/>}
+    {activeModal && <div className="admin-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!busy)setActiveModal(null)}}>
+      <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+        <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
+        <span className="eyebrow">WORKFLOWS PROJECT</span>
+        {activeModal==='account'&&<form onSubmit={createAccount}>
+          <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Создайте профиль сотрудника. Роль и доступ к компании можно назначить после сохранения.</p>
+          <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/></label>
+          <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
+          <label className="admin-field">Контактный номер телефона<input type="tel" placeholder="+358…" value={phoneForCreate} onChange={e=>setPhoneForCreate(e.target.value)} required/></label>
+          <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required/></label>
+          <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать учётную запись'}</button>
+        </form>}
+        {activeModal==='reset'&&<form onSubmit={resetUserAccess}>
+          <h2 id="admin-modal-title">Сбросить пароль</h2><p className="admin-modal-intro">Сотрудник получит временный пароль и должен будет сменить его при следующем входе.</p>
+          <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
+          <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={10} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required/></label>
+          <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
+        </form>}
+        {activeModal==='company'&&<form onSubmit={createCompany}>
+          <h2 id="admin-modal-title">Создать компанию</h2><p className="admin-modal-intro">Создайте отдельное пространство компании. После этого можно добавить сотрудников и страницы мастеров.</p>
+          <label className="admin-field">Название компании<input value={companyName} onChange={e=>{setCompanyName(e.target.value);setCompanySlug(makeSlug(e.target.value))}} required autoFocus/></label>
+          <label className="admin-field">Адрес страницы (slug)<input value={companySlug} onChange={e=>setCompanySlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*"/></label>
+          <label className="admin-field">Описание<input value={companyDescription} onChange={e=>setCompanyDescription(e.target.value)}/></label>
+          <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать компанию'}</button>
+        </form>}
+        {activeModal==='masterPro'&&<form onSubmit={createMasterPage}>
+          <h2 id="admin-modal-title">Создать страницу Master_pro</h2><p className="admin-modal-intro">Индивидуальная страница специалиста, не привязанная к компании.</p>
+          <label className="admin-field">Имя мастера<input value={pageName} onChange={e=>{setPageKind('individual');setPageName(e.target.value);setPageSlug(makeSlug(e.target.value))}} required autoFocus/></label>
+          <label className="admin-field">Адрес страницы (slug)<input value={pageSlug} onChange={e=>setPageSlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*"/></label>
+          <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)}/></label>
+          <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать страницу'}</button>
+        </form>}
+      </section>
+    </div>}
   </section></main>
 }
