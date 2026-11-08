@@ -135,6 +135,22 @@ export default function AdminApp() {
     setBusy(false)
   }
 
+  async function toggleAccountStatus(account: Account) {
+    if (!supabase || account.platform_role === 'owner') return
+    const disabled = !account.disabled_at
+    const confirmed = window.confirm(disabled
+      ? `Отключить доступ для ${account.full_name}?`
+      : `Включить доступ для ${account.full_name}?`)
+    if (!confirmed) return
+    setBusy(true); setError(''); setNotice('')
+    const { error: statusError } = await supabase.functions.invoke('owner-set-account-status', {
+      body: { userId: account.id, disabled },
+    })
+    if (statusError) setError(statusError.message)
+    else { setNotice(disabled ? 'Доступ к учётной записи отключён.' : 'Доступ к учётной записи включён.'); await loadAccounts() }
+    setBusy(false)
+  }
+
   async function resetUserAccess(event: FormEvent) {
     event.preventDefault()
     if(!supabase||!resetUserId)return
@@ -181,11 +197,11 @@ export default function AdminApp() {
     setBusy(false)
   }
 
-  async function assignRole(event: FormEvent) {
+  async function assignRole(event: FormEvent, companyOverride?: string) {
     event.preventDefault()
     if (!supabase || !selectedUserId) return
     setBusy(true); setError(''); setNotice('')
-    const body = { userId: selectedUserId, role: selectedRole, companyId: selectedRole === 'master_pro' ? null : selectedCompanyId, masterId: selectedRole === 'admin' ? null : selectedMasterId }
+    const body = { userId: selectedUserId, role: selectedRole, companyId: selectedRole === 'master_pro' ? null : (companyOverride ?? selectedCompanyId), masterId: selectedRole === 'admin' ? null : selectedMasterId }
     const { error: assignError } = await supabase.functions.invoke('assign-user-role', { body })
     if (assignError) setError(assignError.message)
     else { setNotice('Роль и связь со страницей назначены.'); setSelectedUserId(''); setSelectedMasterId(''); await loadAccounts() }
@@ -213,7 +229,7 @@ export default function AdminApp() {
 
   if (!sessionReady && supabase) return <main className="admin-shell"><section className="admin-card">Загрузка…</section></main>
   if (!profile) return <main className="admin-shell"><form className="admin-card" onSubmit={signIn}>
-    <span className="eyebrow">АДМИНИСТРИРОВАНИЕ</span><h1>Вход в панель управления</h1>
+    <span className="eyebrow">Workflows project</span><h1>административная панель</h1>
     <label className="admin-field">Email<input type="email" autoComplete="username" placeholder="name@example.com" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
     <label className="admin-field">Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
     {!isSupabaseConfigured && <p className="admin-error">Авторизация пока не подключена. Для входа необходимо настроить соединение с базой данных.</p>}
@@ -232,57 +248,128 @@ export default function AdminApp() {
   if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell"><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell"><section className="admin-wide">
-    <header className="admin-top"><div><span className="eyebrow">УПРАВЛЕНИЕ</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
+    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">Workflows project</span><h1>административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
     {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' ? <>
-      <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ ДОСТУПОМ</span><h2>Пользователи</h2></div><span>{accounts.length} учётных записей</span></div>
-      <form className="admin-card admin-create-form" onSubmit={createCompany}>
-        <h3>Создать компанию</h3>
-        <label className="admin-field">Название компании<input value={companyName} onChange={e=>{setCompanyName(e.target.value);setCompanySlug(makeSlug(e.target.value))}} required /></label>
-        <label className="admin-field">Адрес страницы (slug)<input value={companySlug} onChange={e=>setCompanySlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
-        <label className="admin-field">Описание<input value={companyDescription} onChange={e=>setCompanyDescription(e.target.value)} /></label>
-        <button className="primary-button" disabled={busy}>Создать компанию</button>
-      </form>
-      <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
-        <h3>Создать страницу мастера</h3>
-        <label className="admin-field">Тип страницы<select value={pageKind} onChange={e=>setPageKind(e.target.value as 'company'|'individual')}><option value="company">Мастер компании</option><option value="individual">Индивидуальный Master_pro</option></select></label>
-        {pageKind==='company'&&<label className="admin-field">Компания<select value={pageCompanyId} onChange={e=>setPageCompanyId(e.target.value)} required><option value="">Выберите компанию</option>{companies.map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
-        <label className="admin-field">Имя мастера<input value={pageName} onChange={e=>{setPageName(e.target.value);setPageSlug(makeSlug(e.target.value))}} required /></label>
-        <label className="admin-field">Адрес страницы (slug)<input value={pageSlug} onChange={e=>setPageSlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
-        <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
-        <button className="primary-button" disabled={busy || (pageKind==='company'&&!pageCompanyId)}>Создать страницу мастера</button>
-      </form>
-      <form className="admin-card admin-create-form" onSubmit={createAccount}>
-        <h3>Создать учётную запись</h3>
-        <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required /></label>
-        <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required /></label>
-        <label className="admin-field">Контактный номер телефона<input type="tel" placeholder="+358…" value={phoneForCreate} onChange={e=>setPhoneForCreate(e.target.value)} required /></label>
-        <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required /></label>
-        <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать учётную запись'}</button>
-      </form>
-      <form className="admin-card admin-create-form" onSubmit={assignRole}>
-        <h3>Назначить роль и связать страницу</h3>
-        <label className="admin-field">Пользователь<select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)} required><option value="">Выберите учётную запись</option>{accounts.filter(a=>a.platform_role !== 'owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email} · {a.phone_e164}</option>)}</select></label>
-        <label className="admin-field">Роль<select value={selectedRole} onChange={e=>{setSelectedRole(e.target.value as 'admin'|'master'|'master_pro');setSelectedMasterId('')}}><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
-        {selectedRole !== 'master_pro' && <label className="admin-field">Компания<select value={selectedCompanyId} onChange={e=>{setSelectedCompanyId(e.target.value);setSelectedMasterId('')}} required><option value="">Выберите компанию</option>{companies.map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
-        {selectedRole !== 'admin' && <label className="admin-field">Страница мастера<select value={selectedMasterId} onChange={e=>setSelectedMasterId(e.target.value)} required><option value="">Выберите свободную страницу</option>{masterPages.filter(page=>!page.profile_id && (selectedRole === 'master_pro' ? page.kind === 'individual' : page.kind === 'company' && page.company_id === selectedCompanyId)).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
-        <button className="primary-button" disabled={busy || !selectedUserId || (selectedRole !== 'admin' && !selectedMasterId) || (selectedRole !== 'master_pro' && !selectedCompanyId)}>{busy?'Сохраняем…':'Назначить роль'}</button>
-      </form>
-      <form className="admin-card admin-create-form" onSubmit={resetUserAccess}>
-        <h3>Сбросить пароль пользователя</h3>
-        <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email} · {a.phone_e164}</option>)}</select></label>
-        <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={10} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required /></label>
-        <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
-      </form>
-      <div className="admin-account-list">{accounts.map(account=><article className="admin-account" key={account.id}>
-        <div><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span></div>
-        <span className="admin-role">{roleLabel(account)}</span>
-        {account.force_password_change && <span className="admin-role">Требуется смена пароля</span>}
-      </article>)}</div>
-      <div className="admin-section-head"><div><span className="eyebrow">СТРАНИЦЫ МАСТЕРОВ</span><h2>Все страницы</h2></div><span>{masterPages.length}</span></div>
-      <div className="admin-account-list">{masterPages.map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>{page.kind==='individual'?'/pro/':'/'+(companies.find(item=>item.id===page.company_id)?.name??'company')+'/'}{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button><button className="secondary-button" onClick={()=>void archiveMasterPage(page)}>В архив</button></article>)}</div>
-            <CompanySettings isOwner companyId={undefined}/>
-      <StaffWorkspace profile={profile}/>
+      <details className="admin-accordion">
+        <summary><span>Учётные записи</span><span className="accordion-count">{accounts.length}</span></summary>
+        <div className="accordion-content">
+          <form className="admin-card admin-create-form" onSubmit={createAccount}>
+            <h3>Создать учётную запись</h3>
+            <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required /></label>
+            <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required /></label>
+            <label className="admin-field">Контактный номер телефона<input type="tel" placeholder="+358…" value={phoneForCreate} onChange={e=>setPhoneForCreate(e.target.value)} required /></label>
+            <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required /></label>
+            <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать учётную запись'}</button>
+          </form>
+          <form className="admin-card admin-create-form" onSubmit={resetUserAccess}>
+            <h3>Сбросить пароль</h3>
+            <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
+            <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={10} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required /></label>
+            <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
+          </form>
+          <div className="admin-account-list">{accounts.map(account=><article className="admin-account" key={account.id}>
+            <div><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span></div>
+            <span className="admin-role">{roleLabel(account)}</span>
+            {account.force_password_change && <span className="admin-role">Требуется смена пароля</span>}
+            {account.disabled_at && <span className="admin-role account-disabled">Отключена</span>}
+            {account.platform_role!=='owner'&&<button className="secondary-button account-action" disabled={busy} onClick={()=>void toggleAccountStatus(account)}>{account.disabled_at?'Включить':'Отключить'}</button>}
+          </article>)}</div>
+        </div>
+      </details>
+
+      <details className="admin-accordion">
+        <summary><span>Компании</span><span className="accordion-count">{companies.length}</span></summary>
+        <div className="accordion-content">
+          <details className="admin-subaccordion">
+            <summary>Управлять</summary>
+            <div className="accordion-content">
+              {companies.map(company=>{
+                const companyPages=masterPages.filter(page=>page.kind==='company'&&page.company_id===company.id)
+                const companyStaff=accounts.filter(account=>account.company_members?.some(member=>member.company_id===company.id))
+                return <details className="admin-company-item" key={company.id}>
+                  <summary><span>{company.name}</span><span className="accordion-meta">{companyPages.length} страниц · {companyStaff.length} сотрудников</span></summary>
+                  <div className="accordion-content">
+                    <CompanySettings isOwner companyId={company.id}/>
+                    <section className="admin-card workspace-section">
+                      <h3>Сотрудники компании</h3>
+                      <div className="admin-account-list">{companyStaff.length?companyStaff.map(account=><article className="admin-account" key={account.id}><div><strong>{account.full_name}</strong><span>{account.email}</span></div><span className="admin-role">{roleLabel(account)}</span></article>):<p>Сотрудники пока не назначены.</p>}</div>
+                      <form className="admin-create-form nested-form" onSubmit={event=>void assignRole(event,company.id)}>
+                        <h3>Добавить человека в компанию</h3>
+                        <label className="admin-field">Учётная запись<select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)} required><option value="">Выберите учётную запись</option>{accounts.filter(a=>a.platform_role!=='owner'&&!a.company_members?.some(m=>m.company_id===company.id)).map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
+                        <label className="admin-field">Роль<select value={selectedRole==='master_pro'?'admin':selectedRole} onChange={e=>{setSelectedRole(e.target.value as 'admin'|'master');setSelectedMasterId('')}}><option value="admin">Admin</option><option value="master">Master</option></select></label>
+                        {selectedRole==='master'&&<label className="admin-field">Страница мастера<select value={selectedMasterId} onChange={e=>setSelectedMasterId(e.target.value)} required><option value="">Выберите страницу</option>{companyPages.filter(page=>!page.profile_id).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
+                        <button className="primary-button" disabled={busy||!selectedUserId||(selectedRole==='master'&&!selectedMasterId)}>{busy?'Сохраняем…':'Добавить в компанию'}</button>
+                      </form>
+                    </section>
+                    <section className="admin-card workspace-section">
+                      <h3>Страницы мастеров</h3>
+                      <div className="admin-account-list">{companyPages.map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{company.name}/{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button account-action" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button><button className="secondary-button account-action" onClick={()=>void archiveMasterPage(page)}>В архив</button></article>)}</div>
+                    </section>
+                    <StaffWorkspace profile={profile} kindFilter="company" companyIdFilter={company.id}/>
+                  </div>
+                </details>
+              })}
+              {!companies.length&&<p className="admin-empty">Компаний пока нет. Создайте первую во вкладке «Создать».</p>}
+            </div>
+          </details>
+          <details className="admin-subaccordion">
+            <summary>Создать</summary>
+            <div className="accordion-content">
+              <form className="admin-card admin-create-form" onSubmit={createCompany}>
+                <h3>Создать компанию</h3>
+                <label className="admin-field">Название компании<input value={companyName} onChange={e=>{setCompanyName(e.target.value);setCompanySlug(makeSlug(e.target.value))}} required /></label>
+                <label className="admin-field">Адрес страницы (slug)<input value={companySlug} onChange={e=>setCompanySlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
+                <label className="admin-field">Описание<input value={companyDescription} onChange={e=>setCompanyDescription(e.target.value)} /></label>
+                <button className="primary-button" disabled={busy}>Создать компанию</button>
+              </form>
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <details className="admin-accordion">
+        <summary><span>Master_pro</span><span className="accordion-count">{masterPages.filter(page=>page.kind==='individual').length}</span></summary>
+        <div className="accordion-content">
+          <details className="admin-subaccordion">
+            <summary>Управлять</summary>
+            <div className="accordion-content">
+              {masterPages.filter(page=>page.kind==='individual').map(page=>{
+                const linkedAccount=accounts.find(account=>account.id===page.profile_id)
+                return <details className="admin-company-item" key={page.id}>
+                  <summary><span>{page.display_name}</span><span className="accordion-meta">{page.is_active?'Активна':'Отключена'}</span></summary>
+                  <div className="accordion-content">
+                    <section className="admin-card">
+                      <div className="admin-account"><div><strong>{linkedAccount?.full_name??'Учётная запись не привязана'}</strong><span>{linkedAccount?.email??'Назначьте Master_pro для этой страницы'}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span></div>
+                      <div className="admin-inline-actions"><button className="secondary-button account-action" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить страницу':'Включить страницу'}</button><button className="secondary-button account-action" onClick={()=>void archiveMasterPage(page)}>В архив</button></div>
+                      {!linkedAccount&&<form className="nested-form" onSubmit={event=>{setSelectedRole('master_pro');void assignRole(event)}}>
+                        <h3>Связать учётную запись</h3>
+                        <label className="admin-field">Пользователь<select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)} required><option value="">Выберите учётную запись</option>{accounts.filter(a=>a.platform_role!=='owner'&&a.platform_role!=='master_pro').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
+                        <input type="hidden" value={page.id}/>
+                        <label className="admin-field">Страница мастера<select value={selectedMasterId} onChange={e=>setSelectedMasterId(e.target.value)} required><option value="">Выберите страницу</option>{masterPages.filter(p=>p.kind==='individual'&&!p.profile_id).map(p=><option key={p.id} value={p.id}>{p.display_name}</option>)}</select></label>
+                        <button className="primary-button" disabled={busy||!selectedUserId||!selectedMasterId}>Назначить Master_pro</button>
+                      </form>}
+                    </section>
+                  </div>
+                </details>
+              })}
+              <StaffWorkspace profile={profile} kindFilter="individual"/>
+            </div>
+          </details>
+          <details className="admin-subaccordion">
+            <summary>Создать</summary>
+            <div className="accordion-content">
+              <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
+                <h3>Создать индивидуальную страницу Master_pro</h3>
+                <label className="admin-field">Имя мастера<input value={pageName} onChange={e=>{setPageKind('individual');setPageName(e.target.value);setPageSlug(makeSlug(e.target.value))}} required /></label>
+                <label className="admin-field">Адрес страницы (slug)<input value={pageSlug} onChange={e=>setPageSlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
+                <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
+                <button className="primary-button" disabled={busy}>Создать страницу Master_pro</button>
+              </form>
+            </div>
+          </details>
+        </div>
+      </details>
     </> : profile.company_members?.some(member=>member.role==='admin') ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ КОМПАНИЕЙ</span><h2>Страницы мастеров</h2></div></div>
       <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
