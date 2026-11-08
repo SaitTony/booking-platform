@@ -14,6 +14,11 @@ type Profile = {
 type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }\ntype CompanyOption = { id: string; name: string }\ntype MasterOption = { id: string; display_name: string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null }
 type Account = Profile & { company_members?: Member[] }
 
+function makeSlug(value: string) {
+  const map: Record<string,string> = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'i',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}
+  return value.toLowerCase().split('').map(char=>map[char] ?? char).join('').normalize('NFKD')
+    .replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+}
 const roleLabel = (profile: Account) => {
   if (profile.platform_role === 'owner') return 'Owner'
   if (profile.platform_role === 'master_pro') return 'Master_pro'
@@ -30,6 +35,14 @@ export default function AdminApp() {
   const [fullName, setFullName] = useState('')
   const [temporaryPassword, setTemporaryPassword] = useState('')
   const [accounts, setAccounts] = useState<Account[]>([])\n  const [companies, setCompanies] = useState<CompanyOption[]>([])\n  const [masterPages, setMasterPages] = useState<MasterOption[]>([])\n  const [selectedUserId, setSelectedUserId] = useState('')\n  const [selectedRole, setSelectedRole] = useState<'admin' | 'master' | 'master_pro'>('admin')\n  const [selectedCompanyId, setSelectedCompanyId] = useState('')\n  const [selectedMasterId, setSelectedMasterId] = useState('')
+  const [companyName,setCompanyName]=useState('')
+  const [companySlug,setCompanySlug]=useState('')
+  const [companyDescription,setCompanyDescription]=useState('')
+  const [pageKind,setPageKind]=useState<'company'|'individual'>('company')
+  const [pageCompanyId,setPageCompanyId]=useState('')
+  const [pageName,setPageName]=useState('')
+  const [pageSlug,setPageSlug]=useState('')
+  const [pageDescription,setPageDescription]=useState('')
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -90,6 +103,28 @@ export default function AdminApp() {
     setBusy(false)
   }
 
+  async function createCompany(event: FormEvent) {
+    event.preventDefault()
+    if(!supabase)return
+    setBusy(true);setError('');setNotice('')
+    const {error:createError}=await supabase.from('companies').insert({name:companyName.trim(),slug:companySlug.trim(),description:companyDescription})
+    if(createError)setError(createError.message)
+    else{setNotice('Компания создана.');setCompanyName('');setCompanySlug('');setCompanyDescription('');await loadDirectories()}
+    setBusy(false)
+  }
+
+  async function createMasterPage(event: FormEvent) {
+    event.preventDefault()
+    if(!supabase)return
+    if(!pageName.trim()||!pageSlug.trim()){setError('Имя и адрес страницы обязательны.');return}
+    setBusy(true);setError('');setNotice('')
+    const payload={kind:pageKind,company_id:pageKind==='company'?pageCompanyId:null,display_name:pageName.trim(),slug:pageSlug.trim(),public_description:pageDescription}
+    const {error:createError}=await supabase.from('masters').insert(payload)
+    if(createError)setError(createError.message)
+    else{setNotice('Страница мастера создана. Учётную запись можно связать с ней после создания пользователя.');setPageName('');setPageSlug('');setPageDescription('');await loadDirectories()}
+    setBusy(false)
+  }
+
   async function assignRole(event: FormEvent) {\n    event.preventDefault()\n    if (!supabase || !selectedUserId) return\n    setBusy(true); setError(''); setNotice('')\n    const body = { userId: selectedUserId, role: selectedRole, companyId: selectedRole === 'master_pro' ? null : selectedCompanyId, masterId: selectedRole === 'admin' ? null : selectedMasterId }\n    const { error: assignError } = await supabase.functions.invoke('assign-user-role', { body })\n    if (assignError) setError(assignError.message)\n    else { setNotice('Роль и связь со страницей назначены.'); setSelectedUserId(''); setSelectedMasterId(''); await loadAccounts() }\n    setBusy(false)\n  }\n\n  async function createAccount(event: FormEvent) {
     event.preventDefault()
     if (!supabase) return
@@ -135,6 +170,22 @@ export default function AdminApp() {
     {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ ДОСТУПОМ</span><h2>Пользователи</h2></div><span>{accounts.length} учётных записей</span></div>
+      <form className="admin-card admin-create-form" onSubmit={createCompany}>
+        <h3>Создать компанию</h3>
+        <label className="admin-field">Название компании<input value={companyName} onChange={e=>{setCompanyName(e.target.value);setCompanySlug(makeSlug(e.target.value))}} required /></label>
+        <label className="admin-field">Адрес страницы (slug)<input value={companySlug} onChange={e=>setCompanySlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
+        <label className="admin-field">Описание<input value={companyDescription} onChange={e=>setCompanyDescription(e.target.value)} /></label>
+        <button className="primary-button" disabled={busy}>Создать компанию</button>
+      </form>
+      <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
+        <h3>Создать страницу мастера</h3>
+        <label className="admin-field">Тип страницы<select value={pageKind} onChange={e=>setPageKind(e.target.value as 'company'|'individual')}><option value="company">Мастер компании</option><option value="individual">Индивидуальный Master_pro</option></select></label>
+        {pageKind==='company'&&<label className="admin-field">Компания<select value={pageCompanyId} onChange={e=>setPageCompanyId(e.target.value)} required><option value="">Выберите компанию</option>{companies.map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
+        <label className="admin-field">Имя мастера<input value={pageName} onChange={e=>{setPageName(e.target.value);setPageSlug(makeSlug(e.target.value))}} required /></label>
+        <label className="admin-field">Адрес страницы (slug)<input value={pageSlug} onChange={e=>setPageSlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
+        <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
+        <button className="primary-button" disabled={busy || (pageKind==='company'&&!pageCompanyId)}>Создать страницу мастера</button>
+      </form>
       <form className="admin-card admin-create-form" onSubmit={createAccount}>
         <h3>Создать учётную запись</h3>
         <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required /></label>
