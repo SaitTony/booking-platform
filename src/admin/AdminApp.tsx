@@ -268,6 +268,6 @@ export default function AdminApp() {
       </form>
       <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===pageCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.id}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span></article>)}</div>
       <StaffWorkspace profile={profile}/>
-    </> : <StaffWorkspace profile={profile}/>
+    </> : <StaffWorkspace profile={profile}/>}
   </section></main>
 }
