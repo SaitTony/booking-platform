@@ -105,6 +105,13 @@ export default function AdminApp() {
     }
   }, [profile?.id, profile?.platform_role, profile?.force_password_change])
 
+  useEffect(() => {
+    if (!profile || profile.force_password_change || profile.disabled_at) return
+    if (profile.platform_role === 'owner' || profile.company_members?.some(member => member.role === 'admin')) {
+      void loadDirectories()
+    }
+  }, [profile?.id, profile?.platform_role, profile?.force_password_change, profile?.disabled_at, profile?.company_members?.[0]?.company_id])
+
   async function signIn(event: FormEvent) {
     event.preventDefault()
     if (!supabase) return
