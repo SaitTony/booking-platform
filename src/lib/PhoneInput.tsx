@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import type { ChangeEvent, InputHTMLAttributes } from 'react'
 
 type PhoneInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'> & {
@@ -7,6 +8,7 @@ type PhoneInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'on
 
 /** Russian phone input stored canonically as +7 followed by exactly 10 digits. */
 export default function PhoneInput({ value, onChange, onFocus, ...props }: PhoneInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const raw = event.target.value
     const digits = raw.replace(/\D/g, '')
@@ -19,7 +21,7 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
 
     let national: string
     if (hasExplicitCountryPrefix) {
-      national = digits.slice(2)
+      national = digits.slice(1)
       // A domestic 8 typed after the prefilled +7 is a trunk prefix, not a national digit.
       if (national.startsWith('8')) national = national.slice(1)
     } else {
@@ -38,6 +40,7 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
   return (
     <input
       {...props}
+      ref={inputRef}
       type="tel"
       inputMode="numeric"
       autoComplete="tel"
@@ -47,7 +50,10 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
       title="Введите +7 и ровно 10 цифр после кода страны"
       placeholder="+7 (___) ___-__-__"
       onFocus={event => {
-        if (!value) onChange('+7')
+        if (!value) {
+          onChange('+7')
+          window.requestAnimationFrame(() => inputRef.current?.setSelectionRange(2, 2))
+        }
         onFocus?.(event)
       }}
       onChange={handleChange}
