@@ -11,8 +11,8 @@ Deno.serve(async (req) => {
     const email = String(body.email ?? "").trim().toLowerCase();
     const phone = String(body.phone ?? "").trim();
     const temporaryPassword = String(body.temporaryPassword ?? "");
-    if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\+[1-9]\d{7,14}$/.test(phone) || temporaryPassword.length < 10) {
-      return json({ error: "Укажите имя, корректный email, телефон в формате E.164 и временный пароль длиной от 10 символов" }, 400);
+    if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\+7[0-9]{10}$/.test(phone) || temporaryPassword.length < 10) {
+      return json({ error: "Укажите имя, корректный email, телефон в формате +7 и ровно 10 цифр после кода страны, а также временный пароль длиной от 10 символов" }, 400);
     }
     const { data, error } = await admin.auth.admin.createUser({
       email, password: temporaryPassword, email_confirm: true,
