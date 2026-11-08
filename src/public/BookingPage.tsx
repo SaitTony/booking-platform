@@ -116,7 +116,7 @@ export default function BookingPage({ individual = false }: { individual?: boole
     setSaving(true);setError('')
     const {data,error:bookingError}=await supabase.rpc('create_booking',{
       p_master_id:master.id,p_service_id:selectedService.id,p_starts_at:selectedSlot,
-      p_client_name:clientName.trim(),p_client_phone_e164:phone
+      p_client_name:clientName.trim(),p_client_phone_e164:phone,p_rules_accepted:rulesAccepted
     })
     if(bookingError)setError(bookingError.message)
     else setBookingId(data as string)
