@@ -9,6 +9,7 @@ type Profile = {
   platform_role: 'pending' | 'owner' | 'master_pro'
   force_password_change: boolean
   disabled_at: string | null
+  company_members?: Member[]
 }
 type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }
 type Account = Profile & { company_members?: Member[] }
@@ -38,7 +39,7 @@ export default function AdminApp() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setProfile(null); setSessionReady(true); return }
     const { data, error: profileError } = await supabase.from('profiles')
-      .select('id,full_name,phone_e164,platform_role,force_password_change,disabled_at')
+      .select('id,full_name,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
       .eq('id', user.id).maybeSingle()
     if (profileError) setError(profileError.message)
     setProfile(data as Profile | null)
@@ -83,12 +84,9 @@ export default function AdminApp() {
     if (!supabase) return
     if (newPassword.length < 10) { setError('Новый пароль должен содержать не менее 10 символов.'); return }
     setBusy(true); setError('')
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
-    if (!updateError) {
-      const { error: completeError } = await supabase.rpc('complete_password_change')
-      if (completeError) setError('Пароль изменён, но не удалось завершить первый вход. Обратитесь к Owner.')
-      else { setNotice('Пароль успешно изменён.'); await loadProfile() }
-    } else setError(updateError.message)
+    const { error: updateError } = await supabase.functions.invoke('change-password', { body: { newPassword } })
+    if (!updateError) { setNotice('Пароль успешно изменён.'); await loadProfile() }
+    else setError(updateError.message)
     setBusy(false)
   }
 
@@ -130,7 +128,7 @@ export default function AdminApp() {
   </form></main>
 
   if (profile.disabled_at) return <main className="admin-shell"><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу Booking Space.</p><button className="secondary-button" onClick={()=>void supabase.auth.signOut()}>Выйти</button></section></main>
-  if (profile.platform_role === 'pending') return <main className="admin-shell"><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase.auth.signOut()}>Выйти</button></section></main>
+  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell"><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell"><section className="admin-wide">
     <header className="admin-top"><div><span className="eyebrow">BOOKING SPACE</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button" onClick={()=>void supabase.auth.signOut()}>Выйти</button></header>
