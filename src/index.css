@@ -133,3 +133,13 @@
   .company-about h3{font-size:23px}
   .company-about p{font-size:15px;line-height:1.6}
 }
+
+
+/* Mobile booking flow: service selection first, booking summary second */
+@media(max-width:650px){
+  .booking-main{display:contents}
+  .booking-main > .section-heading:first-child{order:1}
+  .booking-main > .service-list{order:2}
+  .booking-aside{order:3}
+  .booking-main > :not(:first-child):not(.service-list){order:4}
+}
