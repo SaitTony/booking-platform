@@ -10,14 +10,14 @@ insert into auth.users (
   phone, phone_confirmed_at, raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at
 ) values
-  ('10000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234567', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Owner"}', now(), now()),
-  ('10000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234568', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Admin"}', now(), now()),
-  ('10000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234569', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Master"}', now(), now()),
-  ('10000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', null, '', now(),
-   '+358401234570', now(), '{"provider":"phone","providers":["phone"]}', '{"full_name":"Test Pro"}', now(), now());
+  ('10000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'owner@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Owner","phone_e164":"+358401234567"}', now(), now()),
+  ('10000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'admin@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Admin","phone_e164":"+358401234568"}', now(), now()),
+  ('10000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'master@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Master","phone_e164":"+358401234569"}', now(), now()),
+  ('10000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'pro@example.test', '', now(),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Pro","phone_e164":"+358401234570"}', now(), now());
 
 update public.profiles
 set platform_role = 'owner', force_password_change = false
