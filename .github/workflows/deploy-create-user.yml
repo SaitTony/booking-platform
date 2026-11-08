@@ -2,6 +2,12 @@ name: Deploy create-user Edge Function
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/functions/owner-set-account-status/**"
+      - ".github/workflows/deploy-create-user.yml"
 
 permissions:
   contents: read
