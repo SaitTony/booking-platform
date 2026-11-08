@@ -31,13 +31,12 @@ The first Owner must be provisioned through a trusted administrative session, no
 
 ```sql
 update public.profiles
-set platform_role = 'owner',
-    force_password_change = false
+set platform_role = 'owner'
 where phone_e164 = '+358XXXXXXXXX';
 ```
 
 4. Verify exactly one row was updated. If zero or more than one row is reported, stop and investigate.
-5. Sign in at `/workflows/admin` using that phone and password.
+5. Sign in at `/workflows/admin` using that phone and temporary password. The first login will require a password change; after changing it, the Owner permissions become active.
 
 Never create an endpoint that lets a user promote their own account to Owner.
 
