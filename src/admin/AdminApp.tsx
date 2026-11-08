@@ -34,6 +34,7 @@ const roleLabel = (profile: Account) => {
 
 export default function AdminApp() {
   const [activeModal, setActiveModal] = useState<'account'|'reset'|'company'|'masterPro'|null>(null)
+  const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>('overview')
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [email, setEmail] = useState('')
@@ -232,7 +233,7 @@ export default function AdminApp() {
 
   if (!sessionReady && supabase) return <main className="admin-shell"><section className="admin-card">Загрузка…</section></main>
   if (!profile) return <main className="admin-shell"><form className="admin-card" onSubmit={signIn}>
-    <span className="eyebrow">Workflows project</span><h1>административная панель</h1>
+    <span className="eyebrow">Workflows project</span><h1>Административная панель</h1>
     <label className="admin-field">Email<input type="email" autoComplete="username" placeholder="name@example.com" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
     <label className="admin-field">Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
     {!isSupabaseConfigured && <p className="admin-error">Авторизация пока не подключена. Для входа необходимо настроить соединение с базой данных.</p>}
@@ -251,11 +252,33 @@ export default function AdminApp() {
   if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell"><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell"><section className="admin-wide">
-    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">Workflows project</span><h1>административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
+    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
+    {profile.platform_role === 'owner' && <section className="admin-stats" aria-label="Сводная статистика">
+      <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>Всего пользователей</small></article>
+      <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>Рабочие пространства</small></article>
+      <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
+    </section>}
     {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' ? <>
-      <details className="admin-accordion">
-        <summary><span>Учётные записи</span><span className="accordion-count">{accounts.length}</span></summary>
+      <div className="admin-workspace-layout">
+        <aside className="admin-sidebar" aria-label="Разделы панели">
+          <span className="admin-sidebar-label">МЕНЮ</span>
+          <button className={activeSection==='overview'?'active':''} onClick={()=>setActiveSection('overview')}><span>⌂</span>Обзор</button>
+          <button className={activeSection==='accounts'?'active':''} onClick={()=>setActiveSection('accounts')}><span>♙</span>Учётные записи</button>
+          <button className={activeSection==='companies'?'active':''} onClick={()=>setActiveSection('companies')}><span>▦</span>Компании</button>
+          <button className={activeSection==='masterPro'?'active':''} onClick={()=>setActiveSection('masterPro')}><span>✦</span>Master_pro</button>
+        </aside>
+        <div className="admin-main-content">
+          {activeSection==='overview' && <section className="admin-overview">
+            <div><span className="eyebrow">ОБЗОР СИСТЕМЫ</span><h2>Добро пожаловать!</h2><p>Выберите раздел в боковом меню, чтобы управлять Workflows.</p></div>
+            <div className="admin-overview-links">
+              <button onClick={()=>setActiveSection('accounts')}>Управление учётными записями <span>→</span></button>
+              <button onClick={()=>setActiveSection('companies')}>Управление компаниями <span>→</span></button>
+              <button onClick={()=>setActiveSection('masterPro')}>Страницы Master_pro <span>→</span></button>
+            </div>
+          </section>}
+      {activeSection==='accounts' && <section className="admin-accordion admin-panel-section">
+        <header className="admin-panel-heading"><h2>Учётные записи</h2><span className="accordion-count">{accounts.length}</span></header>
         <div className="accordion-content">
           <div className="admin-action-grid">
             <button className="admin-action-card" onClick={()=>setActiveModal('account')}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ для сотрудника</small></button>
@@ -269,10 +292,10 @@ export default function AdminApp() {
             {account.platform_role!=='owner'&&<button className="secondary-button account-action" disabled={busy} onClick={()=>void toggleAccountStatus(account)}>{account.disabled_at?'Включить':'Отключить'}</button>}
           </article>)}</div>
         </div>
-      </details>
+      </section>}
 
-      <details className="admin-accordion">
-        <summary><span>Компании</span><span className="accordion-count">{companies.length}</span></summary>
+      {activeSection==='companies' && <section className="admin-accordion admin-panel-section">
+        <header className="admin-panel-heading"><h2>Компании</h2><span className="accordion-count">{companies.length}</span></header>
         <div className="accordion-content">
           <details className="admin-subaccordion">
             <summary>Управлять</summary>
@@ -301,7 +324,7 @@ export default function AdminApp() {
                     </section>
                     <StaffWorkspace profile={profile} kindFilter="company" companyIdFilter={company.id}/>
                   </div>
-                </details>
+                </section>}
               })}
               {!companies.length&&<p className="admin-empty">Компаний пока нет. Создайте первую во вкладке «Создать».</p>}
             </div>
@@ -315,8 +338,8 @@ export default function AdminApp() {
         </div>
       </details>
 
-      <details className="admin-accordion">
-        <summary><span>Master_pro</span><span className="accordion-count">{masterPages.filter(page=>page.kind==='individual').length}</span></summary>
+      {activeSection==='masterPro' && <section className="admin-accordion admin-panel-section">
+        <header className="admin-panel-heading"><h2>Master_pro</h2><span className="accordion-count">{masterPages.filter(page=>page.kind==='individual').length}</span></header>
         <div className="accordion-content">
           <details className="admin-subaccordion">
             <summary>Управлять</summary>
@@ -336,7 +359,7 @@ export default function AdminApp() {
                       </form>}
                     </section>
                   </div>
-                </details>
+                </section>}
               })}
               <StaffWorkspace profile={profile} kindFilter="individual"/>
             </div>
@@ -349,6 +372,8 @@ export default function AdminApp() {
           </details>
         </div>
       </details>
+        </div>
+      </div>
     </> : profile.company_members?.some(member=>member.role==='admin') ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ КОМПАНИЕЙ</span><h2>Страницы мастеров</h2></div></div>
       <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
