@@ -5,6 +5,10 @@ grant insert, update on public.services to authenticated;
 grant insert, update on public.working_hours to authenticated;
 grant insert, update on public.schedule_exceptions to authenticated;
 
+-- Booking rules are fixed product constraints in v1. Staff may read settings,
+-- but no Data API role may write them (including inherited/default grants).
+revoke insert, update, delete on public.booking_settings from public, anon, authenticated;
+
 -- Public booking writes are performed only by the SECURITY DEFINER RPC, never direct table inserts.
 revoke insert, update, delete on public.bookings from anon, authenticated;
 revoke insert, update, delete on public.clients from anon, authenticated;
