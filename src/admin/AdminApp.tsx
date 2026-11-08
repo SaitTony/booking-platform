@@ -253,11 +253,6 @@ export default function AdminApp() {
 
   return <main className="admin-shell"><section className="admin-wide">
     <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
-    {profile.platform_role === 'owner' && <section className="admin-stats" aria-label="Сводная статистика">
-      <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>Всего пользователей</small></article>
-      <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>Рабочие пространства</small></article>
-      <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
-    </section>}
     {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' ? <>
       <div className="admin-workspace-layout">
@@ -270,6 +265,11 @@ export default function AdminApp() {
         </aside>
         <div className="admin-main-content">
           {activeSection==='overview' && <section className="admin-overview">
+    {profile.platform_role === 'owner' && <section className="admin-stats" aria-label="Сводная статистика">
+      <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>Всего пользователей</small></article>
+      <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>Рабочие пространства</small></article>
+      <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
+    </section>}
             <div><span className="eyebrow">ОБЗОР СИСТЕМЫ</span><h2>Добро пожаловать!</h2><p>Выберите раздел в боковом меню, чтобы управлять Workflows.</p></div>
             <div className="admin-overview-links">
               <button onClick={()=>setActiveSection('accounts')}>Управление учётными записями <span>→</span></button>
