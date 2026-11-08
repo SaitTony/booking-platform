@@ -25,7 +25,7 @@ All functions verify the caller's access token and check the Owner role server-s
 
 The first Owner must be provisioned through a trusted administrative session, not through a public endpoint.
 
-1. In Supabase Dashboard > Authentication > Users, add the first user with the Owner's phone number and a strong password. Confirm the phone number in the dashboard.
+1. In Supabase Dashboard > Authentication > Users, add the first user with the Owner's phone number and a strong password. Set user metadata `full_name` to the Owner's name and confirm the phone number in the dashboard.
 2. The database trigger creates a profile with the safe `pending` role.
 3. In SQL Editor, replace the placeholder with the Owner's exact E.164 phone and run this one-time statement:
 
