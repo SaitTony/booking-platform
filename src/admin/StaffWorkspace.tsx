@@ -21,6 +21,9 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
   const [newService,setNewService]=useState({name:'',description:'',duration:'60',price:'0'})
   const [editingServiceId,setEditingServiceId]=useState('')
   const [exceptionDate,setExceptionDate]=useState('')
+  const [exceptionDayOff,setExceptionDayOff]=useState(true)
+  const [exceptionOpens,setExceptionOpens]=useState('09:00')
+  const [exceptionCloses,setExceptionCloses]=useState('18:00')
   const [pageName,setPageName]=useState('')
   const [pageDescription,setPageDescription]=useState('')
   const [photoUrl,setPhotoUrl]=useState('')
@@ -102,7 +105,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     if(!supabase||!masterId||!exceptionDate)return
     setBusy(true);setError('')
     const {error:insertError}=await supabase.from('schedule_exceptions').upsert({
-      master_id:masterId,exception_date:exceptionDate,is_day_off:true,opens_at:null,closes_at:null,note:'Выходной',
+      master_id:masterId,exception_date:exceptionDate,is_day_off:exceptionDayOff,opens_at:exceptionDayOff?null:exceptionOpens,closes_at:exceptionDayOff?null:exceptionCloses,note:exceptionDayOff?'Выходной':'Изменённое расписание',
     },{onConflict:'master_id,exception_date'})
     if(insertError)setError(insertError.message);else{setNotice('Исключение расписания добавлено.');setExceptionDate('')}
     setBusy(false)
@@ -158,7 +161,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     </section>}
     {canEdit&&<section className="admin-card workspace-section"><h3>Рабочее расписание</h3>
       <div className="workspace-hours">{weekdays.map((day,index)=>{const row=hours.find(h=>h.weekday===index);return <HoursRow key={index} label={day} row={row} disabled={busy} onSave={(opens,closes,off)=>void saveHours(index,opens,closes,off,row?.id)}/>})}</div>
-      <form className="workspace-exception" onSubmit={addDayOff}><label className="admin-field">Добавить выходной<input type="date" value={exceptionDate} onChange={e=>setExceptionDate(e.target.value)} required/></label><button className="secondary-button" disabled={busy}>Добавить исключение</button></form>
+      <form className="workspace-exception" onSubmit={addDayOff}><label className="admin-field">Дата исключения<input type="date" value={exceptionDate} onChange={e=>setExceptionDate(e.target.value)} required/></label><label className="admin-field">Тип<select value={exceptionDayOff?'off':'hours'} onChange={e=>setExceptionDayOff(e.target.value==='off')}><option value="off">Выходной</option><option value="hours">Изменить часы</option></select></label>{!exceptionDayOff&&<><label className="admin-field">Начало<input type="time" value={exceptionOpens} onChange={e=>setExceptionOpens(e.target.value)}/></label><label className="admin-field">Окончание<input type="time" value={exceptionCloses} onChange={e=>setExceptionCloses(e.target.value)}/></label></>}<button className="secondary-button" disabled={busy||(!exceptionDayOff&&exceptionCloses<=exceptionOpens)}>Сохранить исключение</button></form>
     </section>}
     <section className="admin-card workspace-section"><h3>Записи</h3>
       <div className="admin-account-list">{bookings.map(booking=><article className="admin-account" key={booking.id}><div><strong>{booking.client_name_snapshot} · {booking.service_name_snapshot}</strong><span>{new Date(booking.starts_at).toLocaleString('ru-RU')} · {booking.client_phone_snapshot}</span></div><span className="admin-role">{booking.status}</span>{canCancel&&booking.status==='confirmed'&&<button className="secondary-button" onClick={()=>void cancelBooking(booking.id)}>Отменить</button>}</article>)}</div>
