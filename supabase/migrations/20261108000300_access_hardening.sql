@@ -37,9 +37,20 @@ drop function public.complete_password_change();
 -- edit ordinary page content and activation state within their scope.
 create or replace function public.guard_master_owner_fields()
 returns trigger language plpgsql set search_path = ''
-as $$
+as $
+declare
+  v_actor_id uuid;
 begin
-  if not public.is_owner() and (
+  v_actor_id := auth.uid();
+  if v_actor_id is null then
+    v_actor_id := nullif(current_setting('app.owner_assignment_actor', true), '')::uuid;
+  end if;
+
+  if not exists (
+    select 1 from public.profiles p
+    where p.id = v_actor_id and p.platform_role = 'owner'
+      and p.disabled_at is null and not p.force_password_change
+  ) and (
     old.profile_id is distinct from new.profile_id
     or old.company_id is distinct from new.company_id
     or old.kind is distinct from new.kind
@@ -49,7 +60,7 @@ begin
   end if;
   return new;
 end;
-$$;
+$;
 
 drop trigger if exists masters_owner_fields_guard on public.masters;
 create trigger masters_owner_fields_guard
@@ -147,6 +158,9 @@ begin
       end if;
     end if;
   end if;
+
+  -- The protected-field trigger verifies this transaction-local Owner identity.
+  perform set_config('app.owner_assignment_actor', p_actor_id::text, true);
 
   -- Clear the previous assignment only after all new values have been validated.
   delete from public.company_members where profile_id = p_user_id;
