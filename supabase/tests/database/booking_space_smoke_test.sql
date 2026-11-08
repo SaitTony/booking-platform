@@ -83,8 +83,8 @@ select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001
 select extensions.ok(public.is_owner(), 'Owner identity is recognized');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select extensions.throws_ok(
-  $update public.booking_settings set booking_horizon_days = 90
-    where master_id = '30000000-0000-4000-8000-000000000001'$,
+  $$update public.booking_settings set booking_horizon_days = 90
+    where master_id = '30000000-0000-4000-8000-000000000001'$$,
   '42501', null,
   'Company Admin cannot change fixed booking rules through the Data API'
 );
@@ -239,12 +239,12 @@ insert into public.schedule_exceptions (
   false, time '23:30', time '23:59', 'Late window boundary test'
 );
 select extensions.throws_ok(
-  $select public.create_booking(
+  $$select public.create_booking(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
     ((((now() at time zone 'UTC')::date + 3)::timestamp + time '23:45') at time zone 'UTC'),
     'Cross Midnight', '+358401234594', true
-  )$,
+  )$$,
   'P0001', 'Выбранное время вне рабочего расписания',
   'Booking duration cannot cross the end of the working window'
 );
