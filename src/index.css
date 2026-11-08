@@ -241,3 +241,59 @@
 .admin-shell .workspace-hour-row{border-color:var(--line)}
 .admin-shell .workspace-hour-row label{color:var(--muted)}
 .admin-shell a{color:#8db8ed}
+
+
+/* Workflows administration: compact expandable hierarchy */
+.admin-wide{width:min(1240px,100%)}
+.admin-branding{display:grid;gap:5px}
+.admin-branding .eyebrow{font-size:14px;letter-spacing:.04em;text-transform:none;color:var(--ink)}
+.admin-branding h1{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.035em;text-transform:none;margin:0;white-space:nowrap}
+.admin-branding p{margin:5px 0 0;font-size:12px}
+.admin-top{align-items:center;padding-bottom:22px}
+.admin-top .logout-button{width:auto;min-width:0;padding:5px 9px;font-size:10px;border-radius:7px;line-height:1.2}
+.admin-accordion,.admin-subaccordion,.admin-company-item{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#102540,#0b1b30);overflow:hidden}
+.admin-accordion{margin-top:16px;box-shadow:0 10px 28px rgba(0,0,0,.14)}
+.admin-accordion>summary,.admin-subaccordion>summary,.admin-company-item>summary{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;list-style:none;font-weight:700}
+.admin-accordion>summary::-webkit-details-marker,.admin-subaccordion>summary::-webkit-details-marker,.admin-company-item>summary::-webkit-details-marker{display:none}
+.admin-accordion>summary{padding:19px 22px;font:700 18px Manrope}
+.admin-accordion>summary:after,.admin-subaccordion>summary:after,.admin-company-item>summary:after{content:'＋';color:var(--muted);font-size:16px;margin-left:auto}
+.admin-accordion[open]>summary:after,.admin-subaccordion[open]>summary:after,.admin-company-item[open]>summary:after{content:'−'}
+.accordion-count{display:grid;place-items:center;min-width:30px;height:30px;padding:0 8px;border-radius:20px;background:#203b5b;color:#dbeaff;font:700 13px 'DM Sans'}
+.accordion-content{display:grid;gap:13px;padding:0 16px 16px}
+.admin-subaccordion{background:#0c1e34;border-color:#2b4665}
+.admin-subaccordion>summary{padding:15px 17px;font-size:14px}
+.admin-subaccordion>.accordion-content{padding:0 12px 13px}
+.admin-company-item{background:#102641;border-color:#345171}
+.admin-company-item>summary{padding:14px 16px;font-size:14px}
+.accordion-meta{margin-left:auto;color:var(--muted);font-size:11px;font-weight:400;white-space:nowrap}
+.admin-company-item>.accordion-content{padding:0 12px 14px}
+.admin-accordion .admin-card{max-width:none}
+.admin-accordion .admin-create-form{margin:0}
+.admin-accordion .admin-account{background:#0b1c30;box-shadow:none}
+.admin-accordion .admin-account-list{margin-top:3px}
+.admin-accordion .admin-section-head{margin:12px 0}
+.admin-accordion .admin-field{min-width:0}
+.admin-accordion .admin-field input,.admin-accordion .admin-field select,.admin-accordion .admin-field textarea{width:100%;min-width:0}
+.admin-accordion .admin-field select,.admin-accordion .admin-field textarea{padding:12px 14px;border:1px solid #345171;border-radius:10px;background:#09192d;color:var(--ink);font:inherit}
+.admin-accordion .nested-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 14px;margin-top:16px}
+.admin-accordion .nested-form h3{grid-column:1/-1}
+.admin-accordion .nested-form button{align-self:end;margin:18px 0}
+.admin-inline-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.admin-accordion .account-action{width:auto;min-width:86px;padding:7px 10px;font-size:10px;white-space:nowrap}
+.admin-accordion .account-disabled{background:#4b252d;color:#ffd9df}
+.admin-empty{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px}
+@media(max-width:760px){
+  .admin-shell{padding:18px 12px}
+  .admin-top{gap:10px;align-items:center}
+  .admin-branding .eyebrow{font-size:12px}
+  .admin-branding h1{font-size:19px;white-space:normal}
+  .admin-top .logout-button{padding:4px 7px;font-size:9px}
+  .admin-accordion>summary{padding:16px;font-size:16px}
+  .accordion-content{padding:0 9px 10px}
+  .admin-subaccordion>.accordion-content,.admin-company-item>.accordion-content{padding-left:7px;padding-right:7px}
+  .accordion-meta{font-size:9px}
+  .admin-accordion .nested-form{grid-template-columns:1fr}
+  .admin-accordion .nested-form button{margin:8px 0}
+  .admin-accordion .admin-account{gap:8px;padding:13px}
+  .admin-accordion .account-action{font-size:9px;padding:7px 8px}
+}
