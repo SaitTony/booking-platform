@@ -43,6 +43,8 @@ export default function AdminApp() {
   const [selectedRole, setSelectedRole] = useState<'admin' | 'master' | 'master_pro'>('admin')
   const [selectedCompanyId, setSelectedCompanyId] = useState('')
   const [selectedMasterId, setSelectedMasterId] = useState('')
+  const [resetUserId,setResetUserId]=useState('')
+  const [resetTemporaryPassword,setResetTemporaryPassword]=useState('')
   const [companyName,setCompanyName]=useState('')
   const [companySlug,setCompanySlug]=useState('')
   const [companyDescription,setCompanyDescription]=useState('')
@@ -120,6 +122,16 @@ export default function AdminApp() {
     const { error: updateError } = await supabase.functions.invoke('change-password', { body: { newPassword } })
     if (!updateError) { setNotice('Пароль успешно изменён.'); await loadProfile() }
     else setError(updateError.message)
+    setBusy(false)
+  }
+
+  async function resetUserAccess(event: FormEvent) {
+    event.preventDefault()
+    if(!supabase||!resetUserId)return
+    setBusy(true);setError('');setNotice('')
+    const {error:resetError}=await supabase.functions.invoke('owner-reset-access',{body:{targetUserId:resetUserId,newTemporaryPassword:resetTemporaryPassword}})
+    if(resetError)setError(resetError.message)
+    else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetTemporaryPassword('');await loadAccounts()}
     setBusy(false)
   }
 
@@ -231,6 +243,12 @@ export default function AdminApp() {
         {selectedRole !== 'master_pro' && <label className="admin-field">Компания<select value={selectedCompanyId} onChange={e=>{setSelectedCompanyId(e.target.value);setSelectedMasterId('')}} required><option value="">Выберите компанию</option>{companies.map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
         {selectedRole !== 'admin' && <label className="admin-field">Страница мастера<select value={selectedMasterId} onChange={e=>setSelectedMasterId(e.target.value)} required><option value="">Выберите свободную страницу</option>{masterPages.filter(page=>!page.profile_id && (selectedRole === 'master_pro' ? page.kind === 'individual' : page.kind === 'company' && page.company_id === selectedCompanyId)).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
         <button className="primary-button" disabled={busy || !selectedUserId || (selectedRole !== 'admin' && !selectedMasterId) || (selectedRole !== 'master_pro' && !selectedCompanyId)}>{busy?'Сохраняем…':'Назначить роль'}</button>
+      </form>
+      <form className="admin-card admin-create-form" onSubmit={resetUserAccess}>
+        <h3>Сбросить пароль пользователя</h3>
+        <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.phone_e164}</option>)}</select></label>
+        <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={10} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required /></label>
+        <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
       </form>
       <div className="admin-account-list">{accounts.map(account=><article className="admin-account" key={account.id}>
         <div><strong>{account.full_name}</strong><span>{account.phone_e164}</span></div>
