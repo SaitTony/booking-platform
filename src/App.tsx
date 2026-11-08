@@ -1,203 +1,58 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Route, Routes, useParams } from 'react-router-dom'
 
-type Service = { id: number; name: string; description: string; duration: number; price: number }
-
-const demoServices: Service[] = [
-  { id: 1, name: 'Консультация', description: 'Знакомство, обсуждение задачи и подбор решения', duration: 30, price: 1200 },
-  { id: 2, name: 'Основная услуга', description: 'Полноценная процедура с индивидуальным подходом', duration: 60, price: 2500 },
-  { id: 3, name: 'Расширенная услуга', description: 'Больше времени и внимания к деталям', duration: 90, price: 3500 },
+type Theme = 'natural' | 'graphite' | 'sand' | 'green' | 'blue'
+type Role = 'owner' | 'admin' | 'master_pro' | 'master'
+const palettes: {id:Theme;name:string;desc:string}[] = [
+  {id:'natural',name:'Natural',desc:'Спокойный природный'},
+  {id:'graphite',name:'Graphite',desc:'Строгий минимализм'},
+  {id:'sand',name:'Sand',desc:'Тёплый премиум'},
+  {id:'green',name:'Deep Green',desc:'Современный салон'},
+  {id:'blue',name:'Midnight Blue',desc:'Технологичный'},
 ]
-
-const demoTimes = ['09:00', '10:30', '12:00', '13:30', '15:00', '16:30', '18:00']
-
-function formatPrice(value: number) {
-  return new Intl.NumberFormat('ru-RU').format(value) + ' ₽'
+const masters = [
+  {slug:'anna',name:'Анна Смирнова',role:'Топ-мастер',desc:'Специализируется на индивидуальном подходе и внимании к деталям.',initial:'А'},
+  {slug:'sergey',name:'Сергей Волков',role:'Мастер',desc:'Помогает подобрать решение и заботится о комфорте каждого гостя.',initial:'С'},
+  {slug:'maria',name:'Мария Орлова',role:'Мастер',desc:'Любит естественный результат и аккуратную работу.',initial:'М'},
+]
+const services = [
+  {id:1,name:'Консультация',desc:'Знакомство, обсуждение задачи и подбор решения',minutes:30,price:1200},
+  {id:2,name:'Основная услуга',desc:'Полноценная процедура с индивидуальным подходом',minutes:60,price:2500},
+  {id:3,name:'Расширенная услуга',desc:'Больше времени и внимания к деталям',minutes:90,price:3500},
+]
+const times = ['09:00','10:30','12:00','13:30','15:00','16:30','18:00']
+const money = (n:number) => new Intl.NumberFormat('ru-RU').format(n)+' ₽'
+function dates14(){return Array.from({length:14},(_,i)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+i);return d})}
+function Header(){return <header className="topbar"><Link to="/" className="brand"><span className="brand-mark">b.</span><span>booking<span className="brand-light">space</span></span></Link><span className="demo-label"><i/> ДЕМО-РЕЖИМ</span></header>}
+function ThemePicker({role,setRole,theme,setTheme,scope}:{role:Role;setRole:(v:Role)=>void;theme:Theme;setTheme:(v:Theme)=>void;scope:'personal'|'company'}){
+ const allowed=scope==='personal'?(role==='owner'||role==='master_pro'):(role==='owner'||role==='admin')
+ return <section className="theme-controls"><div className="theme-head"><div><span className="eyebrow">НАСТРОЙКИ ОФОРМЛЕНИЯ</span><strong>Цветовая тема</strong></div><label className="role-select">Роль в демо<select value={role} onChange={e=>setRole(e.target.value as Role)}><option value="owner">Owner</option><option value="admin">Admin</option><option value="master_pro">Master_pro</option><option value="master">Master</option></select></label></div>
+ {allowed?<div className="theme-options">{palettes.map(p=><button key={p.id} className={'theme-option '+(theme===p.id?'active':'')} onClick={()=>setTheme(p.id)}><span className={'palette palette-'+p.id}><i/><i/><i/><i/></span><span><b>{p.name}</b><small>{p.desc}</small></span>{theme===p.id&&<em>✓</em>}</button>)}</div>:<p className="permission-note">У этой роли нет права менять оформление. Выберите {scope==='personal'?'Owner или Master_pro':'Owner или Admin'}.</p>}
+ <p className="demo-note">Это демонстрация будущих прав. Реальная защита настроек будет обеспечена через Supabase.</p></section>
 }
-
-function makeDates() {
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date()
-    date.setHours(12, 0, 0, 0)
-    date.setDate(date.getDate() + index)
-    return date
-  })
+function Home(){return <main className="home-shell"><div className="home-card home-wide"><div className="brand-mark">b.</div><span className="eyebrow">ОБНОВЛЁННОЕ ДЕМО · BOOKING SPACE</span><h1>Две модели работы. Одна платформа.</h1><p>Посмотрите, как могут выглядеть индивидуальная страница специалиста и полноценная страница компании с общей обложкой, описанием и командой.</p><div className="route-grid"><Link to="/pro/anna" className="route-card"><span>MASTER_PRO</span><strong>Индивидуальный мастер</strong><small>Персональная страница, услуги, расписание и своя цветовая тема.</small><b>Открыть страницу →</b></Link><Link to="/chop" className="route-card"><span>COMPANY</span><strong>CHOP Studio</strong><small>Обложка компании, описание и перечень страниц мастеров.</small><b>Открыть компанию →</b></Link></div><div className="home-links"><Link to="/chop/anna">Анна в CHOP</Link><Link to="/chop/sergey">Сергей в CHOP</Link><Link to="/chop/maria">Мария в CHOP</Link></div><p className="demo-note">Все данные демонстрационные. Записи пока не сохраняются.</p></div></main>}
+function Company({theme,role,setRole,setTheme}:{theme:Theme;role:Role;setRole:(v:Role)=>void;setTheme:(v:Theme)=>void}){
+ return <main className="booking-shell"><Header/><section className="company-hero"><div className="company-cover-art"><span>CHOP</span><small>STUDIO · EST. 2020</small></div><div><span className="eyebrow">КОМПАНИЯ · ОБЩАЯ СТРАНИЦА</span><h1>CHOP Studio</h1><p>Пространство профессионального ухода, стиля и внимания к деталям. Выберите специалиста и удобное время для визита.</p><div className="master-meta"><span>⌖ Центр города</span><span>✦ Команда из 3 специалистов</span></div></div></section><ThemePicker role={role} setRole={setRole} theme={theme} setTheme={setTheme} scope="company"/><section className="company-content"><div className="section-heading"><div><span className="eyebrow">НАША КОМАНДА</span><h2>Выберите своего мастера</h2></div><span className="section-caption">Специалисты CHOP Studio</span></div><div className="team-grid">{masters.map(m=><Link to={'/chop/'+m.slug} className="team-card" key={m.slug}><div className={'team-image '+m.slug}>{m.initial}</div><div className="team-copy"><span>{m.role}</span><strong>{m.name}</strong><p>{m.desc}</p><b>Перейти к записи →</b></div></Link>)}</div><div className="company-about"><h3>О компании</h3><p>Мы объединили специалистов с разным опытом и единым отношением к качеству. На странице каждого мастера доступны его услуги, стоимость, расписание и свободные интервалы.</p><p>Общая цветовая тема компании применяется к её главной странице и всем подстраницам.</p></div></section><footer className="page-footer"><span>CHOP Studio · booking space</span><span>Онлайн-запись без ожидания</span></footer></main>
 }
-
-function DemoHome() {
-  return (
-    <main className="home-shell">
-      <div className="home-card">
-        <div className="brand-mark">b.</div>
-        <div className="eyebrow">ПЛАТФОРМА ОНЛАЙН-ЗАПИСИ</div>
-        <h1>Запись без лишних звонков</h1>
-        <p>Это техническая главная страница платформы. У каждого специалиста будет своя персональная ссылка для клиентов.</p>
-        <Link className="primary-link" to="/anna">Посмотреть демо-страницу мастера <span>→</span></Link>
-        <div className="home-foot">Демонстрационный режим · Данные пока не сохраняются</div>
-      </div>
-    </main>
-  )
+function MasterPage({companyMode,theme,role,setRole,setTheme}:{companyMode:boolean;theme:Theme;role:Role;setRole:(v:Role)=>void;setTheme:(v:Theme)=>void}){
+ const {slug,masterSlug}=useParams();const current=companyMode?masterSlug:slug;const master=masters.find(m=>m.slug===current)||masters[0]
+ const [serviceId,setServiceId]=useState(2),[day,setDay]=useState(0),[time,setTime]=useState(''),[name,setName]=useState(''),[phone,setPhone]=useState(''),[rules,setRules]=useState(false),[done,setDone]=useState(false)
+ const days=dates14(),service=services.find(s=>s.id===serviceId)||services[0],dateLabel=days[day].toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})
+ if(done)return <main className="booking-shell"><Header/><div className="success-card"><div className="success-icon">✓</div><span className="eyebrow">ДЕМО-БРОНИРОВАНИЕ</span><h1>Вы записаны!</h1><p>Спасибо, {name}. Это пример подтверждения записи.</p><div className="receipt"><div>Мастер<strong>{master.name}</strong></div><div>Услуга<strong>{service.name}</strong></div><div>Дата и время<strong>{dateLabel}, {time}</strong></div><div>Стоимость<strong>{money(service.price)}</strong></div><div>Телефон<strong>{phone}</strong></div></div><p className="demo-note">Запись не отправлена мастеру и не сохранена в базе данных.</p><button className="secondary-button full-button" onClick={()=>{setDone(false);setTime('');setName('');setPhone('')}}>Создать ещё одну демо-запись</button></div></main>
+ return <main className="booking-shell"><Header/>{companyMode&&<div className="breadcrumb"><Link to="/chop">CHOP Studio</Link><span>/</span>{master.name}</div>}<section className="master-hero"><div className={'master-avatar '+master.slug}>{master.initial}</div><div className="master-copy"><span className="eyebrow">{companyMode?'МАСТЕР · CHOP STUDIO':'ИНДИВИДУАЛЬНЫЙ СПЕЦИАЛИСТ · MASTER_PRO'}</span><h1>{master.name}</h1><p>{companyMode?master.desc:'Помогаю найти время для себя. Индивидуальный подход, внимание к деталям и комфорт на каждом этапе.'}</p><div className="master-meta"><span>✦ {companyMode?master.role:'Частная практика'}</span><span>⌖ По предварительной записи</span></div></div></section><ThemePicker role={role} setRole={setRole} theme={theme} setTheme={setTheme} scope={companyMode?'company':'personal'}/>
+ <div className="booking-layout"><section className="booking-main"><div className="section-heading"><div><span className="eyebrow">ШАГ 1</span><h2>Выберите услугу</h2></div><span className="section-caption">Что будем делать?</span></div><div className="service-list">{services.map(s=><button key={s.id} className={'service-card '+(serviceId===s.id?'selected':'')} onClick={()=>setServiceId(s.id)}><span className="service-radio">{serviceId===s.id?'✓':''}</span><span className="service-info"><strong>{s.name}</strong><small>{s.desc}</small><em>{s.minutes} минут</em></span><b>{money(s.price)}</b></button>)}</div>
+ <div className="section-heading date-heading"><div><span className="eyebrow">ШАГ 2</span><h2>Выберите дату</h2></div><span className="section-caption">Ближайшие 14 дней</span></div><div className="date-strip">{days.map((d,i)=><button key={d.toISOString()} className={'date-card '+(day===i?'active':'')} onClick={()=>{setDay(i);setTime('')}}><small>{i===0?'Сегодня':d.toLocaleDateString('ru-RU',{weekday:'short'})}</small><strong>{d.getDate()}</strong><small>{d.toLocaleDateString('ru-RU',{month:'short'}).replace('.','')}</small></button>)}</div>
+ <div className="section-heading time-heading"><div><span className="eyebrow">ШАГ 3</span><h2>Свободное время</h2></div><span className="section-caption">{dateLabel}</span></div><div className="time-grid">{times.map(t=><button key={t} className={'time-button '+(time===t?'active':'')} onClick={()=>setTime(t)}>{t}</button>)}</div>
+ {time&&<section className="client-section"><div className="section-heading"><div><span className="eyebrow">ШАГ 4</span><h2>Ваши контакты</h2></div></div><label className="field-label">Ваше имя<input value={name} onChange={e=>setName(e.target.value)} placeholder="Как к вам обращаться?"/></label><label className="field-label">Номер телефона<input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+7 (___) ___-__-__" type="tel"/></label><div className="booking-summary"><span>{service.name} · {service.minutes} мин.</span><b>{money(service.price)}</b><small>{dateLabel}, {time}</small></div><button className="primary-button full-button" disabled={!name.trim()||phone.replace(/\D/g,'').length<7} onClick={()=>setRules(true)}>Продолжить →</button></section>}</section>
+ <aside className="booking-aside"><div className="aside-card"><span className="eyebrow">ВАША ЗАПИСЬ</span><div className="aside-master"><div className={'mini-avatar '+master.slug}>{master.initial}</div><div><strong>{master.name}</strong><small>{companyMode?'CHOP Studio':'Индивидуальный мастер'}</small></div></div><hr/><div className="aside-detail"><span>Услуга</span><b>{service.name}</b></div><div className="aside-detail"><span>Длительность</span><b>{service.minutes} минут</b></div><div className="aside-detail"><span>Дата</span><b>{dateLabel}</b></div><div className="aside-detail"><span>Время</span><b>{time||'Не выбрано'}</b></div><hr/><div className="aside-total"><span>Итого</span><strong>{money(service.price)}</strong></div></div></aside></div><footer className="page-footer"><span>{companyMode?'CHOP Studio':'booking space'}</span><span>Онлайн-запись без ожидания</span></footer>
+ {rules&&<div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setRules(false)}}><section className="rules-modal"><button className="modal-close" onClick={()=>setRules(false)}>×</button><span className="eyebrow">ПОЖАЛУЙСТА, ОЗНАКОМЬТЕСЬ</span><h2>Правила записи</h2><p>Пожалуйста, приходите вовремя. Если планы изменились, заранее свяжитесь с мастером.</p><ul><li>Запись подтверждается автоматически.</li><li>Изменить или отменить запись можно, связавшись с мастером.</li><li>Выбранное время резервируется после подтверждения.</li></ul><div className="booking-summary"><b>{service.name}</b><small>{dateLabel}, {time} · {money(service.price)}</small></div><button className="primary-button full-button" onClick={()=>{setRules(false);setDone(true)}}>Согласен, подтвердить запись →</button><button className="modal-back" onClick={()=>setRules(false)}>Вернуться и проверить данные</button><p className="demo-note">Демо: реальная бронь не создаётся.</p></section></div>}</main>
 }
-
-function MasterPage() {
-  const { slug } = useParams()
-  const [selectedService, setSelectedService] = useState(2)
-  const [selectedDate, setSelectedDate] = useState(0)
-  const [selectedTime, setSelectedTime] = useState('')
-  const [clientName, setClientName] = useState('')
-  const [clientPhone, setClientPhone] = useState('')
-  const [showRules, setShowRules] = useState(false)
-  const [confirmed, setConfirmed] = useState(false)
-  const dates = useMemo(makeDates, [])
-  const service = demoServices.find(item => item.id === selectedService) ?? demoServices[0]
-  const masterName = slug === 'anna' ? 'Анна Смирнова' : 'Ваш мастер'
-  const formattedDate = dates[selectedDate].toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'long' })
-
-  function chooseDate(index: number) {
-    setSelectedDate(index)
-    setSelectedTime('')
-  }
-
-  if (confirmed) {
-    return (
-      <main className="booking-shell">
-        <div className="success-card">
-          <div className="success-icon">✓</div>
-          <div className="eyebrow">ДЕМО-БРОНИРОВАНИЕ</div>
-          <h1>Вы записаны!</h1>
-          <p className="success-lead">Спасибо, {clientName}. Ваша демонстрационная запись выглядит так:</p>
-          <div className="receipt">
-            <div><span>Мастер</span><strong>{masterName}</strong></div>
-            <div><span>Услуга</span><strong>{service.name}</strong></div>
-            <div><span>Дата и время</span><strong>{formattedDate}, {selectedTime}</strong></div>
-            <div><span>Стоимость</span><strong>{formatPrice(service.price)}</strong></div>
-            <div><span>Телефон</span><strong>{clientPhone}</strong></div>
-          </div>
-          <p className="demo-note">Это демонстрация интерфейса. Запись пока не отправлена мастеру и не сохранена в базе.</p>
-          <button className="secondary-button full-button" onClick={() => { setConfirmed(false); setSelectedTime(''); setClientName(''); setClientPhone('') }}>Создать ещё одну демо-запись</button>
-        </div>
-      </main>
-    )
-  }
-
-  return (
-    <main className="booking-shell">
-      <header className="topbar">
-        <Link to="/" className="brand"><span className="brand-mark">b.</span><span>booking<span className="brand-light">space</span></span></Link>
-        <span className="demo-label"><i /> ДЕМО-РЕЖИМ</span>
-      </header>
-
-      <section className="master-hero">
-        <div className="master-avatar">А</div>
-        <div className="master-copy">
-          <div className="eyebrow">ПЕРСОНАЛЬНАЯ СТРАНИЦА МАСТЕРА</div>
-          <h1>{masterName}</h1>
-          <p>Помогаю найти время для себя. Индивидуальный подход, внимание к деталям и комфорт на каждом этапе.</p>
-          <div className="master-meta"><span>✦ Частная практика</span><span>⌖ По предварительной записи</span></div>
-        </div>
-        <div className="hero-decoration" aria-hidden="true"><span>your time</span><b>is now.</b></div>
-      </section>
-
-      <div className="booking-layout">
-        <section className="booking-main">
-          <div className="section-heading">
-            <div><div className="step-label">ШАГ 1</div><h2>Выберите услугу</h2></div>
-            <span className="section-caption">Что будем делать?</span>
-          </div>
-          <div className="service-list">
-            {demoServices.map(item => (
-              <button key={item.id} className={`service-card ${selectedService === item.id ? 'selected' : ''}`} onClick={() => setSelectedService(item.id)}>
-                <span className="service-radio">{selectedService === item.id ? '✓' : ''}</span>
-                <span className="service-info"><strong>{item.name}</strong><small>{item.description}</small><em>{item.duration} минут</em></span>
-                <span className="service-price">{formatPrice(item.price)}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="section-heading date-heading">
-            <div><div className="step-label">ШАГ 2</div><h2>Выберите дату</h2></div>
-            <span className="section-caption">Ближайшие 7 дней</span>
-          </div>
-          <div className="date-strip">
-            {dates.map((date, index) => (
-              <button key={date.toISOString()} className={`date-card ${selectedDate === index ? 'active' : ''}`} onClick={() => chooseDate(index)}>
-                <small>{index === 0 ? 'Сегодня' : date.toLocaleDateString('ru-RU', { weekday: 'short' })}</small>
-                <strong>{date.getDate()}</strong>
-                <small>{date.toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '')}</small>
-              </button>
-            ))}
-          </div>
-
-          <div className="section-heading time-heading">
-            <div><div className="step-label">ШАГ 3</div><h2>Свободное время</h2></div>
-            <span className="section-caption">{formattedDate}</span>
-          </div>
-          <div className="time-grid">
-            {demoTimes.map(time => (
-              <button key={time} className={`time-button ${selectedTime === time ? 'active' : ''}`} onClick={() => setSelectedTime(time)}>{time}</button>
-            ))}
-          </div>
-
-          {selectedTime && (
-            <section className="client-section">
-              <div className="section-heading">
-                <div><div className="step-label">ШАГ 4</div><h2>Ваши контакты</h2></div>
-                <span className="section-caption">Остался последний шаг</span>
-              </div>
-              <label className="field-label">Ваше имя<input value={clientName} onChange={event => setClientName(event.target.value)} placeholder="Как к вам обращаться?" autoComplete="name" /></label>
-              <label className="field-label">Номер телефона<input value={clientPhone} onChange={event => setClientPhone(event.target.value)} placeholder="+7 (___) ___-__-__" type="tel" autoComplete="tel" /></label>
-              <div className="booking-summary"><span>{service.name} · {service.duration} мин.</span><strong>{formatPrice(service.price)}</strong><small>{formattedDate}, {selectedTime}</small></div>
-              <button className="primary-button full-button" disabled={!clientName.trim() || clientPhone.replace(/\D/g, '').length < 7} onClick={() => setShowRules(true)}>Продолжить <span>→</span></button>
-              <p className="privacy-hint">Нажимая «Продолжить», вы сможете ознакомиться с правилами записи.</p>
-            </section>
-          )}
-        </section>
-
-        <aside className="booking-aside">
-          <div className="aside-card">
-            <div className="aside-top"><span>ВАША ЗАПИСЬ</span><span className="aside-spark">✳</span></div>
-            <div className="aside-master"><div className="mini-avatar">А</div><div><strong>{masterName}</strong><small>Ваш специалист</small></div></div>
-            <div className="aside-divider" />
-            <div className="aside-detail"><span>Услуга</span><strong>{service.name}</strong></div>
-            <div className="aside-detail"><span>Длительность</span><strong>{service.duration} минут</strong></div>
-            <div className="aside-detail"><span>Дата</span><strong>{formattedDate}</strong></div>
-            <div className="aside-detail"><span>Время</span><strong>{selectedTime || 'Не выбрано'}</strong></div>
-            <div className="aside-divider" />
-            <div className="aside-total"><span>Итого</span><strong>{formatPrice(service.price)}</strong></div>
-            <p className="aside-foot">Выберите услугу, дату и время — и мы подготовим вашу запись.</p>
-          </div>
-          <div className="secure-note"><span>♧</span><p><strong>Ваше время — ваша ценность</strong><br />Запись занимает всего пару минут.</p></div>
-        </aside>
-      </div>
-      <footer className="page-footer"><span>booking space</span><span>Онлайн-запись без ожидания</span></footer>
-
-      {showRules && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowRules(false) }}>
-          <section className="rules-modal" role="dialog" aria-modal="true" aria-labelledby="rules-title">
-            <button className="modal-close" onClick={() => setShowRules(false)} aria-label="Закрыть">×</button>
-            <div className="eyebrow">ПОЖАЛУЙСТА, ОЗНАКОМЬТЕСЬ</div>
-            <h2 id="rules-title">Правила записи</h2>
-            <p>Пожалуйста, приходите вовремя. Если планы изменились, заранее свяжитесь с мастером по указанным контактам.</p>
-            <ul><li>Запись подтверждается автоматически.</li><li>Изменить или отменить запись можно, связавшись с мастером.</li><li>Выбранное время резервируется после подтверждения.</li></ul>
-            <div className="modal-booking"><strong>{service.name}</strong><span>{formattedDate}, {selectedTime} · {formatPrice(service.price)}</span></div>
-            <button className="primary-button full-button" onClick={() => { setShowRules(false); setConfirmed(true) }}>Согласен, подтвердить запись <span>→</span></button>
-            <button className="modal-back" onClick={() => setShowRules(false)}>Вернуться и проверить данные</button>
-            <p className="demo-note">Демо: подтверждение не создаёт реальную бронь.</p>
-          </section>
-        </div>
-      )}
-    </main>
-  )
-}
-
-function AdminPage() {
-  return <main className="home-shell"><div className="home-card"><div className="eyebrow">АДМИНИСТРИРОВАНИЕ</div><h1>Панель управления</h1><p>Вход для администратора появится после подключения авторизации.</p><Link className="primary-link" to="/">Вернуться на главную <span>→</span></Link></div></main>
-}
-
-function NotFound() {
-  return <main className="home-shell"><div className="home-card"><h1>Страница не найдена</h1><Link className="primary-link" to="/anna">Открыть демо-страницу мастера →</Link></div></main>
-}
-
-export default function App() {
-  return <Routes><Route path="/" element={<DemoHome />} /><Route path="/admin/*" element={<AdminPage />} /><Route path="/:slug" element={<MasterPage />} /><Route path="*" element={<NotFound />} /></Routes>
+function NotFound(){return <main className="home-shell"><div className="home-card"><h1>Страница не найдена</h1><Link className="primary-button" to="/">Вернуться к демо</Link></div></main>}
+export default function App(){
+ const [role,setRole]=useState<Role>('owner')
+ const [personalTheme,setPersonalTheme]=useState<Theme>(()=>(localStorage.getItem('demo-personal-theme') as Theme)||'natural')
+ const [companyTheme,setCompanyTheme]=useState<Theme>(()=>(localStorage.getItem('demo-company-theme') as Theme)||'natural')
+ useEffect(()=>{localStorage.setItem('demo-personal-theme',personalTheme)},[personalTheme])
+ useEffect(()=>{localStorage.setItem('demo-company-theme',companyTheme)},[companyTheme])
+ return <div className="app-root" data-theme="natural"><Routes><Route path="/" element={<Home/>}/><Route path="/pro/:slug" element={<MasterPage companyMode={false} theme={personalTheme} role={role} setRole={setRole} setTheme={setPersonalTheme}/>}/><Route path="/:companySlug/:masterSlug" element={<MasterPage companyMode theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="/:companySlug" element={<Company theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="*" element={<NotFound/>}/></Routes></div>
 }
