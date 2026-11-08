@@ -19,10 +19,14 @@ grant usage on schema public to service_role;
 grant all privileges on all tables in schema public to service_role;
 
 -- RLS policy helper functions must be executable by the API roles evaluating those policies.
-grant execute on function public.is_owner() to anon, authenticated, service_role;
-grant execute on function public.can_manage_master(uuid) to anon, authenticated, service_role;
-grant execute on function public.can_view_master(uuid) to anon, authenticated, service_role;
-grant execute on function public.is_company_admin(uuid) to anon, authenticated, service_role;
+revoke all on function public.is_owner() from public, anon;
+revoke all on function public.can_manage_master(uuid) from public, anon;
+revoke all on function public.can_view_master(uuid) from public, anon;
+revoke all on function public.is_company_admin(uuid) from public, anon;
+grant execute on function public.is_owner() to authenticated, service_role;
+grant execute on function public.can_manage_master(uuid) to authenticated, service_role;
+grant execute on function public.can_view_master(uuid) to authenticated, service_role;
+grant execute on function public.is_company_admin(uuid) to authenticated, service_role;
 
 -- Server-side account management uses service_role only; it is never exposed to the browser.
 grant execute on function public.owner_assign_user_role(uuid,uuid,text,uuid,uuid) to service_role;
