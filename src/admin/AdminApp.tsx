@@ -1,3 +1,4 @@
+import StaffWorkspace from './StaffWorkspace'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -266,6 +267,7 @@ export default function AdminApp() {
         <button className="primary-button" disabled={busy || !pageCompanyId}>Создать страницу мастера</button>
       </form>
       <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===pageCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.id}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span></article>)}</div>
-    </> : <section className="admin-card"><h2>Рабочее пространство</h2><p>Доступные разделы будут отображаться здесь в соответствии с вашей ролью.</p></section>}
+      <StaffWorkspace profile={profile}/>
+    </> : <StaffWorkspace profile={profile}/>
   </section></main>
 }
