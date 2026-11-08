@@ -1,3 +1,4 @@
+import CompanySettings from './CompanySettings'
 import StaffWorkspace from './StaffWorkspace'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -136,6 +137,13 @@ export default function AdminApp() {
     setBusy(false)
   }
 
+  async function toggleMasterPage(page:MasterOption) {
+    if(!supabase)return
+    const {error:updateError}=await supabase.from('masters').update({is_active:!page.is_active}).eq('id',page.id)
+    if(updateError)setError(updateError.message)
+    else{setNotice('Статус страницы изменён.');await loadDirectories()}
+  }
+
   async function createCompany(event: FormEvent) {
     event.preventDefault()
     if(!supabase)return
@@ -266,7 +274,8 @@ export default function AdminApp() {
         <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
         <button className="primary-button" disabled={busy || !pageCompanyId}>Создать страницу мастера</button>
       </form>
-      <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===pageCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.id}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span></article>)}</div>
+      <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===pageCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.id}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button></article>)}</div>
+      <CompanySettings isOwner={false} companyId={pageCompanyId}/>
       <StaffWorkspace profile={profile}/>
     </> : <StaffWorkspace profile={profile}/>}
   </section></main>
