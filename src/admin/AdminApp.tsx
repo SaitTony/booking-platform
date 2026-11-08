@@ -44,7 +44,6 @@ export default function AdminApp() {
   const [masterPages, setMasterPages] = useState<MasterOption[]>([])
   const [selectedUserId, setSelectedUserId] = useState('')
   const [selectedRole, setSelectedRole] = useState<'admin' | 'master' | 'master_pro'>('admin')
-  const [selectedCompanyId, setSelectedCompanyId] = useState('')
   const [selectedMasterId, setSelectedMasterId] = useState('')
   const [resetUserId,setResetUserId]=useState('')
   const [resetTemporaryPassword,setResetTemporaryPassword]=useState('')
@@ -202,7 +201,7 @@ export default function AdminApp() {
     if (!supabase || !selectedUserId) return
     const roleToAssign = roleOverride ?? (companyOverride && selectedRole === 'master_pro' ? 'admin' : selectedRole)
     setBusy(true); setError(''); setNotice('')
-    const body = { userId: selectedUserId, role: roleToAssign, companyId: roleToAssign === 'master_pro' ? null : (companyOverride ?? selectedCompanyId), masterId: roleToAssign === 'admin' ? null : (masterOverride ?? selectedMasterId) }
+    const body = { userId: selectedUserId, role: roleToAssign, companyId: roleToAssign === 'master_pro' ? null : companyOverride, masterId: roleToAssign === 'admin' ? null : (masterOverride ?? selectedMasterId) }
     const { error: assignError } = await supabase.functions.invoke('assign-user-role', { body })
     if (assignError) setError(assignError.message)
     else { setNotice('Роль и связь со страницей назначены.'); setSelectedUserId(''); setSelectedMasterId(''); await loadAccounts() }
