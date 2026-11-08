@@ -41,7 +41,6 @@ export default function AdminApp() {
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [fullName, setFullName] = useState('')
-  const [temporaryPassword, setTemporaryPassword] = useState('')
   const [accounts, setAccounts] = useState<Account[]>([])
   const [companies, setCompanies] = useState<CompanyOption[]>([])
   const [masterPages, setMasterPages] = useState<MasterOption[]>([])
@@ -129,7 +128,7 @@ export default function AdminApp() {
   async function changePassword(event: FormEvent) {
     event.preventDefault()
     if (!supabase) return
-    if (newPassword.length < 10) { setError('Новый пароль должен содержать не менее 10 символов.'); return }
+    if (newPassword.length < 6) { setError('Новый пароль должен содержать не менее 6 символов.'); return }
     setBusy(true); setError('')
     const { error: updateError } = await supabase.functions.invoke('change-password', { body: { newPassword } })
     if (!updateError) { setNotice('Пароль успешно изменён.'); await loadProfile() }
@@ -159,7 +158,7 @@ export default function AdminApp() {
     setBusy(true);setError('');setNotice('')
     const {error:resetError}=await supabase.functions.invoke('owner-reset-access',{body:{targetUserId:resetUserId,newTemporaryPassword:resetTemporaryPassword}})
     if(resetError)setError(resetError.message)
-    else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetTemporaryPassword('');setActiveModal(null);await loadAccounts()}
+    else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetActiveModal(null);await loadAccounts()}
     setBusy(false)
   }
 
@@ -217,7 +216,7 @@ export default function AdminApp() {
     if (!isValidRussianPhone(phoneForCreate.trim())) { setError('Введите номер в формате +7 и ровно 10 цифр после кода страны.'); return }
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
-      body: { fullName, email: emailForCreate, phone: phoneForCreate, temporaryPassword },
+      body: { fullName, email: emailForCreate, phone: phoneForCreate },
     })
     if (createError) setError(createError.message)
     else {
@@ -242,8 +241,8 @@ export default function AdminApp() {
   </form></main>
 
   if (profile.force_password_change) return <main className="admin-shell"><form className="admin-card" onSubmit={changePassword}>
-    <span className="eyebrow">ПЕРВЫЙ ВХОД</span><h1>Создайте свой пароль</h1><p>Временный пароль больше не будет использоваться. Придумайте новый пароль длиной не менее 10 символов.</p>
-    <label className="admin-field">Новый пароль<input type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required minLength={10} /></label>
+    <span className="eyebrow">ПЕРВЫЙ ВХОД</span><h1>Создайте свой пароль</h1><p>Временный пароль больше не будет использоваться. Придумайте новый пароль длиной не менее 6 символов.</p>
+    <label className="admin-field">Новый пароль<input type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required minLength={6} /></label>
     {error && <p className="admin-error">{error}</p>}
     <button className="primary-button full-button" disabled={busy}>{busy?'Сохраняем…':'Сменить пароль'}</button>
   </form></main>
@@ -397,13 +396,13 @@ export default function AdminApp() {
           <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/></label>
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
           <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
-          <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required/></label>
+          <p className="admin-modal-intro">Временный пароль для входа: <strong>000000</strong>. После первого входа сотрудник должен будет задать собственный пароль.</p>
           <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
         {activeModal==='reset'&&<form onSubmit={resetUserAccess}>
           <h2 id="admin-modal-title">Сбросить пароль</h2><p className="admin-modal-intro">Сотрудник получит временный пароль и должен будет сменить его при следующем входе.</p>
           <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
-          <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={10} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required/></label>
+          <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={6} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required/></label>
           <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
         </form>}
         {activeModal==='company'&&<form onSubmit={createCompany}>
