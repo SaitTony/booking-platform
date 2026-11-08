@@ -48,7 +48,8 @@ export default function AdminApp() {
   const [selectedRole, setSelectedRole] = useState<'admin' | 'master' | 'master_pro'>('admin')
   const [selectedMasterId, setSelectedMasterId] = useState('')
   const [resetUserId,setResetUserId]=useState('')
-  const [resetTemporaryPassword,setResetTemporaryPassword]=useState('')
+  const [temporaryPassword,setTemporaryPassword]=useState('000000')
+  const [resetTemporaryPassword,setResetTemporaryPassword]=useState('000000')
   const [companyName,setCompanyName]=useState('')
   const [companySlug,setCompanySlug]=useState('')
   const [companyDescription,setCompanyDescription]=useState('')
@@ -216,12 +217,12 @@ export default function AdminApp() {
     if (!isValidRussianPhone(phoneForCreate.trim())) { setError('Введите номер в формате +7 и ровно 10 цифр после кода страны.'); return }
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
-      body: { fullName, email: emailForCreate, phone: phoneForCreate },
+      body: { fullName, email: emailForCreate, phone: phoneForCreate, temporaryPassword },
     })
     if (createError) setError(createError.message)
     else {
       setNotice('Учётная запись создана. Теперь назначьте пользователю роль и свяжите его со страницей.')
-      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setActiveModal(null)
+      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('000000'); setActiveModal(null)
       await loadAccounts()
     }
     setBusy(false)
@@ -396,13 +397,14 @@ export default function AdminApp() {
           <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/></label>
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
           <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
-          <p className="admin-modal-intro">Временный пароль для входа: <strong>000000</strong>. После первого входа сотрудник должен будет задать собственный пароль.</p>
+          <label className="admin-field">Временный пароль<input type="text" autoComplete="new-password" minLength={6} value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} required/></label>
+          <p className="admin-modal-intro">После первого входа сотрудник должен будет задать собственный пароль.</p>
           <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
         {activeModal==='reset'&&<form onSubmit={resetUserAccess}>
           <h2 id="admin-modal-title">Сбросить пароль</h2><p className="admin-modal-intro">Сотрудник получит временный пароль и должен будет сменить его при следующем входе.</p>
           <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
-          <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={6} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required/></label>
+          <label className="admin-field">Новый временный пароль<input type="text" autoComplete="new-password" minLength={6} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required/></label>
           <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
         </form>}
         {activeModal==='company'&&<form onSubmit={createCompany}>
