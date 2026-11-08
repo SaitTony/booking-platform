@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build
+        env:
+          VITE_SUPABASE_URL: https://cetcxttaqtberrntsntr.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_GMJlnRBrbKZnEcqSBkr3Dg_UVmLKUGL
         run: npm run build
       - name: Preserve SPA fallback
         run: cp dist/index.html dist/404.html
