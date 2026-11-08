@@ -46,7 +46,7 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
       autoComplete="tel"
       value={value}
       maxLength={24}
-      pattern="\\+7[0-9]{10}"
+      pattern={String.raw`\+7[0-9]{10}`}
       title="Введите +7 и ровно 10 цифр после кода страны"
       placeholder="+7 (___) ___-__-__"
       onFocus={event => {
