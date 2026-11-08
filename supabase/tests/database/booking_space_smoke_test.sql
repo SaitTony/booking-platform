@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(28);
+select extensions.plan(29);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -157,6 +157,10 @@ select extensions.isnt(
 select extensions.is(
   (select count(*)::integer from public.clients where phone_e164 = '+358401234599'),
   1, 'The same E.164 phone maps to one client record'
+);
+select extensions.is(
+  (select full_name from public.clients where phone_e164 = '+358401234599'),
+  'Client One', 'A public booking cannot overwrite an existing client name'
 );
 select extensions.throws_ok(
   $$select public.create_booking(
