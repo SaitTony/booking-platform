@@ -57,6 +57,7 @@ export default function App(){
  const [personalTheme,setPersonalTheme]=useState<Theme>(()=>(localStorage.getItem('demo-personal-theme') as Theme)||'natural')
  const [companyTheme,setCompanyTheme]=useState<Theme>(()=>(localStorage.getItem('demo-company-theme') as Theme)||'natural')
  const location=useLocation()
+ useEffect(()=>{document.title=location.pathname.startsWith('/admin')?'Workflows - административная панель':'Демо — две модели работы'},[location.pathname])
  const activeTheme=(location.pathname.startsWith('/pro/')||location.pathname.startsWith('/demo/pro/'))?personalTheme:companyTheme
  useEffect(()=>{localStorage.setItem('demo-personal-theme',personalTheme)},[personalTheme])
  useEffect(()=>{localStorage.setItem('demo-company-theme',companyTheme)},[companyTheme])
