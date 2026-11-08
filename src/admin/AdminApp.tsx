@@ -265,12 +265,12 @@ export default function AdminApp() {
         </aside>
         <div className="admin-main-content">
           {activeSection==='overview' && <section className="admin-overview">
+            <div><h2>Обзор системы</h2><h3>Добро пожаловать!</h3><p>Выберите раздел в боковом меню, чтобы управлять Workflows.</p></div>
     {profile.platform_role === 'owner' && <section className="admin-stats" aria-label="Сводная статистика">
       <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>Всего пользователей</small></article>
       <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>Рабочие пространства</small></article>
       <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
     </section>}
-            <div><span className="eyebrow">ОБЗОР СИСТЕМЫ</span><h2>Добро пожаловать!</h2><p>Выберите раздел в боковом меню, чтобы управлять Workflows.</p></div>
             <div className="admin-overview-links">
               <button onClick={()=>setActiveSection('accounts')}>Управление учётными записями <span>→</span></button>
               <button onClick={()=>setActiveSection('companies')}>Управление компаниями <span>→</span></button>
