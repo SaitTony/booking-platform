@@ -75,8 +75,10 @@ export default function BookingPage({ individual = false }: { individual?: boole
       if (!cancelled) {
         setServices((serviceData ?? []) as ServiceRecord[])
         setServiceId(serviceData?.[0]?.id ?? '')
-        const nextDays = Array.from({length:30},(_,index)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+index);return d})
-        setDays(nextDays); setSelectedDate(dateKey(nextDays[0]))
+        const {data:zoneData}=await supabase!.from('masters').select('timezone').eq('id',masterId).single()
+        const [year,month,day]=dateKeyInZone(new Date(),zoneData?.timezone??'UTC').split('-').map(Number)
+        const nextDays=Array.from({length:30},(_,index)=>new Date(year,month-1,day+index,12,0,0))
+        setDays(nextDays);setSelectedDate(dateKey(nextDays[0]))
       }
     }
     load().catch(e=>{if(!cancelled)setError(e instanceof Error?e.message:'Не удалось загрузить страницу')})
