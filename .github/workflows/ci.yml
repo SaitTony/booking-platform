@@ -35,19 +35,19 @@ jobs:
         id: setup-supabase
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 3.0.0
 
       - name: Start disposable local Supabase stack
         run: supabase start
 
       - name: Apply every migration to the disposable local database
-        run: supabase db reset --local
+        run: supabase db reset
 
       - name: Check migration status
-        run: supabase migration list --local
+        run: supabase migration list
 
       - name: Run database functional tests
-        run: supabase test db --local
+        run: supabase test db
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
