@@ -184,3 +184,5 @@
 .workspace-exception{display:flex;align-items:end;gap:12px;margin-top:20px}
 .workspace-exception .admin-field{max-width:260px;margin-bottom:0}
 @media(max-width:760px){.workspace-service-form{grid-template-columns:1fr 1fr}.workspace-hour-row{grid-template-columns:1fr 1fr 1fr;gap:8px}.workspace-hour-row strong{grid-column:1/-1}.workspace-hour-row button{grid-column:1/-1}.workspace-exception{align-items:stretch;flex-direction:column}}
+
+.master-avatar img,.mini-avatar img,.team-image img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
