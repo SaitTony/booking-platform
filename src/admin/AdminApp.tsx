@@ -197,11 +197,12 @@ export default function AdminApp() {
     setBusy(false)
   }
 
-  async function assignRole(event: FormEvent, companyOverride?: string) {
+  async function assignRole(event: FormEvent, companyOverride?: string, masterOverride?: string, roleOverride?: 'admin'|'master'|'master_pro') {
     event.preventDefault()
     if (!supabase || !selectedUserId) return
+    const roleToAssign = roleOverride ?? (companyOverride && selectedRole === 'master_pro' ? 'admin' : selectedRole)
     setBusy(true); setError(''); setNotice('')
-    const body = { userId: selectedUserId, role: selectedRole, companyId: selectedRole === 'master_pro' ? null : (companyOverride ?? selectedCompanyId), masterId: selectedRole === 'admin' ? null : selectedMasterId }
+    const body = { userId: selectedUserId, role: roleToAssign, companyId: roleToAssign === 'master_pro' ? null : (companyOverride ?? selectedCompanyId), masterId: roleToAssign === 'admin' ? null : (masterOverride ?? selectedMasterId) }
     const { error: assignError } = await supabase.functions.invoke('assign-user-role', { body })
     if (assignError) setError(assignError.message)
     else { setNotice('Роль и связь со страницей назначены.'); setSelectedUserId(''); setSelectedMasterId(''); await loadAccounts() }
@@ -342,12 +343,10 @@ export default function AdminApp() {
                     <section className="admin-card">
                       <div className="admin-account"><div><strong>{linkedAccount?.full_name??'Учётная запись не привязана'}</strong><span>{linkedAccount?.email??'Назначьте Master_pro для этой страницы'}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span></div>
                       <div className="admin-inline-actions"><button className="secondary-button account-action" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить страницу':'Включить страницу'}</button><button className="secondary-button account-action" onClick={()=>void archiveMasterPage(page)}>В архив</button></div>
-                      {!linkedAccount&&<form className="nested-form" onSubmit={event=>{setSelectedRole('master_pro');void assignRole(event)}}>
+                      {!linkedAccount&&<form className="nested-form" onSubmit={event=>void assignRole(event,undefined,page.id,'master_pro')}>
                         <h3>Связать учётную запись</h3>
                         <label className="admin-field">Пользователь<select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)} required><option value="">Выберите учётную запись</option>{accounts.filter(a=>a.platform_role!=='owner'&&a.platform_role!=='master_pro').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
-                        <input type="hidden" value={page.id}/>
-                        <label className="admin-field">Страница мастера<select value={selectedMasterId} onChange={e=>setSelectedMasterId(e.target.value)} required><option value="">Выберите страницу</option>{masterPages.filter(p=>p.kind==='individual'&&!p.profile_id).map(p=><option key={p.id} value={p.id}>{p.display_name}</option>)}</select></label>
-                        <button className="primary-button" disabled={busy||!selectedUserId||!selectedMasterId}>Назначить Master_pro</button>
+                        <button className="primary-button" disabled={busy||!selectedUserId}>Назначить Master_pro</button>
                       </form>}
                     </section>
                   </div>
