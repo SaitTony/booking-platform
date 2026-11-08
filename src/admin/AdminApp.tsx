@@ -15,7 +15,7 @@ type Profile = {
 }
 type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }
 type CompanyOption = { id: string; name: string }
-type MasterOption = { id: string; display_name: string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
+type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
 
 function makeSlug(value: string) {
@@ -77,7 +77,7 @@ export default function AdminApp() {
     if (!supabase) return
     const [{ data: companyData }, { data: masterData }] = await Promise.all([
       supabase.from('companies').select('id,name').order('name'),
-      supabase.from('masters').select('id,display_name,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),
+      supabase.from('masters').select('id,display_name,slug,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),
     ])
     setCompanies((companyData ?? []) as CompanyOption[])
     setMasterPages((masterData ?? []) as MasterOption[])
@@ -135,6 +135,13 @@ export default function AdminApp() {
     if(resetError)setError(resetError.message)
     else{setNotice('Временный пароль установлен. Передайте его пользователю безопасным способом — при следующем входе он должен будет сменить пароль.');setResetUserId('');setResetTemporaryPassword('');await loadAccounts()}
     setBusy(false)
+  }
+
+  async function archiveMasterPage(page:MasterOption) {
+    if(!supabase||!window.confirm('Переместить страницу мастера в архив? История записей сохранится.'))return
+    const {error:updateError}=await supabase.from('masters').update({is_active:false,archived_at:new Date().toISOString()}).eq('id',page.id)
+    if(updateError)setError(updateError.message)
+    else{setNotice('Страница архивирована, история записей сохранена.');await loadDirectories()}
   }
 
   async function toggleMasterPage(page:MasterOption) {
@@ -264,7 +271,9 @@ export default function AdminApp() {
         <span className="admin-role">{roleLabel(account)}</span>
         {account.force_password_change && <span className="admin-role">Требуется смена пароля</span>}
       </article>)}</div>
-      <CompanySettings isOwner companyId={undefined}/>
+      <div className="admin-section-head"><div><span className="eyebrow">СТРАНИЦЫ МАСТЕРОВ</span><h2>Все страницы</h2></div><span>{masterPages.length}</span></div>
+      <div className="admin-account-list">{masterPages.map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>{page.kind==='individual'?'/pro/':'/'+(companies.find(item=>item.id===page.company_id)?.name??'company')+'/'}{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button><button className="secondary-button" onClick={()=>void archiveMasterPage(page)}>В архив</button></article>)}</div>
+            <CompanySettings isOwner companyId={undefined}/>
       <StaffWorkspace profile={profile}/>
     </> : profile.company_members?.some(member=>member.role==='admin') ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ КОМПАНИЕЙ</span><h2>Страницы мастеров</h2></div></div>
@@ -276,7 +285,7 @@ export default function AdminApp() {
         <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
         <button className="primary-button" disabled={busy || !pageCompanyId}>Создать страницу мастера</button>
       </form>
-      <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===pageCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.id}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button></article>)}</div>
+      <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===pageCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button><button className="secondary-button" onClick={()=>void archiveMasterPage(page)}>В архив</button></article>)}</div>
       <CompanySettings isOwner={false} companyId={pageCompanyId}/>
       <StaffWorkspace profile={profile}/>
     </> : <StaffWorkspace profile={profile}/>}
