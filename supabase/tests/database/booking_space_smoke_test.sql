@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(27);
+select extensions.plan(28);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -82,6 +82,12 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
 select extensions.ok(public.is_owner(), 'Owner identity is recognized');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
+select extensions.throws_ok(
+  $update public.booking_settings set booking_horizon_days = 90
+    where master_id = '30000000-0000-4000-8000-000000000001'$,
+  '42501', null,
+  'Company Admin cannot change fixed booking rules through the Data API'
+);
 select extensions.ok(public.can_manage_master('30000000-0000-4000-8000-000000000001'), 'Company Admin can manage company masters');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true);
 select extensions.ok(not public.can_manage_master('30000000-0000-4000-8000-000000000001'), 'Employee Master cannot manage pages');
