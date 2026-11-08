@@ -1,4 +1,4 @@
-import { createClient, type User } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient, type User } from "https://esm.sh/@supabase/supabase-js@2";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") ?? "https://saittony.github.io",
@@ -24,15 +24,18 @@ export function clients() {
   };
 }
 
-export async function requireOwner(req: Request, admin: ReturnType<typeof createClient>, anon: ReturnType<typeof createClient>): Promise<User> {
+type ServerSupabaseClient = SupabaseClient<any, "public", any, any, any>;
+
+export async function requireOwner(req: Request, admin: ServerSupabaseClient, anon: ServerSupabaseClient): Promise<User> {
   const header = req.headers.get("Authorization");
   if (!header) throw new Error("Требуется авторизация");
   const token = header.replace(/^Bearer\s+/i, "");
   const { data, error } = await anon.auth.getUser(token);
   if (error || !data.user) throw new Error("Недействительная сессия");
-  const { data: profile, error: profileError } = await admin
+  const { data: profileData, error: profileError } = await admin
     .from("profiles").select("platform_role,force_password_change,disabled_at").eq("id", data.user.id).single();
-  if (profileError || profile?.platform_role !== "owner" || profile.force_password_change || profile.disabled_at) {
+  const profile = profileData as { platform_role: string; force_password_change: boolean; disabled_at: string | null } | null;
+  if (profileError || !profile || profile.platform_role !== "owner" || profile.force_password_change || profile.disabled_at) {
     throw new Error("Только активный Owner может выполнять эту операцию");
   }
   return data.user;
