@@ -290,7 +290,7 @@ export default function AdminApp() {
                 return <details className="admin-company-item" key={company.id}>
                   <summary><span>{company.name}</span><span className="accordion-meta">{companyPages.length} страниц · {companyStaff.length} сотрудников</span></summary>
                   <div className="accordion-content">
-                    <CompanySettings isOwner companyId={company.id}/>
+                    <CompanySettings isOwner companyId={company.id} hideSelector/>
                     <section className="admin-card workspace-section">
                       <h3>Сотрудники компании</h3>
                       <div className="admin-account-list">{companyStaff.length?companyStaff.map(account=><article className="admin-account" key={account.id}><div><strong>{account.full_name}</strong><span>{account.email}</span></div><span className="admin-role">{roleLabel(account)}</span></article>):<p>Сотрудники пока не назначены.</p>}</div>
