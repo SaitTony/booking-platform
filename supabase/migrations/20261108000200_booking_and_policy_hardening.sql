@@ -148,7 +148,7 @@ begin
 
   insert into public.clients(phone_e164, full_name)
   values (p_client_phone_e164, trim(p_client_name))
-  on conflict (phone_e164) do update set full_name = excluded.full_name, updated_at = now()
+  on conflict (phone_e164) do update set updated_at = now()
   returning id into v_client_id;
 
   insert into public.bookings(
