@@ -69,9 +69,10 @@ values ('30000000-0000-4000-8000-000000000001'),
 
 -- Schema and role helper checks.
 select extensions.has_table('public', 'profiles', 'profiles table exists');
-select extensions.ok(public.is_owner(), 'Owner identity is recognized');
 
 set local role authenticated;
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
+select extensions.ok(public.is_owner(), 'Owner identity is recognized');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select extensions.ok(public.can_manage_master('30000000-0000-4000-8000-000000000001'), 'Company Admin can manage company masters');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true);
