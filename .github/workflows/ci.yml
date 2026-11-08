@@ -9,16 +9,50 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-backend-validation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
-        run: npm install
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
       - name: TypeScript and Vite build
         run: npm run build
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start disposable local Supabase stack
+        run: supabase start
+
+      - name: Apply every migration to the disposable local database
+        run: supabase db reset --local
+
+      - name: Check migration status
+        run: supabase migration list --local
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type-check Edge Functions
+        run: |
+          deno check supabase/functions/create-user/index.ts
+          deno check supabase/functions/assign-user-role/index.ts
+          deno check supabase/functions/change-password/index.ts
+          deno check supabase/functions/owner-reset-access/index.ts
+
+      - name: Stop disposable local Supabase stack
+        if: always()
+        run: supabase stop --no-backup
