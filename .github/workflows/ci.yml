@@ -10,7 +10,7 @@ permissions:
 
 # Avoid pulling multiple disposable Supabase stacks for the same branch at once.
 concurrency:
-  group: booking-space-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: booking-space-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
