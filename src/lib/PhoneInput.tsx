@@ -10,19 +10,29 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const raw = event.target.value
     const digits = raw.replace(/\D/g, '')
+    const hasExplicitCountryPrefix = /^\s*\+7/.test(raw)
 
-    // If +7 is already prefilled and the user starts with domestic trunk prefix 8,
-    // treat it as the prefix to replace, not as the first national digit.
-    if (value === '+7' && digits === '78') {
+    if (!digits) {
       onChange('+7')
       return
     }
 
-    let national = digits
-    if (national.startsWith('8')) national = national.slice(1)
-    else if (national.startsWith('7')) national = national.slice(1)
+    let national: string
+    if (hasExplicitCountryPrefix) {
+      national = digits.slice(2)
+      // A domestic 8 typed after the prefilled +7 is a trunk prefix, not a national digit.
+      if (national.startsWith('8')) national = national.slice(1)
+    } else {
+      national = digits
+      // Accept 8XXXXXXXXXX, 7XXXXXXXXXX, and 10 national digits.
+      if (national.startsWith('8')) national = national.slice(1)
+      else if (national.startsWith('7')) {
+        national = national.slice(1)
+        if (national.startsWith('8')) national = national.slice(1)
+      }
+    }
 
-    onChange(national ? '+7' + national.slice(0, 10) : '')
+    onChange('+7' + national.slice(0, 10))
   }
 
   return (
@@ -32,14 +42,16 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
       inputMode="numeric"
       autoComplete="tel"
       value={value}
-      maxLength={12}
+      maxLength={24}
+      pattern="\\+7[0-9]{10}"
+      title="Введите +7 и ровно 10 цифр после кода страны"
       placeholder="+7 (___) ___-__-__"
       onFocus={event => {
         if (!value) onChange('+7')
         onFocus?.(event)
       }}
       onChange={handleChange}
-      aria-invalid={value !== '' && !/^\+7\d{10}$/.test(value)}
+      aria-invalid={value.length > 2 && !isValidRussianPhone(value)}
     />
   )
 }
