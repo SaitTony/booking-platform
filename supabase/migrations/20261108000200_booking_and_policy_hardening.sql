@@ -113,8 +113,7 @@ begin
     raise exception 'Запись доступна не более чем на % дней вперёд', v_settings.booking_horizon_days;
   end if;
   v_local := p_starts_at at time zone v_master.timezone;
-  if extract(minute from v_local)::integer % v_settings.slot_step_minutes <> 0
-     or extract(second from v_local) <> 0 then
+  if extract(second from v_local) <> 0 then
     raise exception 'Время не соответствует шагу расписания';
   end if;
 
@@ -136,6 +135,10 @@ begin
   if v_open is null or v_local::time < v_open
      or (v_local + make_interval(mins => v_service.duration))::time > v_close then
     raise exception 'Выбранное время вне рабочего расписания';
+  end if;
+  if floor(extract(epoch from (v_local - (v_local::date + v_open))) / 60)::integer
+       % v_settings.slot_step_minutes <> 0 then
+    raise exception 'Время не соответствует шагу расписания';
   end if;
 
   if not coalesce(p_rules_accepted, false) then raise exception 'Необходимо подтвердить ознакомление с правилами записи'; end if;
