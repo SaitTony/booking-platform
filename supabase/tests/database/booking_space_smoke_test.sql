@@ -27,6 +27,14 @@ update public.profiles
 set platform_role = 'master_pro', force_password_change = false
 where id = '10000000-0000-4000-8000-000000000004';
 
+-- These staff accounts have completed the required first-login password change.
+update public.profiles
+set force_password_change = false
+where id in (
+  '10000000-0000-4000-8000-000000000002',
+  '10000000-0000-4000-8000-000000000003'
+);
+
 insert into public.companies (id, name, slug, timezone)
 values ('20000000-0000-4000-8000-000000000001', 'Test Company', 'test-company', 'UTC');
 
