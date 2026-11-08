@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     const fullName = String(body.fullName ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
     const phone = String(body.phone ?? "").trim();
-    const temporaryPassword = "0".repeat(6);
+    const temporaryPassword = String(body.temporaryPassword ?? "");
     if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\+7[0-9]{10}$/.test(phone) || temporaryPassword.length < 6) {
       return json({ error: "Укажите имя, корректный email, телефон в формате +7 и ровно 10 цифр после кода страны, а также временный пароль длиной от 6 символов" }, 400);
     }
