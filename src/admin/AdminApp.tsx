@@ -1,4 +1,5 @@
 import CompanySettings from './CompanySettings'
+import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import StaffWorkspace from './StaffWorkspace'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -212,6 +213,7 @@ export default function AdminApp() {
   async function createAccount(event: FormEvent) {
     event.preventDefault()
     if (!supabase) return
+    if (!isValidRussianPhone(phoneForCreate.trim())) { setError('Введите номер в формате +7 и ровно 10 цифр после кода страны.'); return }
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
       body: { fullName, email: emailForCreate, phone: phoneForCreate, temporaryPassword },
@@ -369,7 +371,7 @@ export default function AdminApp() {
           <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Создайте профиль сотрудника. Роль и доступ к компании можно назначить после сохранения.</p>
           <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/></label>
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
-          <label className="admin-field">Контактный номер телефона<input type="tel" placeholder="+358…" value={phoneForCreate} onChange={e=>setPhoneForCreate(e.target.value)} required/></label>
+          <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
           <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required/></label>
           <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
