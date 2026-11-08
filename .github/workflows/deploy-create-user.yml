@@ -30,3 +30,6 @@ jobs:
 
       - name: Deploy create-user function
         run: supabase functions deploy create-user --project-ref "$SUPABASE_PROJECT_ID" --yes
+
+      - name: Deploy owner-set-account-status function
+        run: supabase functions deploy owner-set-account-status --project-ref "$SUPABASE_PROJECT_ID" --yes
