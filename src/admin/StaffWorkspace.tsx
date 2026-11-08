@@ -110,7 +110,7 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     if(!supabase||!masterId)return
     setBusy(true);setError('')
     const current=masters.find(m=>m.id===masterId)
-    const payload={display_name:pageName.trim(),public_description:pageDescription,theme:{id:theme}}
+    const payload:Record<string,unknown>={display_name:pageName.trim(),public_description:pageDescription}\n    if(current?.kind==='individual')payload.theme={id:theme}
     const {error:updateError}=await supabase.from('masters').update(payload).eq('id',masterId)
     if(updateError)setError(updateError.message)
     else{
