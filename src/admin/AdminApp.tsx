@@ -11,7 +11,9 @@ type Profile = {
   disabled_at: string | null
   company_members?: Member[]
 }
-type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }\ntype CompanyOption = { id: string; name: string }\ntype MasterOption = { id: string; display_name: string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
+type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }
+type CompanyOption = { id: string; name: string }
+type MasterOption = { id: string; display_name: string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
 
 function makeSlug(value: string) {
@@ -34,7 +36,13 @@ export default function AdminApp() {
   const [newPassword, setNewPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [temporaryPassword, setTemporaryPassword] = useState('')
-  const [accounts, setAccounts] = useState<Account[]>([])\n  const [companies, setCompanies] = useState<CompanyOption[]>([])\n  const [masterPages, setMasterPages] = useState<MasterOption[]>([])\n  const [selectedUserId, setSelectedUserId] = useState('')\n  const [selectedRole, setSelectedRole] = useState<'admin' | 'master' | 'master_pro'>('admin')\n  const [selectedCompanyId, setSelectedCompanyId] = useState('')\n  const [selectedMasterId, setSelectedMasterId] = useState('')
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [companies, setCompanies] = useState<CompanyOption[]>([])
+  const [masterPages, setMasterPages] = useState<MasterOption[]>([])
+  const [selectedUserId, setSelectedUserId] = useState('')
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'master' | 'master_pro'>('admin')
+  const [selectedCompanyId, setSelectedCompanyId] = useState('')
+  const [selectedMasterId, setSelectedMasterId] = useState('')
   const [companyName,setCompanyName]=useState('')
   const [companySlug,setCompanySlug]=useState('')
   const [companyDescription,setCompanyDescription]=useState('')
@@ -59,7 +67,17 @@ export default function AdminApp() {
     setSessionReady(true)
   }
 
-  async function loadDirectories() {\n    if (!supabase) return\n    const [{ data: companyData }, { data: masterData }] = await Promise.all([\n      supabase.from('companies').select('id,name').order('name'),\n      supabase.from('masters').select('id,display_name,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),\n    ])\n    setCompanies((companyData ?? []) as CompanyOption[])\n    setMasterPages((masterData ?? []) as MasterOption[])\n  }\n\n  async function loadAccounts() {
+  async function loadDirectories() {
+    if (!supabase) return
+    const [{ data: companyData }, { data: masterData }] = await Promise.all([
+      supabase.from('companies').select('id,name').order('name'),
+      supabase.from('masters').select('id,display_name,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),
+    ])
+    setCompanies((companyData ?? []) as CompanyOption[])
+    setMasterPages((masterData ?? []) as MasterOption[])
+  }
+
+  async function loadAccounts() {
     if (!supabase) return
     const { data, error: listError } = await supabase.from('profiles')
       .select('id,full_name,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
@@ -125,7 +143,18 @@ export default function AdminApp() {
     setBusy(false)
   }
 
-  async function assignRole(event: FormEvent) {\n    event.preventDefault()\n    if (!supabase || !selectedUserId) return\n    setBusy(true); setError(''); setNotice('')\n    const body = { userId: selectedUserId, role: selectedRole, companyId: selectedRole === 'master_pro' ? null : selectedCompanyId, masterId: selectedRole === 'admin' ? null : selectedMasterId }\n    const { error: assignError } = await supabase.functions.invoke('assign-user-role', { body })\n    if (assignError) setError(assignError.message)\n    else { setNotice('Роль и связь со страницей назначены.'); setSelectedUserId(''); setSelectedMasterId(''); await loadAccounts() }\n    setBusy(false)\n  }\n\n  async function createAccount(event: FormEvent) {
+  async function assignRole(event: FormEvent) {
+    event.preventDefault()
+    if (!supabase || !selectedUserId) return
+    setBusy(true); setError(''); setNotice('')
+    const body = { userId: selectedUserId, role: selectedRole, companyId: selectedRole === 'master_pro' ? null : selectedCompanyId, masterId: selectedRole === 'admin' ? null : selectedMasterId }
+    const { error: assignError } = await supabase.functions.invoke('assign-user-role', { body })
+    if (assignError) setError(assignError.message)
+    else { setNotice('Роль и связь со страницей назначены.'); setSelectedUserId(''); setSelectedMasterId(''); await loadAccounts() }
+    setBusy(false)
+  }
+
+  async function createAccount(event: FormEvent) {
     event.preventDefault()
     if (!supabase) return
     setBusy(true); setError(''); setNotice('')
