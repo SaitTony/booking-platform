@@ -46,10 +46,11 @@ returns trigger language plpgsql set search_path = ''
 as $$
 declare v_count integer;
 begin
-  if new.kind = 'company' and new.archived_at is null then
+  if new.kind = 'company' and new.is_active and new.archived_at is null then
+    -- Serialize concurrent page activations for the same company.
     perform 1 from public.companies where id = new.company_id for update;
     select count(*) into v_count from public.masters
-      where company_id = new.company_id and archived_at is null
+      where company_id = new.company_id and is_active and archived_at is null
         and (tg_op = 'INSERT' or id <> new.id);
     if v_count >= 5 then
       raise exception 'В компании может быть не более пяти активных страниц мастеров';
@@ -60,7 +61,7 @@ end;
 $$;
 drop trigger if exists masters_limit_before_write on public.masters;
 create trigger masters_limit_before_write
-before insert or update of company_id, archived_at, kind on public.masters
+before insert or update of company_id, archived_at, kind, is_active on public.masters
 for each row execute function public.enforce_company_master_limit();
 
 create or replace function public.create_booking(
