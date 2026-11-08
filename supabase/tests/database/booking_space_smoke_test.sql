@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(26);
+select extensions.plan(27);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -222,6 +222,25 @@ select extensions.throws_ok(
   )$$,
   'P0001', 'Телефон должен быть в формате E.164',
   'Booking requires an E.164 phone number'
+);
+
+-- A duration may not cross the end of the local working window or midnight.
+insert into public.schedule_exceptions (
+  master_id, exception_date, is_day_off, opens_at, closes_at, note
+) values (
+  '30000000-0000-4000-8000-000000000001',
+  (now() at time zone 'UTC')::date + 3,
+  false, time '23:30', time '23:59', 'Late window boundary test'
+);
+select extensions.throws_ok(
+  $select public.create_booking(
+    '30000000-0000-4000-8000-000000000001',
+    '40000000-0000-4000-8000-000000000001',
+    ((((now() at time zone 'UTC')::date + 3)::timestamp + time '23:45') at time zone 'UTC'),
+    'Cross Midnight', '+358401234594', true
+  )$,
+  'P0001', 'Выбранное время вне рабочего расписания',
+  'Booking duration cannot cross the end of the working window'
 );
 
 -- RLS checks are run as real Postgres API roles with simulated Supabase JWT subjects.
