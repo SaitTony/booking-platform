@@ -31,6 +31,10 @@ drop policy if exists companies_owner_delete on public.companies;
 revoke all on function public.complete_password_change() from public, authenticated;
 drop function public.complete_password_change();
 
+-- Booking horizon, minimum lead time and slot step are fixed product rules in v1.
+-- Keep booking_settings read-only for staff; only trusted database operations may change it.
+drop policy if exists settings_manager_write on public.booking_settings;
+
 
 -- Only the platform Owner may link accounts to pages, move pages between companies,
 -- change a page's kind, or archive a page. Company admins and Master_pro users may
