@@ -11,8 +11,8 @@ Deno.serve(async (req) => {
     const { data, error: authError } = await anon.auth.getUser(token);
     if (authError || !data.user) return json({ error: "Недействительная сессия" }, 401);
     const { newPassword } = await req.json();
-    if (typeof newPassword !== "string" || newPassword.length < 10) {
-      return json({ error: "Пароль должен содержать не менее 10 символов" }, 400);
+    if (typeof newPassword !== "string" || newPassword.length < 6) {
+      return json({ error: "Пароль должен содержать не менее 6 символов" }, 400);
     }
     const { error: updateError } = await admin.auth.admin.updateUserById(data.user.id, { password: newPassword });
     if (updateError) throw updateError;
