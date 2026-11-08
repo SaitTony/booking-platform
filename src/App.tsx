@@ -1,3 +1,6 @@
+import BookingPage from './public/BookingPage'
+import CompanyLanding from './public/CompanyLanding'
+import { isSupabaseConfigured } from './lib/supabase'
 import AdminApp from './admin/AdminApp'
 import { useEffect, useState } from 'react'
 import { Link, Route, Routes, useLocation, useParams } from 'react-router-dom'
@@ -58,5 +61,5 @@ export default function App(){
  const activeTheme=location.pathname.startsWith('/pro/')?personalTheme:companyTheme
  useEffect(()=>{localStorage.setItem('demo-personal-theme',personalTheme)},[personalTheme])
  useEffect(()=>{localStorage.setItem('demo-company-theme',companyTheme)},[companyTheme])
- return <div className="app-root" data-theme={activeTheme}><Routes><Route path="/admin/*" element={<AdminApp/>}/><Route path="/" element={<Home/>}/><Route path="/pro/:slug" element={<MasterPage companyMode={false} theme={personalTheme} role={role} setRole={setRole} setTheme={setPersonalTheme}/>}/><Route path="/:companySlug/:masterSlug" element={<MasterPage companyMode theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="/:companySlug" element={<Company theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="*" element={<NotFound/>}/></Routes></div>
+ return <div className="app-root" data-theme={activeTheme}><Routes><Route path="/admin/*" element={<AdminApp/>}/><Route path="/" element={<Home/>}/><Route path="/pro/:slug" element={isSupabaseConfigured?<BookingPage individual/>:<MasterPage companyMode={false} theme={personalTheme} role={role} setRole={setRole} setTheme={setPersonalTheme}/>}/><Route path="/:companySlug/:masterSlug" element={isSupabaseConfigured?<BookingPage/>:<MasterPage companyMode theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="/:companySlug" element={isSupabaseConfigured?<CompanyLanding/>:<Company theme={companyTheme} role={role} setRole={setRole} setTheme={setCompanyTheme}/>}/><Route path="*" element={<NotFound/>}/></Routes></div>
 }
