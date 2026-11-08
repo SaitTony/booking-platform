@@ -130,7 +130,7 @@ export default function BookingPage({ individual = false }: { individual?: boole
   if(!master)return null
 
   return <main className="booking-shell" data-theme={pageTheme}>
-    <header className="topbar"><Link to="/" className="brand"><span className="brand-mark" aria-hidden="true">✦</span></Link><span className="demo-label"><i/> ОНЛАЙН-ЗАПИСЬ</span></header>
+    <header className="topbar"><span className="brand" aria-hidden="true"><span className="brand-mark" aria-hidden="true">✦</span></span><span className="demo-label"><i/> ОНЛАЙН-ЗАПИСЬ</span></header>
     {company && <div className="breadcrumb"><Link to={'/'+company.slug}>{company.name}</Link><span>/</span>{master.display_name}</div>}
     <section className="master-hero"><div className="master-avatar">{master.photo_url?<img src={master.photo_url} alt={master.display_name}/>:master.display_name.slice(0,1).toUpperCase()}</div><div className="master-copy"><span className="eyebrow">{company?.name ?? 'ИНДИВИДУАЛЬНЫЙ МАСТЕР'}</span><h1>{master.display_name}</h1><p>{master.public_description}</p></div></section>
     <div className="booking-layout"><section className="booking-main">
