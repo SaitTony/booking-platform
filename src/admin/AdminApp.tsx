@@ -7,6 +7,7 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase'
 type Profile = {
   id: string
   full_name: string
+  email: string
   phone_e164: string
   platform_role: 'pending' | 'owner' | 'master_pro'
   force_password_change: boolean
@@ -33,7 +34,7 @@ const roleLabel = (profile: Account) => {
 export default function AdminApp() {
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -64,7 +65,7 @@ export default function AdminApp() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setProfile(null); setSessionReady(true); return }
     const { data, error: profileError } = await supabase.from('profiles')
-      .select('id,full_name,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
+      .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
       .eq('id', user.id).maybeSingle()
     if (profileError) setError(profileError.message)
     setProfile(data as Profile | null)
@@ -86,7 +87,7 @@ export default function AdminApp() {
   async function loadAccounts() {
     if (!supabase) return
     const { data, error: listError } = await supabase.from('profiles')
-      .select('id,full_name,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
+      .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
       .order('created_at', { ascending: false })
     if (listError) setError(listError.message)
     setAccounts((data ?? []) as unknown as Account[])
@@ -116,9 +117,9 @@ export default function AdminApp() {
     event.preventDefault()
     if (!supabase) return
     setBusy(true); setError(''); setNotice('')
-    const normalizedPhone = phone.replace(/[\s()-]/g, '')
-    const { error: signInError } = await supabase.auth.signInWithPassword({ phone: normalizedPhone, password })
-    if (signInError) setError('Не удалось войти. Проверьте номер телефона и пароль.')
+    const normalizedEmail = email.trim().toLowerCase()
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
+    if (signInError) setError('Не удалось войти. Проверьте email и пароль.')
     else await loadProfile()
     setBusy(false)
   }
@@ -196,23 +197,24 @@ export default function AdminApp() {
     if (!supabase) return
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
-      body: { fullName, phone: phoneForCreate, temporaryPassword },
+      body: { fullName, email: emailForCreate, phone: phoneForCreate, temporaryPassword },
     })
     if (createError) setError(createError.message)
     else {
       setNotice('Учётная запись создана. Теперь назначьте пользователю роль и свяжите его со страницей.')
-      setFullName(''); setPhoneForCreate(''); setTemporaryPassword('')
+      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('')
       await loadAccounts()
     }
     setBusy(false)
   }
 
+  const [emailForCreate, setEmailForCreate] = useState('')
   const [phoneForCreate, setPhoneForCreate] = useState('')
 
   if (!sessionReady && supabase) return <main className="admin-shell"><section className="admin-card">Загрузка…</section></main>
   if (!profile) return <main className="admin-shell"><form className="admin-card" onSubmit={signIn}>
     <span className="eyebrow">АДМИНИСТРИРОВАНИЕ</span><h1>Вход в панель управления</h1>
-    <label className="admin-field">Номер телефона<input type="tel" autoComplete="tel" placeholder="+358…" value={phone} onChange={e=>setPhone(e.target.value)} required /></label>
+    <label className="admin-field">Email<input type="email" autoComplete="username" placeholder="name@example.com" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
     <label className="admin-field">Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
     {!isSupabaseConfigured && <p className="admin-error">Авторизация пока не подключена. Для входа необходимо настроить соединение с базой данных.</p>}
     {error && <p className="admin-error">{error}</p>}
@@ -253,13 +255,14 @@ export default function AdminApp() {
       <form className="admin-card admin-create-form" onSubmit={createAccount}>
         <h3>Создать учётную запись</h3>
         <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required /></label>
-        <label className="admin-field">Номер телефона<input type="tel" placeholder="+358…" value={phoneForCreate} onChange={e=>setPhoneForCreate(e.target.value)} required /></label>
+        <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required /></label>
+        <label className="admin-field">Контактный номер телефона<input type="tel" placeholder="+358…" value={phoneForCreate} onChange={e=>setPhoneForCreate(e.target.value)} required /></label>
         <label className="admin-field">Временный пароль<input type="text" autoComplete="off" value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} minLength={10} required /></label>
         <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать учётную запись'}</button>
       </form>
       <form className="admin-card admin-create-form" onSubmit={assignRole}>
         <h3>Назначить роль и связать страницу</h3>
-        <label className="admin-field">Пользователь<select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)} required><option value="">Выберите учётную запись</option>{accounts.filter(a=>a.platform_role !== 'owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.phone_e164}</option>)}</select></label>
+        <label className="admin-field">Пользователь<select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)} required><option value="">Выберите учётную запись</option>{accounts.filter(a=>a.platform_role !== 'owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email} · {a.phone_e164}</option>)}</select></label>
         <label className="admin-field">Роль<select value={selectedRole} onChange={e=>{setSelectedRole(e.target.value as 'admin'|'master'|'master_pro');setSelectedMasterId('')}}><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
         {selectedRole !== 'master_pro' && <label className="admin-field">Компания<select value={selectedCompanyId} onChange={e=>{setSelectedCompanyId(e.target.value);setSelectedMasterId('')}} required><option value="">Выберите компанию</option>{companies.map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
         {selectedRole !== 'admin' && <label className="admin-field">Страница мастера<select value={selectedMasterId} onChange={e=>setSelectedMasterId(e.target.value)} required><option value="">Выберите свободную страницу</option>{masterPages.filter(page=>!page.profile_id && (selectedRole === 'master_pro' ? page.kind === 'individual' : page.kind === 'company' && page.company_id === selectedCompanyId)).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
@@ -267,12 +270,12 @@ export default function AdminApp() {
       </form>
       <form className="admin-card admin-create-form" onSubmit={resetUserAccess}>
         <h3>Сбросить пароль пользователя</h3>
-        <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.phone_e164}</option>)}</select></label>
+        <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email} · {a.phone_e164}</option>)}</select></label>
         <label className="admin-field">Новый временный пароль<input type="text" autoComplete="off" minLength={10} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required /></label>
         <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
       </form>
       <div className="admin-account-list">{accounts.map(account=><article className="admin-account" key={account.id}>
-        <div><strong>{account.full_name}</strong><span>{account.phone_e164}</span></div>
+        <div><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span></div>
         <span className="admin-role">{roleLabel(account)}</span>
         {account.force_password_change && <span className="admin-role">Требуется смена пароля</span>}
       </article>)}</div>
