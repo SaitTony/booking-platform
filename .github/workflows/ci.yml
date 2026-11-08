@@ -36,12 +36,15 @@ jobs:
       - name: TypeScript and Vite build
         run: npm run build
 
-      - name: Setup Supabase CLI
+      - name: Install pinned Supabase CLI
         id: setup-supabase
-        uses: supabase/setup-cli@v1
-        with:
-          version: 3.0.0
-          github-token: ${{ github.token }}
+        run: |
+          curl -fsSL -o /tmp/supabase.tar.gz https://github.com/supabase/cli/releases/download/v3.0.0/supabase_3.0.0_linux_amd64.tar.gz
+          curl -fsSL -o /tmp/supabase-checksums.txt https://github.com/supabase/cli/releases/download/v3.0.0/checksums.txt
+          grep 'supabase_3.0.0_linux_amd64.tar.gz' /tmp/supabase-checksums.txt | (cd /tmp && sha256sum -c -)
+          tar -xzf /tmp/supabase.tar.gz -C /tmp
+          sudo install /tmp/supabase /usr/local/bin/supabase
+          supabase --version
 
       - name: Start disposable local Supabase stack
         run: supabase start
