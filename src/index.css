@@ -25,3 +25,73 @@
 .master-cover-photo span,.master-cover-photo b{position:relative;z-index:1;letter-spacing:.2em;font:700 10px Manrope}
 .master-cover-photo b{font-weight:500;font-size:8px}
 @media(max-width:650px){.master-cover-photo{height:125px;margin-top:18px;padding:15px 17px}.master-cover-photo span{font-size:9px}}
+
+
+/* Dark palette */
+.app-root[data-theme="dark"]{--page:#17191c;--surface:#22262b;--soft:#2d333a;--ink:#f0f2f4;--muted:#a6afb9;--line:#3b424b;--accent:#9aafc8;--accent-hover:#b3c4d8;--cover-a:#485462;--cover-b:#252e38}
+.app-root[data-theme="dark"] .primary-button,.app-root[data-theme="dark"] .theme-option.active{color:#17191c}
+.app-root[data-theme="dark"] .date-card.active,.app-root[data-theme="dark"] .time-button.active{color:#17191c}
+.app-root[data-theme="dark"] .date-card.active strong{color:#17191c}
+.palette-dark i:nth-child(1){background:#9aafc8}
+.palette-dark i:nth-child(2){background:#485462}
+.palette-dark i:nth-child(3){background:#f0f2f4}
+.palette-dark i:nth-child(4){background:#17191c}
+
+/* Desktop readability: larger type, tighter use of available space */
+@media(min-width:900px){
+  .booking-shell{width:min(1380px,100%);padding:0 38px}
+  .booking-layout{grid-template-columns:minmax(0,1fr) 320px;gap:34px;padding-top:32px}
+  .topbar{height:68px}
+  .master-hero{gap:22px;padding:28px 0}
+  .master-avatar{width:88px;height:88px;flex-basis:88px;font-size:38px}
+  .master-copy h1{font-size:46px}
+  .master-copy p,.company-hero p{font-size:17px;line-height:1.6}
+  .master-meta{font-size:13px;margin-top:10px}
+  .eyebrow{font-size:11px}
+  .theme-controls{margin:16px 0;padding:18px 22px}
+  .theme-head strong{font-size:18px}
+  .role-select{font-size:13px}
+  .theme-options{grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin-top:12px}
+  .theme-option{padding:12px 10px;gap:10px}
+  .theme-option b{font-size:13px}
+  .theme-option small{font-size:11px}
+  .palette{flex-basis:27px}
+  .section-heading{margin-bottom:13px}
+  .section-heading h2{font-size:27px}
+  .section-caption{font-size:12px}
+  .service-list{gap:7px}
+  .service-card{padding:15px 18px}
+  .service-info strong{font-size:17px}
+  .service-info small,.service-info em{font-size:12px}
+  .service-card>b{font-size:15px}
+  .date-heading{margin-top:23px}
+  .date-card{padding:10px 5px}
+  .date-card small{font-size:10px}
+  .date-card strong{font-size:23px}
+  .time-heading{margin-top:20px}
+  .time-button{padding:13px;font-size:14px}
+  .field-label{font-size:13px}
+  .field-label input{padding:14px;font-size:15px}
+  .primary-button,.secondary-button{padding:15px;font-size:14px}
+  .aside-card{padding:18px}
+  .aside-master strong{font-size:13px}
+  .aside-master small{font-size:11px}
+  .aside-detail{font-size:12px}
+  .aside-total{font-size:13px}
+  .aside-total strong{font-size:21px}
+  .company-hero{gap:28px;padding:26px 0}
+  .company-cover-art{min-height:235px}
+  .company-hero h1{font-size:52px}
+  .company-content{padding:26px 0 38px}
+  .team-grid{gap:12px}
+  .team-image{height:150px}
+  .team-copy{padding:15px}
+  .team-copy>span{font-size:11px}
+  .team-copy strong{font-size:19px}
+  .team-copy p{font-size:13px;line-height:1.5}
+  .team-copy b{font-size:12px}
+  .company-about{margin-top:22px}
+  .company-about h3{font-size:20px}
+  .company-about p{font-size:13px}
+  .page-footer{font-size:12px;padding:14px 0 18px}
+}
