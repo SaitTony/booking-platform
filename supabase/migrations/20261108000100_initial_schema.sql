@@ -60,7 +60,7 @@ create table public.company_members (
 
 create table public.clients (
   id uuid primary key default gen_random_uuid(),
-  phone_e164 text not null unique,
+  phone_e164 text not null unique check (phone_e164 ~ '^\+[1-9][0-9]{7,14}'),
   full_name text not null check (length(trim(full_name)) > 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -446,7 +446,7 @@ create table public.company_members (
 
 create table public.clients (
   id uuid primary key default gen_random_uuid(),
-  phone_e164 text not null unique,
+  phone_e164 text not null unique check (phone_e164 ~ '^\+[1-9][0-9]{7,14}'),
   full_name text not null check (length(trim(full_name)) > 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
