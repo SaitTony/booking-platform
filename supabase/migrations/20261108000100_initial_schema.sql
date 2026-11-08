@@ -9,7 +9,7 @@ create type public.booking_status as enum ('confirmed', 'cancelled', 'completed'
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null check (length(trim(full_name)) > 0),
-  phone_e164 text not null unique check (phone_e164 ~ '^\\+[1-9][0-9]{7,14}
+  phone_e164 text not null unique check (phone_e164 ~ '^\+[1-9][0-9]{7,14}
   platform_role public.platform_role not null default 'pending',
   force_password_change boolean not null default true,
   disabled_at timestamptz,
