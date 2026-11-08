@@ -11,7 +11,7 @@ type Profile = {
   disabled_at: string | null
   company_members?: Member[]
 }
-type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }\ntype CompanyOption = { id: string; name: string }\ntype MasterOption = { id: string; display_name: string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null }
+type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }\ntype CompanyOption = { id: string; name: string }\ntype MasterOption = { id: string; display_name: string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
 
 function makeSlug(value: string) {
@@ -59,7 +59,7 @@ export default function AdminApp() {
     setSessionReady(true)
   }
 
-  async function loadDirectories() {\n    if (!supabase) return\n    const [{ data: companyData }, { data: masterData }] = await Promise.all([\n      supabase.from('companies').select('id,name').order('name'),\n      supabase.from('masters').select('id,display_name,kind,company_id,profile_id').is('archived_at', null).order('display_name'),\n    ])\n    setCompanies((companyData ?? []) as CompanyOption[])\n    setMasterPages((masterData ?? []) as MasterOption[])\n  }\n\n  async function loadAccounts() {
+  async function loadDirectories() {\n    if (!supabase) return\n    const [{ data: companyData }, { data: masterData }] = await Promise.all([\n      supabase.from('companies').select('id,name').order('name'),\n      supabase.from('masters').select('id,display_name,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),\n    ])\n    setCompanies((companyData ?? []) as CompanyOption[])\n    setMasterPages((masterData ?? []) as MasterOption[])\n  }\n\n  async function loadAccounts() {
     if (!supabase) return
     const { data, error: listError } = await supabase.from('profiles')
       .select('id,full_name,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
@@ -206,6 +206,17 @@ export default function AdminApp() {
         <span className="admin-role">{roleLabel(account)}</span>
         {account.force_password_change && <span className="admin-role">Требуется смена пароля</span>}
       </article>)}</div>
-    </> : <section className="admin-card"><h2>Рабочее пространство</h2><p>Права доступа определены. Разделы управления будут подключаться следующими этапами.</p></section>}
+    </> : profile.company_members?.some(member=>member.role==='admin') ? <>
+      <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ КОМПАНИЕЙ</span><h2>Страницы мастеров</h2></div></div>
+      <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
+        <h3>Создать страницу мастера</h3>
+        <p>Новая страница будет добавлена в вашу компанию. Максимум — пять активных страниц.</p>
+        <label className="admin-field">Имя мастера<input value={pageName} onChange={e=>{setPageName(e.target.value);setPageSlug(makeSlug(e.target.value))}} required /></label>
+        <label className="admin-field">Адрес страницы (slug)<input value={pageSlug} onChange={e=>setPageSlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
+        <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
+        <button className="primary-button" disabled={busy || !pageCompanyId}>Создать страницу мастера</button>
+      </form>
+      <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===pageCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.id}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span></article>)}</div>
+    </> : <section className="admin-card"><h2>Рабочее пространство</h2><p>Доступные разделы будут отображаться здесь в соответствии с вашей ролью.</p></section>}
   </section></main>
 }
