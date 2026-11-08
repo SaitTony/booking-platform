@@ -51,8 +51,7 @@ begin
       while v_local_start + make_interval(mins => v_service.duration) <= p_date + v_window.closes_at loop
         v_slot_start := v_local_start at time zone v_master.timezone;
         v_slot_end := v_slot_start + make_interval(mins => v_service.duration);
-        if extract(minute from v_local_start)::integer % v_step = 0
-          and v_slot_start >= now() + make_interval(mins => v_lead)
+        if v_slot_start >= now() + make_interval(mins => v_lead)
           and v_slot_start <= now() + make_interval(days => v_horizon)
           and not exists (select 1 from public.bookings b where b.master_id = p_master_id
             and b.status = 'confirmed' and tstzrange(b.starts_at,b.ends_at,'[)') &&
@@ -72,8 +71,7 @@ begin
       while v_local_start + make_interval(mins => v_service.duration) <= p_date + v_window.closes_at loop
         v_slot_start := v_local_start at time zone v_master.timezone;
         v_slot_end := v_slot_start + make_interval(mins => v_service.duration);
-        if extract(minute from v_local_start)::integer % v_step = 0
-          and v_slot_start >= now() + make_interval(mins => v_lead)
+        if v_slot_start >= now() + make_interval(mins => v_lead)
           and v_slot_start <= now() + make_interval(days => v_horizon)
           and not exists (select 1 from public.bookings b where b.master_id = p_master_id
             and b.status = 'confirmed' and tstzrange(b.starts_at,b.ends_at,'[)') &&
