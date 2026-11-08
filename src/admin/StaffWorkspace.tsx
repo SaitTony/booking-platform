@@ -140,7 +140,8 @@ export default function StaffWorkspace({profile}:{profile:StaffProfile}) {
     {error&&<p className="admin-error">{error}</p>}{notice&&<p className="admin-notice">{notice}</p>}
     {canEdit&&<form className="admin-card workspace-section" onSubmit={savePage}><h3>Страница мастера</h3>
       <label className="admin-field">Имя<input value={pageName} onChange={e=>setPageName(e.target.value)} required /></label>
-      <label className="admin-field">Описание<textarea value={pageDescription} onChange={e=>setPageDescription(e.target.value)} rows={3}/></label>\n      <label className="admin-field">Ссылка на фотографию<input value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)} placeholder="https://…"/></label>
+      <label className="admin-field">Описание<textarea value={pageDescription} onChange={e=>setPageDescription(e.target.value)} rows={3}/></label>
+      <label className="admin-field">Ссылка на фотографию<input value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)} placeholder="https://…"/></label>
       {profile.platform_role==='master_pro'&&<label className="admin-field">Цветовая тема<select value={theme} onChange={e=>setTheme(e.target.value)}><option value="natural">Natural</option><option value="graphite">Graphite</option><option value="sand">Sand</option><option value="green">Deep Green</option><option value="blue">Midnight Blue</option><option value="dark">Dark</option></select></label>}
       <button className="primary-button" disabled={busy}>Сохранить страницу</button>
     </form>}
