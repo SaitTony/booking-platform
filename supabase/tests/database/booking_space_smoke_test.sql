@@ -289,7 +289,7 @@ select extensions.is(
 -- internal cascade role may clear this exact link while deleting a user.
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select extensions.throws_ok(
-  $update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001'$,
+  $$update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001'$$,
   'P0001', 'Только Owner может менять привязку аккаунта, тип, компанию или архивировать страницу',
   'Company Admin cannot detach a staff profile'
 );
