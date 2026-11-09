@@ -137,6 +137,12 @@ export default function AdminApp() {
   const [pageDescription,setPageDescription]=useState('')
   const [pageProfileId,setPageProfileId]=useState('')
   const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    if (!notice) return
+    const timeout = window.setTimeout(() => setNotice(''), 3000)
+    return () => window.clearTimeout(timeout)
+  }, [notice])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [adminTheme,setAdminTheme]=useState<AdminTheme>(()=>{const saved=localStorage.getItem('workflows-admin-theme');return adminPalettes.some(item=>item.id===saved)?saved as AdminTheme:'natural'})
