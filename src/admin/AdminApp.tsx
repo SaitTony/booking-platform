@@ -308,10 +308,10 @@ export default function AdminApp() {
   }
 
   async function archiveMasterPage(page:MasterOption) {
-    if(!supabase||busy||!window.confirm('Переместить страницу мастера в архив? История записей сохранится.'))return
+    if(!supabase||busy||!window.confirm('Удалить страницу мастера? Она будет перемещена в архив, а история записей сохранится.'))return
     setBusy(true);setError('');setNotice('')
     try {
-      const {error:updateError}=await supabase.from('masters').update({is_active:false,archived_at:new Date().toISOString()}).eq('id',page.id)
+      const {error:updateError}=await supabase.from('masters').update({is_active:false,archived_at:new Date().toISOString(),...(page.kind==='individual'?{profile_id:null}:{})}).eq('id',page.id)
       if(updateError)setError(updateError.message)
       else{setNotice('Страница архивирована, история записей сохранена.');await loadDirectories()}
     } finally { setBusy(false) }
