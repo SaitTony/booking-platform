@@ -32,6 +32,7 @@ Deno.serve(async (req) => {
 
     return json({ success: true });
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "Не удалось удалить учётную запись" }, 400);
+    console.error("owner-delete-user failed", error);
+    return json({ error: error instanceof Error ? error.message : "Не удалось удалить учётную запись" }, 500);
   }
 });
