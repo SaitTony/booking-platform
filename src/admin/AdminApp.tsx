@@ -38,6 +38,12 @@ function hasDuplicateIndividualPageName(pages: MasterOption[], name: string, exc
   return !!normalized && pages.some(page => page.kind === 'individual' && page.id !== excludeId && normalizePageName(page.display_name) === normalized)
 }
 
+const RESERVED_COMPANY_SLUGS = new Set(['admin', 'demo', 'pro'])
+
+function isReservedCompanySlug(value: string) {
+  return RESERVED_COMPANY_SLUGS.has(value.trim().toLowerCase())
+}
+
 function makeSlug(value: string) {
   const map: Record<string,string> = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'i',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}
   return value.toLowerCase().split('').map(char=>map[char] ?? char).join('').normalize('NFKD')
@@ -315,6 +321,7 @@ export default function AdminApp() {
     if(!supabase||!settingsCompany)return
     if(!editCompanyName.trim()||!editCompanySlug.trim()) {setError('Название и адрес страницы обязательны.');return}
     if(!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(editCompanySlug.trim())) {setError('Адрес страницы должен содержать только латинские буквы, цифры и дефисы.');return}
+    if(isReservedCompanySlug(editCompanySlug)) {setError('Этот адрес зарезервирован системой. Выберите другое имя страницы.');return}
     setBusy(true);setError('');setNotice('')
     const {error:updateError}=await supabase.from('companies').update({name:editCompanyName.trim(),slug:editCompanySlug.trim(),description:editCompanyDescription.trim()}).eq('id',settingsCompany.id)
     if(updateError)setError(updateError.message)
@@ -397,6 +404,9 @@ export default function AdminApp() {
   async function createCompany(event: FormEvent) {
     event.preventDefault()
     if(!supabase)return
+    if(!companyName.trim()||!companySlug.trim()){setError('Название и адрес страницы обязательны.');return}
+    if(!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(companySlug.trim())){setError('Адрес страницы должен содержать только латинские буквы, цифры и дефисы.');return}
+    if(isReservedCompanySlug(companySlug)){setError('Этот адрес зарезервирован системой. Выберите другое имя страницы.');return}
     setBusy(true);setError('');setNotice('')
     const {error:createError}=await supabase.from('companies').insert({name:companyName.trim(),slug:companySlug.trim(),description:companyDescription})
     if(createError)setError(createError.message)
