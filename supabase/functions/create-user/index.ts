@@ -1,5 +1,9 @@
 import { clients, corsHeaders, json, requireOwner } from "../_shared/auth.ts";
 
+function normalizePageName(value: string) {
+  return value.trim().replace(/\\s+/g, " ").toLowerCase();
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -35,6 +39,15 @@ Deno.serve(async (req) => {
     if ((role === "master" || role === "master_pro") &&
         (!pageName || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(pageSlug))) {
       return json({ error: "Не удалось сформировать страницу мастера" }, 400);
+    }
+    if (role === "master_pro") {
+      const { data: existingPages, error: pagesError } = await admin
+        .from("masters").select("display_name").eq("kind", "individual").is("archived_at", null);
+      if (pagesError) throw pagesError;
+      const normalizedName = normalizePageName(pageName);
+      if ((existingPages ?? []).some((page) => normalizePageName(page.display_name) === normalizedName)) {
+        return json({ error: "Страница с таким названием уже существует. Измените название страницы и попробуйте снова." }, 409);
+      }
     }
     const { data, error } = await admin.auth.admin.createUser({
       email, password: temporaryPassword, email_confirm: true,
