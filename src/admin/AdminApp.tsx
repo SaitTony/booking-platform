@@ -526,7 +526,7 @@ export default function AdminApp() {
       <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===viewCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button></article>)}</div>
       <CompanySettings isOwner={false} companyId={viewCompanyId}/>
       <StaffWorkspace profile={displayedProfile??profile}/>
-    </> : <StaffWorkspace profile={profile}/>}
+    </> : <StaffWorkspace profile={displayedProfile??profile}/>}
     {activeModal && <div className="admin-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!busy)setActiveModal(null)}}>
       <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
