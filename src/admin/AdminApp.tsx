@@ -16,7 +16,7 @@ type Profile = {
   company_members?: Member[]
 }
 type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }
-type CompanyOption = { id: string; name: string }
+type CompanyOption = { id: string; name: string; is_active: boolean }
 type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
 
@@ -33,7 +33,7 @@ const roleLabel = (profile: Account) => {
 }
 
 export default function AdminApp() {
-  const [activeModal, setActiveModal] = useState<'account'|'reset'|'company'|'masterPro'|null>(null)
+  const [activeModal, setActiveModal] = useState<'account'|'accounts'|'reset'|'delete'|'company'|'masterPro'|null>(null)
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>('overview')
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -49,6 +49,10 @@ export default function AdminApp() {
   const [selectedMasterId, setSelectedMasterId] = useState('')
   const [resetUserId,setResetUserId]=useState('')
   const [temporaryPassword,setTemporaryPassword]=useState('000000')
+  const [createRole,setCreateRole]=useState<'admin'|'master'|'master_pro'|''>('')
+  const [createCompanyId,setCreateCompanyId]=useState('')
+  const [createMasterId,setCreateMasterId]=useState('')
+  const [deleteTargetId,setDeleteTargetId]=useState('')
   const [resetTemporaryPassword,setResetTemporaryPassword]=useState('000000')
   const [companyName,setCompanyName]=useState('')
   const [companySlug,setCompanySlug]=useState('')
@@ -79,7 +83,7 @@ export default function AdminApp() {
   async function loadDirectories() {
     if (!supabase) return
     const [{ data: companyData }, { data: masterData }] = await Promise.all([
-      supabase.from('companies').select('id,name').order('name'),
+      supabase.from('companies').select('id,name,is_active').order('name'),
       supabase.from('masters').select('id,display_name,slug,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),
     ])
     setCompanies((companyData ?? []) as CompanyOption[])
@@ -138,18 +142,40 @@ export default function AdminApp() {
   }
 
   async function toggleAccountStatus(account: Account) {
-    if (!supabase || account.platform_role === 'owner') return
+    if (!supabase || account.platform_role === 'owner' || busy) return
     const disabled = !account.disabled_at
-    const confirmed = window.confirm(disabled
-      ? `Отключить доступ для ${account.full_name}?`
-      : `Включить доступ для ${account.full_name}?`)
-    if (!confirmed) return
     setBusy(true); setError(''); setNotice('')
     const { error: statusError } = await supabase.functions.invoke('owner-set-account-status', {
       body: { userId: account.id, disabled },
     })
     if (statusError) setError(statusError.message)
     else { setNotice(disabled ? 'Доступ к учётной записи отключён.' : 'Доступ к учётной записи включён.'); await loadAccounts() }
+    setBusy(false)
+  }
+
+  async function toggleCompanyStatus(company: CompanyOption) {
+    if (!supabase || busy) return
+    setBusy(true); setError(''); setNotice('')
+    const { error: updateError } = await supabase.from('companies')
+      .update({ is_active: !company.is_active }).eq('id', company.id)
+    if (updateError) setError(updateError.message)
+    else { setNotice(company.is_active ? 'Компания отключена.' : 'Компания включена.'); await loadDirectories() }
+    setBusy(false)
+  }
+
+  async function deleteAccount() {
+    if (!supabase || !deleteTargetId || busy) return
+    setBusy(true); setError(''); setNotice('')
+    const { error: deleteError } = await supabase.functions.invoke('owner-delete-user', {
+      body: { userId: deleteTargetId },
+    })
+    if (deleteError) setError(deleteError.message)
+    else {
+      setNotice('Учётная запись полностью удалена. История записей сохранена.')
+      setDeleteTargetId('')
+      setActiveModal('accounts')
+      await Promise.all([loadAccounts(), loadDirectories()])
+    }
     setBusy(false)
   }
 
@@ -215,14 +241,23 @@ export default function AdminApp() {
     event.preventDefault()
     if (!supabase) return
     if (!isValidRussianPhone(phoneForCreate.trim())) { setError('Введите номер в формате +7 и ровно 10 цифр после кода страны.'); return }
+    if (!createRole) { setError('Выберите роль сотрудника.'); return }
+    if ((createRole === 'admin' || createRole === 'master') && !createCompanyId) { setError('Выберите компанию.'); return }
+    if ((createRole === 'master' || createRole === 'master_pro') && !createMasterId) { setError('Выберите страницу мастера.'); return }
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
-      body: { fullName, email: emailForCreate, phone: phoneForCreate, temporaryPassword },
+      body: {
+        fullName, email: emailForCreate, phone: phoneForCreate, temporaryPassword,
+        role: createRole,
+        companyId: createRole === 'master_pro' ? null : createCompanyId,
+        masterId: createRole === 'admin' ? null : createMasterId,
+      },
     })
     if (createError) setError(createError.message)
     else {
-      setNotice('Учётная запись создана. Теперь назначьте пользователю роль и свяжите его со страницей.')
-      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('000000'); setActiveModal(null)
+      setNotice('Учётная запись создана, роль назначена.')
+      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('000000')
+      setCreateRole(''); setCreateCompanyId(''); setCreateMasterId(''); setActiveModal(null)
       await loadAccounts()
     }
     setBusy(false)
@@ -265,32 +300,20 @@ export default function AdminApp() {
         </aside>
         <div className="admin-main-content">
           {activeSection==='overview' && <section className="admin-overview">
-            <div><h2>Обзор системы</h2><h3>Добро пожаловать!</h3><p>Выберите раздел в боковом меню, чтобы управлять Workflows.</p></div>
-    {profile.platform_role === 'owner' && <section className="admin-stats" aria-label="Сводная статистика">
-      <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>Всего пользователей</small></article>
-      <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>Рабочие пространства</small></article>
-      <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
-    </section>}
-            <div className="admin-overview-links">
-              <button onClick={()=>setActiveSection('accounts')}>Управление учётными записями <span>→</span></button>
-              <button onClick={()=>setActiveSection('companies')}>Управление компаниями <span>→</span></button>
-              <button onClick={()=>setActiveSection('masterPro')}>Страницы Master_pro <span>→</span></button>
-            </div>
+            <h2>Обзор системы</h2>
+            <section className="admin-stats" aria-label="Сводная статистика">
+              <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>{accounts.filter(account=>!account.disabled_at).length} активных</small></article>
+              <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных</small></article>
+              <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
+            </section>
           </section>}
       {activeSection==='accounts' && <section className="admin-accordion admin-panel-section">
         <header className="admin-panel-heading"><h2>Учётные записи</h2><span className="accordion-count">{accounts.length}</span></header>
         <div className="accordion-content">
           <div className="admin-action-grid">
-            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ для сотрудника</small></button>
-            <button className="admin-action-card" onClick={()=>{setResetTemporaryPassword('000000');setResetUserId('');setActiveModal('reset')}}><span className="admin-action-icon">↻</span><strong>Сбросить пароль</strong><small>Выдать новый временный пароль</small></button>
+            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCreateMasterId('');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ и сразу назначить роль</small></button>
+            <button className="admin-action-card" onClick={()=>setActiveModal('accounts')}><span className="admin-action-icon">☷</span><strong>Все пользователи</strong><small>Открыть список и управление учётными записями</small></button>
           </div>
-          <div className="admin-account-list">{accounts.map(account=><article className="admin-account" key={account.id}>
-            <div><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span></div>
-            <span className="admin-role">{roleLabel(account)}</span>
-            {account.force_password_change && <span className="admin-role">Требуется смена пароля</span>}
-            {account.disabled_at && <span className="admin-role account-disabled">Отключена</span>}
-            {account.platform_role!=='owner'&&<button className="secondary-button account-action" disabled={busy} onClick={()=>void toggleAccountStatus(account)}>{account.disabled_at?'Включить':'Отключить'}</button>}
-          </article>)}</div>
         </div>
       </section>}
 
@@ -306,6 +329,7 @@ export default function AdminApp() {
                 return <details className="admin-company-item" key={company.id}>
                   <summary><span>{company.name}</span><span className="accordion-meta">{companyPages.length} страниц · {companyStaff.length} сотрудников</span></summary>
                   <div className="accordion-content">
+                    <div className="admin-account company-status-row"><div><strong>Статус компании</strong><span>{company.is_active?'Компания активна':'Компания отключена'}</span></div><button type="button" className={`admin-switch ${company.is_active?'is-on':''}`} role="switch" aria-checked={company.is_active} aria-label={company.is_active?'Отключить компанию':'Включить компанию'} disabled={busy} onClick={()=>void toggleCompanyStatus(company)}><span/></button></div>
                     <CompanySettings isOwner companyId={company.id} hideSelector/>
                     <section className="admin-card workspace-section">
                       <h3>Сотрудники компании</h3>
@@ -393,19 +417,39 @@ export default function AdminApp() {
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
         <span className="eyebrow">WORKFLOWS PROJECT</span>
         {activeModal==='account'&&<form onSubmit={createAccount}>
-          <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Создайте профиль сотрудника. Роль и доступ к компании можно назначить после сохранения.</p>
+          <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Заполните данные сотрудника и назначьте ему роль сразу при создании.</p>
           <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/></label>
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
           <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
+          <label className="admin-field">Роль<select value={createRole} onChange={e=>{setCreateRole(e.target.value as 'admin'|'master'|'master_pro'|'');setCreateCompanyId('');setCreateMasterId('')}} required><option value="">Выберите роль</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
+          {(createRole==='admin'||createRole==='master')&&<label className="admin-field">Компания<select value={createCompanyId} onChange={e=>{setCreateCompanyId(e.target.value);setCreateMasterId('')}} required><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
+          {createRole==='master'&&<label className="admin-field">Страница мастера<select value={createMasterId} onChange={e=>setCreateMasterId(e.target.value)} required><option value="">Выберите страницу</option>{masterPages.filter(page=>page.kind==='company'&&page.company_id===createCompanyId&&page.is_active&&!page.profile_id).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
+          {createRole==='master_pro'&&<label className="admin-field">Индивидуальная страница<select value={createMasterId} onChange={e=>setCreateMasterId(e.target.value)} required><option value="">Выберите страницу</option>{masterPages.filter(page=>page.kind==='individual'&&page.is_active&&!page.profile_id).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
           <label className="admin-field">Временный пароль<input type="text" autoComplete="new-password" minLength={6} value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} required/></label>
           <p className="admin-modal-intro">После первого входа сотрудник должен будет задать собственный пароль.</p>
-          <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)}>{busy?'Создаём…':'Создать учётную запись'}</button>
+          <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)||(createRole==='admin'||createRole==='master')&&!createCompanyId||(createRole==='master'||createRole==='master_pro')&&!createMasterId}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
+        {activeModal==='accounts'&&<div className="admin-modal-account-list">
+          <h2 id="admin-modal-title">Все учётные записи</h2>
+          <p className="admin-modal-intro">Здесь можно управлять доступом, сбрасывать пароли и удалять учётные записи.</p>
+          <div className="admin-account-list">{accounts.map(account=><article className="admin-account admin-account-manage-row" key={account.id}>
+            <div className="account-main"><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span><span>{roleLabel(account)}{account.force_password_change?' · требуется смена пароля':''}</span></div>
+            {account.platform_role!=='owner'&&<div className="account-controls">
+              <button type="button" className={`admin-switch ${!account.disabled_at?'is-on':''}`} role="switch" aria-checked={!account.disabled_at} aria-label={account.disabled_at?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>void toggleAccountStatus(account)}><span/></button>
+              <button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(account.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить пароль</button>
+              <button type="button" className="danger-button" disabled={busy} onClick={()=>{setDeleteTargetId(account.id);setActiveModal('delete')}}>Удалить УЗ</button>
+            </div>}
+          </article>)}</div>
+        </div>}
+        {activeModal==='delete'&&<div>
+          <h2 id="admin-modal-title">Удалить учётную запись?</h2>
+          <p className="admin-modal-intro">Будет безвозвратно удалён пользователь <strong>{accounts.find(account=>account.id===deleteTargetId)?.full_name??''}</strong>, его запись профиля и данные авторизации. История записей клиентов сохранится.</p>
+          <div className="admin-modal-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>setActiveModal('accounts')}>Отмена</button><button type="button" className="danger-button" disabled={busy} onClick={()=>void deleteAccount()}>{busy?'Удаляем…':'Да, удалить УЗ'}</button></div>
+        </div>}
         {activeModal==='reset'&&<form onSubmit={resetUserAccess}>
-          <h2 id="admin-modal-title">Сбросить пароль</h2><p className="admin-modal-intro">Сотрудник получит временный пароль и должен будет сменить его при следующем входе.</p>
-          <label className="admin-field">Пользователь<select value={resetUserId} onChange={e=>setResetUserId(e.target.value)} required><option value="">Выберите пользователя</option>{accounts.filter(a=>a.platform_role!=='owner').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
+          <h2 id="admin-modal-title">Сбросить пароль</h2><p className="admin-modal-intro">Для пользователя <strong>{accounts.find(account=>account.id===resetUserId)?.full_name??''}</strong> будет установлен временный пароль. При следующем входе его нужно будет сменить.</p>
           <label className="admin-field">Новый временный пароль<input type="text" autoComplete="new-password" minLength={6} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required/></label>
-          <button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button>
+          <div className="admin-modal-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>setActiveModal('accounts')}>Назад</button><button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button></div>
         </form>}
         {activeModal==='company'&&<form onSubmit={createCompany}>
           <h2 id="admin-modal-title">Создать компанию</h2><p className="admin-modal-intro">Создайте отдельное пространство компании. После этого можно добавить сотрудников и страницы мастеров.</p>
