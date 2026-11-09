@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(34);
+select extensions.plan(35);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
