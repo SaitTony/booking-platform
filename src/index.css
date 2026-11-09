@@ -851,3 +851,8 @@
 .admin-shell .account-settings-status span{color:var(--admin-muted,var(--muted));font-size:13px}
 .admin-shell .admin-account-settings-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 @media(max-width:700px){.admin-shell .admin-top-actions{gap:6px}.admin-shell .admin-settings-trigger{width:40px;height:40px}.admin-shell .admin-account-settings-actions{justify-content:stretch}.admin-shell .admin-account-settings-actions button{flex:1}}
+
+
+/* Owner role preview is deliberately read-only */
+.admin-shell[data-preview-mode="true"] .admin-wide > :not(.admin-top):not(.admin-modal-backdrop){pointer-events:none;user-select:none}
+.admin-shell[data-preview-mode="true"] .admin-top .admin-branding p{font-weight:700}
