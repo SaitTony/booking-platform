@@ -31,6 +31,10 @@ jobs:
           VITE_SUPABASE_URL: https://cetcxttaqtberrntsntr.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_GMJlnRBrbKZnEcqSBkr3Dg_UVmLKUGL
         run: npm run build
+      - name: Publish standalone accounts prototype
+        run: |
+          mkdir -p dist/prototype/accounts
+          cp prototype/accounts/index.html dist/prototype/accounts/index.html
       - name: Preserve SPA fallback
         run: cp dist/index.html dist/404.html
       - name: Upload artifact
