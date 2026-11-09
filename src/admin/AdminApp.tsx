@@ -406,10 +406,6 @@ export default function AdminApp() {
         <div className="admin-main-content">
           {activeSection==='overview' && <section className="admin-overview">
             <h2>Обзор системы</h2>
-            <section className="admin-theme-picker">
-              <div className="admin-theme-heading"><div><span className="eyebrow">ОФОРМЛЕНИЕ ПАНЕЛИ</span><h3>Цветовая тема</h3><p>Выберите палитру, которая будет использоваться в административной панели.</p></div><span className="admin-theme-current">{adminPalettes.find(item=>item.id===adminTheme)?.name}</span></div>
-              <div className="theme-options admin-theme-options">{adminPalettes.map(item=><button type="button" key={item.id} className={`theme-option ${adminTheme===item.id?'active':''}`} onClick={()=>{setAdminTheme(item.id);localStorage.setItem('workflows-admin-theme',item.id)}}><span className={`palette palette-${item.id}`}><i/><i/><i/><i/></span><span><b>{item.name}</b><small>{item.desc}</small></span>{adminTheme===item.id&&<em>✓</em>}</button>)}</div>
-            </section>
             <section className="admin-stats" aria-label="Сводная статистика">
               <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>{accounts.filter(account=>!account.disabled_at).length} активных</small></article>
               <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных</small></article>
@@ -515,18 +511,18 @@ export default function AdminApp() {
       </div>
     </> : displayedProfile?.company_members?.some(member=>member.role==='admin') ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ КОМПАНИЕЙ</span><h2>Страницы мастеров</h2></div></div>
-      <form className="admin-card admin-create-form" onSubmit={createMasterPage}>
+      {!previewAccount&&<form className="admin-card admin-create-form" onSubmit={createMasterPage}>
         <h3>Создать страницу мастера</h3>
         <p>Новая страница будет добавлена в вашу компанию. Максимум — пять активных страниц.</p>
         <label className="admin-field">Имя мастера<input value={pageName} onChange={e=>{setPageName(e.target.value);setPageSlug(makeSlug(e.target.value))}} required /></label>
         <label className="admin-field">Адрес страницы (slug)<input value={pageSlug} onChange={e=>setPageSlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
         <label className="admin-field">Описание<input value={pageDescription} onChange={e=>setPageDescription(e.target.value)} /></label>
-        <button className="primary-button" disabled={busy || !viewCompanyId || !!previewAccount}>Создать страницу мастера</button>
-      </form>
-      <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===viewCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span><button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button></article>)}</div>
-      <CompanySettings isOwner={false} companyId={viewCompanyId}/>
-      <StaffWorkspace profile={displayedProfile??profile}/>
-    </> : <StaffWorkspace profile={displayedProfile??profile}/>}
+        <button className="primary-button" disabled={busy || !viewCompanyId}>Создать страницу мастера</button>
+      </form>}
+      <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===viewCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span>{!previewAccount&&<button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button>}</article>)}</div>
+      <CompanySettings isOwner={false} companyId={viewCompanyId} readOnly={!!previewAccount}/>
+      <StaffWorkspace profile={displayedProfile??profile} kindFilter="company" companyIdFilter={viewCompanyId} readOnly={!!previewAccount}/>
+    </> : <StaffWorkspace profile={displayedProfile??profile} readOnly={!!previewAccount}/>}
     {activeModal && <div className="admin-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!busy)setActiveModal(null)}}>
       <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
