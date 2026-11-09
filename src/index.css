@@ -830,3 +830,24 @@
  .admin-shell .admin-theme-heading{align-items:flex-start;flex-direction:column}
 }
 @media(max-width:420px){.admin-shell .account-inline-fields{grid-template-columns:1fr}}
+
+
+/* Admin settings and per-account action dialogs */
+.admin-shell .admin-top-actions{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.admin-shell .admin-settings-trigger,.admin-shell .account-settings-button{display:grid;place-items:center;width:42px;height:42px;min-height:42px;padding:0;font-size:20px;line-height:1}
+.admin-shell .admin-settings-trigger{font-size:22px}
+.admin-shell .account-settings-button{flex:0 0 40px;border:1px solid var(--admin-line,var(--line));border-radius:10px;background:var(--admin-soft,var(--soft));color:var(--admin-accent,var(--accent));cursor:pointer}
+.admin-shell .account-settings-button:hover,.admin-shell .admin-settings-trigger:hover{filter:brightness(.96)}
+.admin-shell .admin-modal:has(.admin-settings-modal),.admin-shell .admin-modal:has(.admin-account-settings-modal){width:min(94vw,760px);max-height:88vh;overflow:auto}
+.admin-shell .admin-settings-modal,.admin-shell .admin-account-settings-modal{display:grid;gap:20px}
+.admin-shell .admin-settings-modal>h2,.admin-shell .admin-account-settings-modal>h2{margin:0;color:var(--admin-text,var(--text))}
+.admin-shell .admin-preview-settings{display:grid;gap:12px;padding:20px;border:1px solid var(--admin-line,var(--line));border-radius:15px;background:var(--admin-surface,var(--surface))}
+.admin-shell .admin-preview-settings h3{margin:0;color:var(--admin-text,var(--text));font:700 18px Manrope}
+.admin-shell .admin-preview-settings p{margin:0;color:var(--admin-muted,var(--muted));font-size:13px;line-height:1.5}
+.admin-shell .admin-preview-settings .admin-field{margin:0}
+.admin-shell .account-settings-status{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px solid var(--admin-line,var(--line));border-radius:12px;background:var(--admin-surface,var(--surface))}
+.admin-shell .account-settings-status>div{display:grid;gap:5px}
+.admin-shell .account-settings-status strong{color:var(--admin-text,var(--text));font-size:15px}
+.admin-shell .account-settings-status span{color:var(--admin-muted,var(--muted));font-size:13px}
+.admin-shell .admin-account-settings-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+@media(max-width:700px){.admin-shell .admin-top-actions{gap:6px}.admin-shell .admin-settings-trigger{width:40px;height:40px}.admin-shell .admin-account-settings-actions{justify-content:stretch}.admin-shell .admin-account-settings-actions button{flex:1}}
