@@ -11,13 +11,13 @@ insert into auth.users (
   created_at, updated_at
 ) values
   ('10000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'owner@example.test', '', now(),
-   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Owner","phone_e164":"+358401234567"}', now(), now()),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Owner","phone_e164":"+79531234567"}', now(), now()),
   ('10000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'admin@example.test', '', now(),
-   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Admin","phone_e164":"+358401234568"}', now(), now()),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Admin","phone_e164":"+79531234568"}', now(), now()),
   ('10000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'master@example.test', '', now(),
-   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Master","phone_e164":"+358401234569"}', now(), now()),
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Master","phone_e164":"+79531234569"}', now(), now()),
   ('10000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'pro@example.test', '', now(),
-   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Pro","phone_e164":"+358401234570"}', now(), now());
+   null, null, '{"provider":"email","providers":["email"]}', '{"full_name":"Test Pro","phone_e164":"+79531234570"}', now(), now());
 
 update public.profiles
 set platform_role = 'owner', force_password_change = false
