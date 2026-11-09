@@ -353,14 +353,6 @@ export default function AdminApp() {
     }
   }
 
-  async function saveMasterPageName(masterId:string,name:string) {
-    if(!supabase||!name.trim())return
-    setBusy(true);setError('');setNotice('')
-    const {error:updateError}=await supabase.from('masters').update({display_name:name.trim()}).eq('id',masterId)
-    if(updateError)setError(updateError.message)
-    else{setNotice('Название страницы обновлено.');await loadDirectories()}
-    setBusy(false)
-  }
 
   async function createAccount(event: FormEvent) {
     event.preventDefault()
