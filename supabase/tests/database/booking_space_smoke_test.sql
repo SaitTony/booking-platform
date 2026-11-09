@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(35);
+select extensions.plan(41);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -37,6 +37,12 @@ where id in (
 
 insert into public.companies (id, name, slug, timezone)
 values ('20000000-0000-4000-8000-000000000001', 'Test Company', 'test-company', 'UTC');
+
+select extensions.throws_ok(
+  $insert into public.companies (name, slug) values ('Reserved route', 'admin')$,
+  '23514', null,
+  'System route slugs cannot be used by companies'
+);
 
 insert into public.masters (id, kind, company_id, profile_id, display_name, slug, timezone)
 values
@@ -306,6 +312,59 @@ select extensions.ok(
   and not exists (select 1 from public.company_members where profile_id = '10000000-0000-4000-8000-000000000003')
   and (select profile_id is null from public.masters where id = '30000000-0000-4000-8000-000000000001'),
   'Profile deletion removes staff membership while retaining the master page'
+);
+
+
+-- New schema hardening: indexes, timestamp maintenance and RLS policy shape.
+select extensions.ok(
+  (select count(*) = 5 from pg_indexes
+   where schemaname = 'public'
+     and indexname in (
+       'booking_status_history_booking_id_idx',
+       'booking_status_history_changed_by_idx',
+       'bookings_cancelled_by_idx',
+       'bookings_service_id_idx',
+       'company_members_company_id_idx'
+     )),
+  'All previously unindexed foreign keys have covering indexes'
+);
+
+update public.companies
+set updated_at = timestamptz '2000-01-01 00:00:00+00'
+where id = '20000000-0000-4000-8000-000000000001';
+select extensions.ok(
+  (select updated_at > timestamptz '2000-01-01 00:00:00+00'
+   from public.companies where id = '20000000-0000-4000-8000-000000000001'),
+  'updated_at is maintained automatically by database triggers'
+);
+
+select extensions.ok(
+  not exists (
+    select p.tablename, p.cmd, role_name
+    from pg_policies p
+    cross join lateral unnest(p.roles) as role_name
+    where p.schemaname = 'public' and p.permissive = 'PERMISSIVE'
+    group by p.tablename, p.cmd, role_name
+    having count(*) > 1
+  ),
+  'No table has duplicate permissive policies for the same role and command'
+);
+
+insert into public.company_members (company_id, profile_id, role, master_id)
+values (
+  '20000000-0000-4000-8000-000000000001',
+  '10000000-0000-4000-8000-000000000001',
+  'master',
+  '30000000-0000-4000-8000-000000000002'
+);
+delete from public.masters where id = '30000000-0000-4000-8000-000000000002';
+select extensions.ok(
+  not exists (
+    select 1 from public.company_members
+    where profile_id = '10000000-0000-4000-8000-000000000001'
+      and master_id = '30000000-0000-4000-8000-000000000002'
+  ),
+  'Deleting an assigned master page cascades its Master membership safely'
 );
 
 select * from extensions.finish();
