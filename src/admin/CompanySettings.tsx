@@ -12,6 +12,12 @@ export default function CompanySettings({isOwner,companyId,hideSelector=false,re
   const [active,setActive]=useState(true)
   const [error,setError]=useState('')
   const [notice,setNotice]=useState('')
+
+  useEffect(()=>{
+    if(!notice)return
+    const timeout=window.setTimeout(()=>setNotice(''),3000)
+    return ()=>window.clearTimeout(timeout)
+  },[notice])
   const [busy,setBusy]=useState(false)
 
   useEffect(()=>{
