@@ -105,14 +105,14 @@ Edge Functions проверяют JWT и повторно проверяют р�
 - `profiles.id → auth.users.id`.
 - `company_members.profile_id → profiles.id`.
 - `company_members.company_id → companies.id`.
-- `company_members.master_id → masters.id` (при удалении назначенной страницы удаляется и членство Master, чтобы не нарушать CHECK роли).
+- `company_members.(master_id, company_id) → masters.(id, company_id)` (составной FK гарантирует, что страница принадлежит той же компании; при удалении страницы удаляется и членство Master).
 - `masters.company_id → companies.id` для корпоративных страниц.
 - `masters.profile_id → profiles.id` для индивидуального Master_pro или связанного сотрудника.
 - `services.master_id`, `working_hours.master_id`, `schedule_exceptions.master_id`, `booking_settings.master_id` → `masters.id`.
-- `bookings.master_id → masters.id`, `bookings.service_id → services.id`, `bookings.client_id → clients.id`.
+- `bookings.master_id → masters.id`, `bookings.(service_id, master_id) → services.(id, master_id)`, `bookings.client_id → clients.id`.
 - `booking_status_history.booking_id → bookings.id`.
 
-Схема использует внешние ключи, уникальные ограничения, CHECK constraints и индексы. Важные бизнес-операции дополнительно проверяются RPC/Edge Functions: например, выбранная услуга должна принадлежать выбранному мастеру.
+Схема использует внешние ключи, составные внешние ключи, уникальные ограничения, CHECK constraints и индексы. БД не позволит привязать сотрудника к странице другой компании или создать бронирование с услугой другого мастера. Эти правила дополнительно проверяются RPC/Edge Functions.
 
 ### Удаление и архивирование
 
