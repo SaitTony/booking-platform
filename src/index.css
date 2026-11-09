@@ -1122,3 +1122,5 @@
  .admin-shell[data-prototype-mode="true"] .admin-modal-actions{flex-wrap:wrap}
  .admin-shell[data-prototype-mode="true"] .admin-modal-actions button{flex:1}
 }
+
+.admin-shell[data-prototype-mode="true"] > .admin-card{max-width:480px;margin:0 auto;}
