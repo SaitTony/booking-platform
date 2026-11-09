@@ -10,6 +10,7 @@ on:
       - "supabase/functions/owner-set-account-status/**"
       - "supabase/functions/change-password/**"
       - "supabase/functions/owner-reset-access/**"
+      - "supabase/functions/owner-delete-user/**"
       - ".github/workflows/deploy-create-user.yml"
 
 permissions:
@@ -48,3 +49,6 @@ jobs:
 
       - name: Deploy owner-reset-access function
         run: supabase functions deploy owner-reset-access --project-ref "$SUPABASE_PROJECT_ID" --yes
+
+      - name: Deploy owner-delete-user function
+        run: supabase functions deploy owner-delete-user --project-ref "$SUPABASE_PROJECT_ID" --yes
