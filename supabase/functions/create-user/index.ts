@@ -1,7 +1,7 @@
 import { clients, corsHeaders, json, requireOwner } from "../_shared/auth.ts";
 
 function normalizePageName(value: string) {
-  return value.trim().replace(/\\s+/g, " ").toLowerCase();
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
 Deno.serve(async (req) => {
