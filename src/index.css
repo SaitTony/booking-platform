@@ -757,3 +757,76 @@
   }
   .admin-shell .admin-modal-account-list>.admin-account-list {padding-right:2px}
 }
+
+
+/* Inline account management workspace */
+.admin-shell .admin-accounts-workspace{display:grid;gap:18px}
+.admin-shell .admin-accounts-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.admin-shell .admin-create-account-button{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:13px 20px}
+.admin-shell .admin-create-account-button span{font-size:20px;line-height:1}
+.admin-shell .admin-account-stats{display:flex;align-items:stretch;gap:12px}
+.admin-shell .admin-account-stat{min-width:135px;display:flex;flex-direction:column;gap:4px;padding:10px 16px;border:1px solid var(--admin-line,var(--line));border-radius:12px;background:var(--admin-surface,var(--surface))}
+.admin-shell .admin-account-stat small{font-size:13px;color:var(--admin-muted,var(--muted))}
+.admin-shell .admin-account-stat strong{font:750 25px/1.1 Manrope;color:var(--admin-text,var(--text))}
+.admin-shell .admin-account-list-inline{gap:11px}
+.admin-shell .admin-account-inline-row{display:grid;gap:12px;padding:16px 18px;background:var(--admin-surface,var(--surface));border-color:var(--admin-line,var(--line))}
+.admin-shell .account-inline-fields{display:grid;grid-template-columns:minmax(150px,1.25fr) minmax(125px,.9fr) minmax(115px,.75fr) minmax(145px,1fr) minmax(150px,1fr) minmax(145px,1fr);align-items:end;gap:10px}
+.admin-shell .account-inline-cell,.admin-shell .account-inline-field{display:flex;min-width:0;flex-direction:column;gap:5px;margin:0}
+.admin-shell .account-inline-cell small,.admin-shell .account-inline-field small{font-size:11px;font-weight:700;color:var(--admin-muted,var(--muted))}
+.admin-shell .account-inline-cell strong{font-size:14px;overflow-wrap:anywhere;color:var(--admin-text,var(--text))}
+.admin-shell .account-inline-field select,.admin-shell .account-inline-field input{width:100%;min-width:0;min-height:40px;padding:8px 9px;border:1px solid var(--admin-line,var(--line));border-radius:8px;background:var(--admin-surface,var(--surface));color:var(--admin-text,var(--text));font-size:13px}
+.admin-shell .account-inline-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.admin-shell .account-inline-actions .primary-button,.admin-shell .account-inline-actions .secondary-button,.admin-shell .account-inline-actions .danger-button{min-height:38px;padding:8px 12px;font-size:12px}
+.admin-shell .account-force-change{align-self:center;font-size:11px;color:#a56a24}
+.admin-shell .admin-theme-picker{display:grid;gap:14px;padding:20px;border:1px solid var(--admin-line,var(--line));border-radius:15px;background:var(--admin-surface,var(--surface))}
+.admin-shell .admin-theme-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.admin-shell .admin-theme-heading h3{margin:5px 0;font:700 19px Manrope;color:var(--admin-text,var(--text))}
+.admin-shell .admin-theme-heading p{margin:0;font-size:13px;color:var(--admin-muted,var(--muted))}
+.admin-shell .admin-theme-current{padding:7px 11px;border-radius:20px;background:var(--admin-soft,var(--soft));color:var(--admin-accent,var(--accent));font-size:12px;font-weight:700}
+.admin-shell .admin-theme-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0}
+.admin-shell .admin-theme-options .theme-option{min-height:58px;padding:10px 12px;background:var(--admin-surface,var(--surface));border-color:var(--admin-line,var(--line));color:var(--admin-text,var(--text))}
+.admin-shell .admin-theme-options .theme-option.active{border-color:var(--admin-accent,var(--accent));box-shadow:0 0 0 1px var(--admin-accent,var(--accent))}
+.admin-shell .admin-theme-options .theme-option b{font-size:13px}
+.admin-shell .admin-theme-options .theme-option small{font-size:11px}
+.admin-shell .palette-dark i:nth-child(1){background:#91a9c6}
+.admin-shell .palette-dark i:nth-child(2){background:#596574}
+.admin-shell .palette-dark i:nth-child(3){background:#f1f1ee}
+.admin-shell .palette-dark i:nth-child(4){background:#171b20}
+
+/* Administrative color palettes */
+.admin-shell[data-admin-theme="natural"]{--admin-page:#f7f6f2;--admin-surface:#fff;--admin-soft:#f0efe9;--admin-text:#282820;--admin-muted:#77766c;--admin-line:#e8e5dc;--admin-accent:#626c57;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="graphite"]{--admin-page:#f4f4f3;--admin-surface:#fff;--admin-soft:#e9e9e8;--admin-text:#24272c;--admin-muted:#6d7178;--admin-line:#dedfe1;--admin-accent:#303943;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="sand"]{--admin-page:#f8f2e9;--admin-surface:#fffdfa;--admin-soft:#eee4d7;--admin-text:#44372d;--admin-muted:#887767;--admin-line:#e9ddcf;--admin-accent:#a47c58;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="green"]{--admin-page:#f2f5f1;--admin-surface:#fff;--admin-soft:#e4ece5;--admin-text:#20382f;--admin-muted:#6f8276;--admin-line:#dce6dd;--admin-accent:#315c4b;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="blue"]{--admin-page:#f3f5f9;--admin-surface:#fff;--admin-soft:#e6ebf3;--admin-text:#202e45;--admin-muted:#75839a;--admin-line:#dce3ed;--admin-accent:#425c85;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="dark"]{--admin-page:#171b20;--admin-surface:#252b31;--admin-soft:#303943;--admin-text:#f1f1ee;--admin-muted:#a7afb8;--admin-line:#414a54;--admin-accent:#91a9c6;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme] .admin-top{border-color:var(--admin-line)}
+.admin-shell[data-admin-theme] .admin-top h1,.admin-shell[data-admin-theme] .admin-section-head h2{color:var(--admin-text)}
+.admin-shell[data-admin-theme] .admin-top p,.admin-shell[data-admin-theme] .admin-section-head>span{color:var(--admin-muted)}
+.admin-shell[data-admin-theme] .admin-overview,.admin-shell[data-admin-theme] .admin-panel-section,.admin-shell[data-admin-theme] .admin-card,.admin-shell[data-admin-theme] .admin-account{background:var(--admin-surface);border-color:var(--admin-line);color:var(--admin-text)}
+.admin-shell[data-admin-theme] .admin-overview h2,.admin-shell[data-admin-theme] .admin-panel-heading h2,.admin-shell[data-admin-theme] .admin-account-manage-row .account-main strong{color:var(--admin-text)}
+.admin-shell[data-admin-theme] .admin-overview p,.admin-shell[data-admin-theme] .admin-account>div span{color:var(--admin-muted)}
+.admin-shell[data-admin-theme] .admin-panel-heading{border-color:var(--admin-line)}
+.admin-shell[data-admin-theme] .admin-sidebar{background:var(--admin-surface);border-color:var(--admin-line)}
+.admin-shell[data-admin-theme] .admin-sidebar button{color:var(--admin-text)}
+.admin-shell[data-admin-theme] .admin-sidebar button:hover,.admin-shell[data-admin-theme] .admin-sidebar button.active{background:var(--admin-soft);border-color:var(--admin-line);color:var(--admin-accent)}
+.admin-shell[data-admin-theme] .admin-sidebar button span{color:var(--admin-accent)}
+.admin-shell[data-admin-theme] .admin-role,.admin-shell[data-admin-theme] .accordion-count{background:var(--admin-soft);color:var(--admin-accent)}
+.admin-shell[data-admin-theme] .admin-account-stat{background:var(--admin-surface);border-color:var(--admin-line)}
+.admin-shell[data-admin-theme] .admin-account-stat strong{color:var(--admin-text)}
+.admin-shell[data-admin-theme] .admin-account-stat small{color:var(--admin-muted)}
+.admin-shell[data-admin-theme] .admin-field input,.admin-shell[data-admin-theme] .admin-field select,.admin-shell[data-admin-theme] .account-inline-field input,.admin-shell[data-admin-theme] .account-inline-field select{background:var(--admin-surface);border-color:var(--admin-line);color:var(--admin-text)}
+.admin-shell[data-admin-theme="dark"] .admin-action-card,.admin-shell[data-admin-theme="dark"] .admin-subaccordion>summary,.admin-shell[data-admin-theme="dark"] .admin-company-item>summary{background:var(--admin-soft);border-color:var(--admin-line);color:var(--admin-text)}
+.admin-shell[data-admin-theme="dark"] .admin-notice{background:#203b2c;color:#b9e6c8}
+.admin-shell[data-admin-theme="dark"] .admin-error{background:#492a2b;color:#ffc8c8}
+@media(max-width:1050px){.admin-shell .account-inline-fields{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){
+ .admin-shell .admin-accounts-toolbar{align-items:stretch;flex-direction:column}
+ .admin-shell .admin-account-stats{width:100%}
+ .admin-shell .admin-account-stat{flex:1;min-width:0}
+ .admin-shell .account-inline-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-shell .account-inline-actions{justify-content:flex-start}
+ .admin-shell .admin-theme-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-shell .admin-theme-heading{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:420px){.admin-shell .account-inline-fields{grid-template-columns:1fr}}
