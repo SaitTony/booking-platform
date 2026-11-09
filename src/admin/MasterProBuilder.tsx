@@ -33,7 +33,7 @@ export default function MasterProBuilder() {
   const [horizon,setHorizon] = useState('30')
   const [device,setDevice] = useState<'desktop'|'mobile'>('desktop')
   const [previewTab,setPreviewTab] = useState<'page'|'booking'>('page')
-  const [saved,setSaved] = useState(false)
+  const [,setSaved] = useState(false)
   const [showPublish,setShowPublish] = useState(false)
   const activeServices = services.filter(item=>item.active)
   const currentService = activeServices.find(item=>item.id===selectedService) ?? activeServices[0]
