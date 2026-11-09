@@ -367,8 +367,8 @@ export default function AdminApp() {
     setBusy(true);setError('');setNotice('')
     try {
       if(nameChanged){
-        const {error:updateProfileError}=await supabase.from('profiles').update({full_name:editFullName.trim()}).eq('id',settingsAccount.id)
-        if(updateProfileError)throw updateProfileError
+        const {error:updateProfileError}=await supabase.functions.invoke('owner-update-account-name',{body:{userId:settingsAccount.id,fullName:editFullName.trim()}})
+        if(updateProfileError)throw new Error(await getFunctionErrorMessage(updateProfileError,'Не удалось изменить имя пользователя.'))
       }
       if(assignmentChanged){
         const {error:assignError}=await supabase.functions.invoke('assign-user-role',{body:{
@@ -483,7 +483,7 @@ export default function AdminApp() {
           <section className="admin-account-group">
             <h3>Мастера_pro</h3>
             <div className="admin-account-list admin-account-list-inline">
-              {accounts.filter(account=>account.platform_role==='master_pro').map((account,index)=><AccountManagementRow key={account.id} account={account} index={index+1} companies={companies} pages={masterPages} onSettings={openAccountSettings}/>)}
+              {accounts.filter(account=>account.platform_role==='master_pro').map((account,index)=><AccountManagementRow key={account.id} account={account} index={accounts.indexOf(account)+1} companies={companies} pages={masterPages} onSettings={openAccountSettings}/>)}
               {!accounts.some(account=>account.platform_role==='master_pro')&&<p className="admin-empty">Мастеров_pro пока нет.</p>}
             </div>
           </section>
