@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(32);
+select extensions.plan(34);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -283,6 +283,24 @@ select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001
 select extensions.is(
   (select count(*)::integer from public.bookings), 2,
   'Owner sees all bookings'
+);
+
+-- Ordinary authenticated staff cannot detach profile ownership, but Auth's
+-- internal cascade role may clear this exact link while deleting a user.
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
+select extensions.throws_ok(
+  $update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001'$,
+  'P0001', 'Только Owner может менять привязку аккаунта, тип, компанию или архивировать страницу',
+  'Company Admin cannot detach a staff profile'
+);
+reset role;
+set local role supabase_auth_admin;
+update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001';
+reset role;
+select extensions.is(
+  (select profile_id from public.masters where id = '30000000-0000-4000-8000-000000000001'),
+  null::uuid,
+  'Auth internal cascade can detach profile ownership'
 );
 
 select * from extensions.finish();
