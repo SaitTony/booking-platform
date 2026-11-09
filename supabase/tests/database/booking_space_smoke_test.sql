@@ -285,23 +285,27 @@ select extensions.is(
   'Owner sees all bookings'
 );
 
--- Ordinary authenticated staff cannot detach profile ownership, but Auth's
--- internal cascade role may clear this exact link while deleting a user.
+-- Ordinary authenticated staff cannot detach profile ownership.
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select extensions.throws_ok(
-  $$update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001'$$,
+  $update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001'$,
   'P0001', 'Только Owner может менять привязку аккаунта, тип, компанию или архивировать страницу',
   'Company Admin cannot detach a staff profile'
 );
 reset role;
-set local role supabase_auth_admin;
-delete from auth.users where id = '10000000-0000-4000-8000-000000000003';
-reset role;
+
+-- Deleting a profile exercises the same FK SET NULL cascade that follows
+-- auth.users -> profiles deletion, without trying to SET ROLE to an internal
+-- Supabase Auth database role from the restricted pgTAP test connection.
+select extensions.lives_ok(
+  $delete from public.profiles where id = '10000000-0000-4000-8000-000000000003'$,
+  'Profile deletion can cascade to the master page without being blocked by the Owner guard'
+);
 select extensions.ok(
   not exists (select 1 from public.profiles where id = '10000000-0000-4000-8000-000000000003')
   and not exists (select 1 from public.company_members where profile_id = '10000000-0000-4000-8000-000000000003')
   and (select profile_id is null from public.masters where id = '30000000-0000-4000-8000-000000000001'),
-  'Auth deletion removes staff profile and membership while retaining the master page'
+  'Profile deletion removes staff membership while retaining the master page'
 );
 
 select * from extensions.finish();
