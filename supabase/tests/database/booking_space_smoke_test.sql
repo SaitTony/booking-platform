@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(40);
+select extensions.plan(41);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -314,6 +314,15 @@ select extensions.ok(
   'Profile deletion removes staff membership while retaining the master page'
 );
 
+
+select extensions.ok(
+  exists (
+    select 1 from pg_extension e
+    join pg_namespace n on n.oid = e.extnamespace
+    where e.extname = 'btree_gist' and n.nspname = 'extensions'
+  ),
+  'btree_gist is installed outside the exposed public schema'
+);
 
 -- New schema hardening: indexes, timestamp maintenance and RLS policy shape.
 select extensions.ok(
