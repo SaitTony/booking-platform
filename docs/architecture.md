@@ -137,7 +137,7 @@ RLS включён на всех основных таблицах `public`.
 
 Публичный доступ ограничен чтением активных публичных страниц, услуг, расписания и вызовом RPC для проверки слотов/создания бронирования. Доступ сотрудников определяется Owner/Admin/Master_pro/Master и принадлежностью к конкретному мастеру/компании.
 
-Вспомогательные SECURITY DEFINER-функции `is_owner`, `is_company_admin`, `can_manage_master`, `can_view_master` размещены в непубличной схеме `private`; доступ к ней предоставлен authenticated, но схема не выставлена через Data API. В `public` оставлены SECURITY INVOKER-обёртки для RLS и совместимости. Публичные `create_booking` и `get_available_slots` — намеренно доступные RPC для гостевого сценария бронирования; обе функции выполняют серверную валидацию. `cancel_booking` доступна authenticated и проверяет права внутри функции.
+Вспомогательные SECURITY DEFINER-функции `is_owner`, `is_company_admin`, `can_manage_master`, `can_view_master` размещены в непубличной схеме `private`; доступ к ней предоставлен authenticated, но схема не выставлена через Data API. В `public` оставлены SECURITY INVOKER-обёртки для RLS и совместимости. Публичные `create_booking` и `get_available_slots` — намеренно доступные RPC для гостевого сценария бронирования; обе функции выполняют серверную валидацию. `cancel_booking` доступна authenticated и проверяет права внутри функции. Для новых функций в `public` права `EXECUTE` больше не выдаются anon/authenticated автоматически: миграция должна явно выдать только необходимые разрешения.
 
 ### Edge Functions
 
