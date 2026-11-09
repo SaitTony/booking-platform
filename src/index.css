@@ -856,3 +856,30 @@
 /* Owner role preview is deliberately read-only */
 .admin-shell[data-preview-mode="true"] .admin-wide > :not(.admin-top):not(.admin-modal-backdrop){pointer-events:none;user-select:none}
 .admin-shell[data-preview-mode="true"] .admin-top .admin-branding p{font-weight:700}
+
+
+/* Web admin control refinements */
+.admin-shell .logout-button{font-size:14px;font-weight:700;padding:9px 15px;min-height:42px}
+.admin-shell .admin-settings-trigger{font-size:44px;width:46px;height:46px;min-height:46px}
+.admin-shell .account-settings-button{width:44px;height:44px;flex-basis:44px;font-size:40px}
+.admin-shell .account-settings-button span{font-size:40px;line-height:1}
+.admin-shell .account-save-button{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--admin-line,var(--line));border-radius:10px;background:var(--admin-accent,var(--accent));color:#fff;font-size:34px;font-weight:800;line-height:1;cursor:pointer}
+.admin-shell .account-save-button:disabled{background:#e4e6e8;border-color:#d5d9dd;color:#9aa1a8;cursor:not-allowed}
+.admin-shell .account-save-button span{transform:translateY(-1px)}
+.admin-shell .admin-account-settings-modal{gap:16px}
+.admin-shell .account-settings-list{display:grid;gap:0;border:1px solid var(--admin-line,var(--line));border-radius:13px;overflow:hidden;background:var(--admin-surface,var(--surface))}
+.admin-shell .account-setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 16px;border-bottom:1px solid var(--admin-line,var(--line))}
+.admin-shell .account-setting-row:last-child{border-bottom:0}
+.admin-shell .account-setting-row>div{display:grid;gap:4px;min-width:0}
+.admin-shell .account-setting-row strong{color:var(--admin-text,var(--text));font-size:14px}
+.admin-shell .account-setting-row span{color:var(--admin-muted,var(--muted));font-size:12px;line-height:1.4}
+.admin-shell .account-setting-row>button:not(.admin-switch){min-width:104px;min-height:38px;flex:0 0 auto}
+@media(max-width:700px){
+ .admin-shell .logout-button{font-size:13px;padding:8px 11px}
+ .admin-shell .admin-settings-trigger{font-size:38px;width:42px;height:42px}
+ .admin-shell .account-settings-button{width:42px;height:42px;flex-basis:42px}
+ .admin-shell .account-settings-button span{font-size:36px}
+ .admin-shell .account-save-button{width:42px;height:42px;flex-basis:42px}
+ .admin-shell .account-setting-row{gap:10px;padding:13px 12px}
+ .admin-shell .account-setting-row>button:not(.admin-switch){min-width:88px}
+}
