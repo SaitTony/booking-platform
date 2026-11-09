@@ -36,6 +36,60 @@ async function getFunctionErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback
 }
 
+
+const adminPalettes = [
+  {id:'natural',name:'Natural',desc:'Спокойный природный'},
+  {id:'graphite',name:'Graphite',desc:'Строгий минимализм'},
+  {id:'sand',name:'Sand',desc:'Тёплый премиум'},
+  {id:'green',name:'Deep Green',desc:'Современный салон'},
+  {id:'blue',name:'Midnight Blue',desc:'Технологичный'},
+  {id:'dark',name:'Dark',desc:'Тёмная тема'},
+] as const
+type AdminTheme = typeof adminPalettes[number]['id']
+
+type StaffRole = 'admin' | 'master' | 'master_pro'
+type AccountManagementRowProps = {
+  account: Account; companies: CompanyOption[]; pages: MasterOption[]; busy: boolean
+  onToggle: (account: Account) => void; onReset: (account: Account) => void; onDelete: (account: Account) => void
+  onSaveAssignment: (userId: string, role: StaffRole, companyId: string | null, masterId: string | null) => void
+  onSavePageName: (masterId: string, name: string) => void
+}
+function AccountManagementRow({account,companies,pages,busy,onToggle,onReset,onDelete,onSaveAssignment,onSavePageName}:AccountManagementRowProps) {
+  const membership=account.company_members?.[0]
+  const individualPage=pages.find(page=>page.kind==='individual'&&page.profile_id===account.id)
+  const currentRole:StaffRole|''=account.platform_role==='master_pro'?'master_pro':membership?.role??''
+  const [role,setRole]=useState<StaffRole|''>(currentRole)
+  const [companyId,setCompanyId]=useState(membership?.company_id??'')
+  const [masterId,setMasterId]=useState(membership?.master_id??individualPage?.id??'')
+  const [pageName,setPageName]=useState(individualPage?.display_name??'')
+  useEffect(()=>{
+    setRole(currentRole);setCompanyId(membership?.company_id??'')
+    setMasterId(membership?.master_id??individualPage?.id??'');setPageName(individualPage?.display_name??'')
+  },[account.id,currentRole,membership?.company_id,membership?.master_id,individualPage?.id,individualPage?.display_name])
+  const companyPages=pages.filter(page=>page.kind==='company'&&page.company_id===companyId&&(!page.profile_id||page.profile_id===account.id)&&page.is_active)
+  const individualPages=pages.filter(page=>page.kind==='individual'&&(!page.profile_id||page.profile_id===account.id)&&page.is_active)
+  const assignmentReady=role==='admin'?!!companyId:role==='master'?!!companyId&&!!masterId:role==='master_pro'?!!masterId:false
+  const selectedPage=pages.find(page=>page.id===masterId)
+  return <article className="admin-account admin-account-inline-row">
+    <div className="account-inline-fields">
+      <div className="account-inline-cell account-email-cell"><small>Email</small><strong>{account.email}</strong></div>
+      <div className="account-inline-cell account-phone-cell"><small>Телефон</small><strong>{account.phone_e164}</strong></div>
+      {account.platform_role==='owner'?<div className="account-inline-cell"><small>Роль</small><strong>Owner</strong></div>:<label className="account-inline-field"><small>Роль</small><select value={role} disabled={busy} onChange={event=>{const next=event.target.value as StaffRole|'';setRole(next);if(next==='master_pro'){setCompanyId('');setMasterId(individualPage?.id??individualPages[0]?.id??'')}else if(next==='master'&&!companyId){const first=companies.find(company=>company.is_active);setCompanyId(first?.id??'');setMasterId('')}else if(next==='admin'){setMasterId('')}}}><option value="">Не назначена</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>}
+      {(role==='admin'||role==='master')&&<label className="account-inline-field account-company-field"><small>Компания</small><select value={companyId} disabled={busy} onChange={event=>{setCompanyId(event.target.value);setMasterId('')}}><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
+      {role==='master'&&<label className="account-inline-field account-page-field"><small>Страница мастера</small><select value={masterId} disabled={busy||!companyId} onChange={event=>setMasterId(event.target.value)}><option value="">Выберите страницу</option>{companyPages.map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
+      {role==='master_pro'&&<><label className="account-inline-field account-page-field"><small>Страница</small><select value={masterId} disabled={busy} onChange={event=>{setMasterId(event.target.value);setPageName(pages.find(page=>page.id===event.target.value)?.display_name??'')}}><option value="">Выберите страницу</option>{individualPages.map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label><label className="account-inline-field account-page-name-field"><small>Название страницы</small><input value={pageName} disabled={busy||!masterId} onChange={event=>setPageName(event.target.value)} /></label></>}
+      {account.force_password_change&&<span className="account-force-change">Требуется смена пароля</span>}
+    </div>
+    {account.platform_role!=='owner'&&<div className="account-inline-actions">
+      <button type="button" className="primary-button" disabled={busy||!assignmentReady} onClick={()=>role&&onSaveAssignment(account.id,role,role==='master_pro'?null:companyId||null,role==='admin'?null:masterId||null)}>Сохранить роль и связь</button>
+      {role==='master_pro'&&selectedPage&&<button type="button" className="secondary-button" disabled={busy||!pageName.trim()||pageName.trim()===selectedPage.display_name} onClick={()=>onSavePageName(selectedPage.id,pageName)}>Сохранить название страницы</button>}
+      <button type="button" className={`admin-switch ${!account.disabled_at?'is-on':''}`} role="switch" aria-checked={!account.disabled_at} aria-label={account.disabled_at?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>onToggle(account)}><span/></button>
+      <button type="button" className="secondary-button" disabled={busy} onClick={()=>onReset(account)}>Сбросить пароль</button>
+      <button type="button" className="danger-button" disabled={busy} onClick={()=>onDelete(account)}>Удалить УЗ</button>
+    </div>}
+  </article>
+}
+
 const roleLabel = (profile: Account) => {
   if (profile.platform_role === 'owner') return 'Owner'
   if (profile.platform_role === 'master_pro') return 'Master_pro'
@@ -44,7 +98,7 @@ const roleLabel = (profile: Account) => {
 }
 
 export default function AdminApp() {
-  const [activeModal, setActiveModal] = useState<'account'|'accounts'|'reset'|'delete'|'company'|'masterPro'|null>(null)
+  const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'masterPro'|null>(null)
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>('overview')
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -75,6 +129,8 @@ export default function AdminApp() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [adminTheme,setAdminTheme]=useState<AdminTheme>(()=>{const saved=localStorage.getItem('workflows-admin-theme');return adminPalettes.some(item=>item.id===saved)?saved as AdminTheme:'natural'})
+
 
   async function loadProfile() {
     if (!supabase) return
@@ -183,7 +239,7 @@ export default function AdminApp() {
     else {
       setNotice('Учётная запись полностью удалена. История записей сохранена.')
       setDeleteTargetId('')
-      setActiveModal('accounts')
+      setActiveModal(null)
       await Promise.all([loadAccounts(), loadDirectories()])
     }
     setBusy(false)
@@ -244,6 +300,28 @@ export default function AdminApp() {
     const { error: assignError } = await supabase.functions.invoke('assign-user-role', { body })
     if (assignError) setError(assignError.message)
     else { setNotice('Роль и связь со страницей назначены.'); setSelectedUserId(''); setSelectedMasterId(''); await loadAccounts() }
+    setBusy(false)
+  }
+
+
+  async function saveAccountAssignment(userId:string, role:StaffRole, companyId:string|null, masterId:string|null) {
+    if(!supabase)return
+    if(role==='admin'&&!companyId){setError('Для Admin необходимо выбрать компанию.');return}
+    if(role==='master'&&(!companyId||!masterId)){setError('Для Master необходимо выбрать компанию и страницу мастера.');return}
+    if(role==='master_pro'&&!masterId){setError('Для Master_pro необходимо выбрать индивидуальную страницу.');return}
+    setBusy(true);setError('');setNotice('')
+    const {error:assignError}=await supabase.functions.invoke('assign-user-role',{body:{userId,role,companyId:role==='master_pro'?null:companyId,masterId:role==='admin'?null:masterId}})
+    if(assignError)setError(await getFunctionErrorMessage(assignError,'Не удалось изменить роль или привязку учётной записи.'))
+    else{setNotice('Роль и принадлежность учётной записи обновлены.');await Promise.all([loadAccounts(),loadDirectories()])}
+    setBusy(false)
+  }
+
+  async function saveMasterPageName(masterId:string,name:string) {
+    if(!supabase||!name.trim())return
+    setBusy(true);setError('');setNotice('')
+    const {error:updateError}=await supabase.from('masters').update({display_name:name.trim()}).eq('id',masterId)
+    if(updateError)setError(updateError.message)
+    else{setNotice('Название страницы обновлено.');await loadDirectories()}
     setBusy(false)
   }
 
@@ -319,7 +397,7 @@ export default function AdminApp() {
   if (profile.disabled_at) return <main className="admin-shell"><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
   if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell"><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
-  return <main className="admin-shell"><section className="admin-wide">
+  return <main className="admin-shell" data-admin-theme={adminTheme}><section className="admin-wide">
     <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
     {notice && <p className="admin-notice">{notice}</p>}{error && !activeModal && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' ? <>
@@ -334,19 +412,31 @@ export default function AdminApp() {
         <div className="admin-main-content">
           {activeSection==='overview' && <section className="admin-overview">
             <h2>Обзор системы</h2>
+            <section className="admin-theme-picker">
+              <div className="admin-theme-heading"><div><span className="eyebrow">ОФОРМЛЕНИЕ ПАНЕЛИ</span><h3>Цветовая тема</h3><p>Выберите палитру, которая будет использоваться в административной панели.</p></div><span className="admin-theme-current">{adminPalettes.find(item=>item.id===adminTheme)?.name}</span></div>
+              <div className="theme-options admin-theme-options">{adminPalettes.map(item=><button type="button" key={item.id} className={`theme-option ${adminTheme===item.id?'active':''}`} onClick={()=>{setAdminTheme(item.id);localStorage.setItem('workflows-admin-theme',item.id)}}><span className={`palette palette-${item.id}`}><i/><i/><i/><i/></span><span><b>{item.name}</b><small>{item.desc}</small></span>{adminTheme===item.id&&<em>✓</em>}</button>)}</div>
+            </section>
             <section className="admin-stats" aria-label="Сводная статистика">
               <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>{accounts.filter(account=>!account.disabled_at).length} активных</small></article>
               <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных</small></article>
               <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
             </section>
           </section>}
-      {activeSection==='accounts' && <section className="admin-accordion admin-panel-section">
-        <header className="admin-panel-heading"><h2>Учётные записи</h2><span className="accordion-count">{accounts.length}</span></header>
-        <div className="accordion-content">
-          <div className="admin-action-grid">
-            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ и сразу назначить роль</small></button>
-            <button className="admin-action-card" onClick={()=>setActiveModal('accounts')}><span className="admin-action-icon">☷</span><strong>Все пользователи</strong><small>Открыть список и управление учётными записями</small></button>
+      {activeSection==='accounts' && <section className="admin-accounts-workspace">
+        <header className="admin-accounts-toolbar">
+          <button className="primary-button admin-create-account-button" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}}><span>＋</span> Создать УЗ</button>
+          <div className="admin-account-stats">
+            <div className="admin-account-stat"><small>Всего УЗ</small><strong>{accounts.length}</strong></div>
+            <div className="admin-account-stat"><small>Активно УЗ</small><strong>{accounts.filter(account=>!account.disabled_at).length}</strong></div>
           </div>
+        </header>
+        <div className="admin-account-list admin-account-list-inline">
+          {accounts.length?accounts.map(account=><AccountManagementRow key={account.id} account={account} companies={companies} pages={masterPages} busy={busy}
+            onToggle={item=>void toggleAccountStatus(item)}
+            onReset={item=>{setResetUserId(item.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}
+            onDelete={item=>{setDeleteTargetId(item.id);setActiveModal('delete')}}
+            onSaveAssignment={(userId,role,companyId,masterId)=>void saveAccountAssignment(userId,role,companyId,masterId)}
+            onSavePageName={(masterId,name)=>void saveMasterPageName(masterId,name)}/>):<p className="admin-empty">Учётных записей пока нет.</p>}
         </div>
       </section>}
 
@@ -464,27 +554,15 @@ export default function AdminApp() {
           <p className="admin-modal-intro">После первого входа сотрудник должен будет задать собственный пароль.</p>
           <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)||!createRole||(createRole==='admin'&&!companyName.trim())||(createRole==='master'&&!createCompanyId)}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
-        {activeModal==='accounts'&&<div className="admin-modal-account-list">
-          <h2 id="admin-modal-title">Все учётные записи</h2>
-          <p className="admin-modal-intro">Здесь можно управлять доступом, сбрасывать пароли и удалять учётные записи.</p>
-          <div className="admin-account-list">{accounts.map(account=><article className="admin-account admin-account-manage-row" key={account.id}>
-            <div className="account-main"><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span><span>{roleLabel(account)}{account.force_password_change?' · требуется смена пароля':''}</span><span>{accountRelationLabel(account)}</span></div>
-            {account.platform_role!=='owner'&&<div className="account-controls">
-              <button type="button" className={`admin-switch ${!account.disabled_at?'is-on':''}`} role="switch" aria-checked={!account.disabled_at} aria-label={account.disabled_at?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>void toggleAccountStatus(account)}><span/></button>
-              <button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(account.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить пароль</button>
-              <button type="button" className="danger-button" disabled={busy} onClick={()=>{setDeleteTargetId(account.id);setActiveModal('delete')}}>Удалить УЗ</button>
-            </div>}
-          </article>)}</div>
-        </div>}
         {activeModal==='delete'&&<div>
           <h2 id="admin-modal-title">Удалить учётную запись?</h2>
           <p className="admin-modal-intro">Будет безвозвратно удалён пользователь <strong>{accounts.find(account=>account.id===deleteTargetId)?.full_name??''}</strong>, его запись профиля и данные авторизации. История записей клиентов сохранится.</p>
-          <div className="admin-modal-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>setActiveModal('accounts')}>Отмена</button><button type="button" className="danger-button" disabled={busy} onClick={()=>void deleteAccount()}>{busy?'Удаляем…':'Да, удалить УЗ'}</button></div>
+          <div className="admin-modal-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>setActiveModal(null)}>Отмена</button><button type="button" className="danger-button" disabled={busy} onClick={()=>void deleteAccount()}>{busy?'Удаляем…':'Да, удалить УЗ'}</button></div>
         </div>}
         {activeModal==='reset'&&<form onSubmit={resetUserAccess}>
           <h2 id="admin-modal-title">Сбросить пароль</h2><p className="admin-modal-intro">Для пользователя <strong>{accounts.find(account=>account.id===resetUserId)?.full_name??''}</strong> будет установлен временный пароль. При следующем входе его нужно будет сменить.</p>
           <label className="admin-field">Новый временный пароль<input type="text" autoComplete="new-password" minLength={6} value={resetTemporaryPassword} onChange={e=>setResetTemporaryPassword(e.target.value)} required/></label>
-          <div className="admin-modal-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>setActiveModal('accounts')}>Назад</button><button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button></div>
+          <div className="admin-modal-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>setActiveModal(null)}>Назад</button><button className="primary-button" disabled={busy||!resetUserId}>Сбросить пароль</button></div>
         </form>}
         {activeModal==='company'&&<form onSubmit={createCompany}>
           <h2 id="admin-modal-title">Создать компанию</h2><p className="admin-modal-intro">Создайте отдельное пространство компании. После этого можно добавить сотрудников и страницы мастеров.</p>
