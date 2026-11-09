@@ -46,7 +46,7 @@ export default function StaffWorkspace({profile,kindFilter,companyIdFilter,readO
     const {data,error:queryError}=await query.order('display_name')
     if(queryError){setError(queryError.message);return}
     setMasters((data??[]) as Master[])
-    if(!masterId&&data?.[0])setMasterId(data[0].id)
+    setMasterId(data?.[0]?.id??'')
   }
 
   async function loadMasterData(id:string){
