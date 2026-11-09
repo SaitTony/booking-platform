@@ -11,3 +11,15 @@ verify_jwt = true
 
 [functions.owner-reset-access]
 verify_jwt = true
+
+[functions.owner-set-account-status]
+verify_jwt = true
+
+[functions.owner-delete-user]
+verify_jwt = true
+
+[functions.owner-update-account-name]
+verify_jwt = true
+
+[functions.owner-delete-company]
+verify_jwt = true
