@@ -1405,3 +1405,68 @@
 .admin-shell .companies-prototype .ap-toolbar{margin-top:-3px}
 @media(max-width:850px){.admin-shell .ap-company-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:560px){.admin-shell .ap-company-stats{grid-template-columns:1fr}.admin-shell .ap-company-stats article{padding:11px 13px}}
+
+
+/* Fix shared account/company settings modal layout in the prototype workspace. */
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:0;
+  padding:0;
+  overflow:hidden;
+}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-settings-field{
+  display:grid;
+  grid-template-columns:minmax(190px,230px) minmax(0,1fr);
+  align-items:center;
+  gap:14px;
+  grid-column:1;
+  min-width:0;
+  margin:0;
+  padding:12px 14px;
+  border:0;
+  border-bottom:1px solid var(--ap-line);
+  font-size:13px;
+}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-settings-field input,
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-settings-field select,
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-settings-field textarea{
+  width:100%;
+  min-width:0;
+  margin:0;
+}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-settings-field textarea{
+  min-height:84px;
+  resize:vertical;
+}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-setting-row{
+  grid-column:1;
+  border:0;
+  border-bottom:1px solid var(--ap-line);
+  border-radius:0;
+  background:#fff;
+}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-setting-row:last-child{border-bottom:0}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-page-url{
+  margin-top:10px;
+}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-page-url>.admin-field{
+  display:grid;
+  grid-template-columns:minmax(190px,230px) minmax(0,1fr);
+  align-items:center;
+  gap:14px;
+  margin:0;
+}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-page-url input{
+  width:100%;
+  min-width:0;
+  margin:0;
+}
+@media(max-width:700px){
+  .admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-settings-field,
+  .admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-page-url>.admin-field{
+    grid-template-columns:minmax(0,1fr);
+    gap:7px;
+  }
+  .admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list>.account-settings-field small{grid-column:1}
+}
