@@ -51,18 +51,6 @@ export default function MasterProBuilder() {
     if(file){setter(URL.createObjectURL(file));setSaved(false)}
   }
 
-  
-    {id:'design',number:'02',title:'Оформление',sub:'Обложка и цветовая тема'},
-    {id:'services',number:'03',title:'Услуги',sub:'Каталог, цены и длительность'},
-    {id:'schedule',number:'04',title:'Расписание',sub:'Рабочие дни и часы'},
-    {id:'settings',number:'05',title:'Настройки записи',sub:'Часовой пояс и горизонт'},
-  ]
-
-  function addService(){
-    if(!newService.name.trim())return
-    const item={id:Date.now(),name:newService.name.trim(),description:newService.description,duration:Math.max(1,Number(newService.duration)||60),price:Math.max(0,Number(newService.price)||0),active:true}
-    setServices(current=>[...current,item]);setSelectedService(item.id);setNewService({name:'',description:'',duration:'60',price:'0'});setSaved(false)
-  }
 
   return <main className="mpb-shell">
     <header className="mpb-topbar">
