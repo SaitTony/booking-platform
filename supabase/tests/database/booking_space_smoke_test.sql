@@ -238,7 +238,7 @@ select extensions.throws_ok(
     ((((now() at time zone 'UTC')::date + 2)::timestamp + time '10:10') at time zone 'UTC'),
     'Bad Phone', '12345', true
   )$$,
-  'P0001', 'Телефон должен быть в формате E.164',
+  'P0001', 'Телефон должен содержать +7 и ровно 10 цифр после кода страны',
   'Booking requires an E.164 phone number'
 );
 
