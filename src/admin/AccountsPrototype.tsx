@@ -31,7 +31,6 @@ type Props = {
   onCreate: () => void
   onSettings: (account: Account) => void
   onToggle: (account: Account) => void
-  onRefresh: () => void
 }
 
 type Tab = 'all' | 'pro' | 'staff'
@@ -43,11 +42,12 @@ function roleOf(account: Account) {
   return role === 'admin' ? 'Admin' : role === 'master' ? 'Master' : 'Не назначена'
 }
 
-export default function AccountsPrototype({ accounts, companies, pages, loading, busy, onCreate, onSettings, onToggle, onRefresh }: Props) {
+export default function AccountsPrototype({ accounts, companies, pages, loading, busy, onCreate, onSettings, onToggle,  }: Props) {
   const [tab, setTab] = useState<Tab>('all')
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [companyFilter, setCompanyFilter] = useState('')
 
   const visibleAccounts = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('ru')
@@ -58,6 +58,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
         || (tab === 'staff' && account.platform_role !== 'master_pro'))
       .filter(account => !roleFilter || roleOf(account) === roleFilter)
       .filter(account => !statusFilter || (statusFilter === 'active' ? !account.disabled_at : !!account.disabled_at))
+      .filter(account => !companyFilter || account.company_members?.some(member => member.company_id === companyFilter))
       .filter(account => {
         if (!query) return true
         const membership = account.company_members?.[0]
@@ -66,11 +67,10 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
         return [account.full_name, account.email, account.phone_e164, roleOf(account), company?.name, page?.display_name]
           .some(value => String(value ?? '').toLocaleLowerCase('ru').includes(query))
       })
-  }, [accounts, companies, pages, tab, search, roleFilter, statusFilter])
+  }, [accounts, companies, pages, tab, search, roleFilter, statusFilter, companyFilter])
 
   const staffCount = accounts.filter(account => account.platform_role !== 'owner' && account.platform_role !== 'master_pro').length
   const proCount = accounts.filter(account => account.platform_role === 'master_pro').length
-  const activeCount = accounts.filter(account => account.platform_role !== 'owner' && !account.disabled_at).length
   const allCount = accounts.filter(account => account.platform_role !== 'owner').length
 
   function accountPlace(account: Account) {
@@ -89,13 +89,6 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
       <button type="button" className="ap-primary" onClick={onCreate}>＋ Создать УЗ</button>
     </header>
 
-    <div className="ap-stats">
-      <article><span>Всего УЗ</span><strong>{allCount}</strong><small>Без учётной записи Owner</small></article>
-      <article><span>Активно УЗ</span><strong>{activeCount}</strong><small>Доступ не отключён</small></article>
-      <article><span>Мастера_pro</span><strong>{proCount}</strong><small>Индивидуальные специалисты</small></article>
-      <article><span>Сотрудники компаний</span><strong>{staffCount}</strong><small>Admin и Master</small></article>
-    </div>
-
     <div className="ap-toolbar">
       <label className="ap-search"><span aria-hidden="true">⌕</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Поиск по имени, email, телефону…" aria-label="Поиск учётных записей"/></label>
       <select value={roleFilter} onChange={event => setRoleFilter(event.target.value)} aria-label="Фильтр по роли">
@@ -104,7 +97,9 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
       <select value={statusFilter} onChange={event => setStatusFilter(event.target.value)} aria-label="Фильтр по статусу">
         <option value="">Любой статус</option><option value="active">Активные</option><option value="disabled">Отключённые</option>
       </select>
-      <button type="button" className="ap-secondary" onClick={onRefresh} disabled={loading || busy}>{loading ? 'Обновляем…' : '↻ Обновить'}</button>
+      <select value={companyFilter} onChange={event => setCompanyFilter(event.target.value)} aria-label="Фильтр по компании">
+        <option value="">Все компании</option>{companies.map(company => <option key={company.id} value={company.id}>{company.name}</option>)}
+      </select>
     </div>
 
     <nav className="ap-tabs" aria-label="Категории учётных записей">
@@ -127,7 +122,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
             <span><i className={'ap-role ap-role-' + roleOf(account).toLowerCase().replace(/[^a-z]+/g, '-')}>{roleOf(account)}</i></span>
             <span className="ap-place" title={accountPlace(account)}>{accountPlace(account)}</span>
             <span><button type="button" className={'ap-switch ' + (!account.disabled_at ? 'is-on' : '')} role="switch" aria-checked={!account.disabled_at} aria-label={account.disabled_at ? 'Включить учётную запись' : 'Отключить учётную запись'} disabled={busy} onClick={() => onToggle(account)}><span/></button></span>
-            <span><button type="button" className="ap-gear" title="Настройки учётной записи" aria-label={'Настройки ' + account.full_name} disabled={busy} onClick={() => onSettings(account)}>⚙</button></span>
+            <span><button type="button" className="ap-gear" title="Действия с учётной записью" aria-label={'Действия для ' + account.full_name} disabled={busy} onClick={() => onSettings(account)}><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.25"/><circle cx="8" cy="8" r="1.25"/><circle cx="13" cy="8" r="1.25"/></svg></button></span>
           </div>)}
       </div>
       <footer className="ap-footer">Данные загружаются из Workflows · Supabase · Изменения выполняются через существующие защищённые функции</footer>
