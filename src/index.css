@@ -1021,3 +1021,104 @@
 .admin-shell .ap-footer{border-top:1px solid var(--ap-line);padding:10px 13px;color:var(--ap-muted);font-size:10px}
 @media(max-width:850px){.admin-shell .ap-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-shell .ap-heading h2{font-size:22px}}
 @media(max-width:560px){.admin-shell .ap-heading{align-items:flex-start;flex-direction:column}.admin-shell .ap-primary{width:100%}.admin-shell .ap-toolbar{align-items:stretch}.admin-shell .ap-search{flex-basis:100%}.admin-shell .ap-toolbar select{flex:1;min-width:0}.admin-shell .ap-secondary{flex:1}}
+
+/* Prototype-only GitHub Actions workspace skin. All selectors are isolated from /admin. */
+.admin-shell[data-prototype-mode="true"]{
+  --ap-bg:#f6f8fa;--ap-surface:#ffffff;--ap-soft:#f6f8fa;--ap-line:#d0d7de;
+  --ap-text:#1f2328;--ap-muted:#59636e;--ap-accent:#0969da;
+  background:var(--ap-bg);color:var(--ap-text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  padding:28px 24px 48px;
+}
+.admin-shell[data-prototype-mode="true"] .admin-wide{width:min(1440px,100%);max-width:1440px}
+.admin-shell[data-prototype-mode="true"] .admin-top{align-items:center;padding:0 0 20px;border-bottom:1px solid var(--ap-line)}
+.admin-shell[data-prototype-mode="true"] .admin-branding .eyebrow{color:var(--ap-muted);font-size:11px;letter-spacing:.1em}
+.admin-shell[data-prototype-mode="true"] .admin-top h1{font-size:24px;letter-spacing:-.025em;margin:5px 0}
+.admin-shell[data-prototype-mode="true"] .admin-top p{font-size:12px;margin:0;color:var(--ap-muted)}
+.admin-shell[data-prototype-mode="true"] .admin-top-actions{gap:8px}
+.admin-shell[data-prototype-mode="true"] .admin-top-actions .secondary-button,.admin-shell[data-prototype-mode="true"] .admin-top-actions .logout-button{width:auto;min-height:34px;padding:6px 12px;border:1px solid var(--ap-line);border-radius:6px;background:#fff;color:var(--ap-text);font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-top-actions .admin-settings-trigger{width:36px;height:36px;min-height:36px;padding:0;font-size:20px}
+.admin-shell[data-prototype-mode="true"] .admin-workspace-layout{display:block;margin-top:18px}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav{display:flex;align-items:center;gap:22px;min-height:48px;margin:0 0 22px;padding:0 2px;border-bottom:1px solid var(--ap-line);overflow-x:auto}
+.admin-shell[data-prototype-mode="true"] .ap-nav-label{align-self:center;margin-right:4px;color:var(--ap-muted);font-size:10px;font-weight:700;letter-spacing:.1em;white-space:nowrap}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button{display:flex;align-items:center;gap:8px;min-height:48px;margin:0 0 -1px;padding:0 3px 1px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--ap-muted);font:500 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;white-space:nowrap;cursor:pointer}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button>span{font-size:15px;color:inherit}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button:hover{color:var(--ap-text)}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button.active{border-bottom-color:#fd8c73;color:var(--ap-text);font-weight:650}
+.admin-shell[data-prototype-mode="true"] .admin-main-content{display:grid;gap:18px;min-width:0}
+.admin-shell[data-prototype-mode="true"] .admin-main-content h2{font-size:22px;letter-spacing:-.02em;color:var(--ap-text)}
+.admin-shell[data-prototype-mode="true"] .admin-main-content h3{font-size:15px;color:var(--ap-text)}
+.admin-shell[data-prototype-mode="true"] .admin-overview{display:grid;gap:15px}
+.admin-shell[data-prototype-mode="true"] .admin-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.admin-shell[data-prototype-mode="true"] .admin-stat-card{padding:16px 18px;border:1px solid var(--ap-line);border-radius:7px;background:var(--ap-surface);box-shadow:none}
+.admin-shell[data-prototype-mode="true"] .admin-stat-card span,.admin-shell[data-prototype-mode="true"] .admin-stat-card small{color:var(--ap-muted);font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-stat-card strong{font-size:27px;color:var(--ap-text);font-variant-numeric:tabular-nums}
+.admin-shell[data-prototype-mode="true"] .admin-panel-section,.admin-shell[data-prototype-mode="true"] .admin-accordion{display:grid;gap:14px;min-width:0}
+.admin-shell[data-prototype-mode="true"] .admin-panel-heading{display:flex;align-items:center;gap:10px;padding:0 0 12px;border-bottom:1px solid var(--ap-line)}
+.admin-shell[data-prototype-mode="true"] .admin-panel-heading h2{margin:0;font-size:22px}
+.admin-shell[data-prototype-mode="true"] .accordion-count{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 7px;border-radius:12px;background:#eff1f3;color:var(--ap-muted);font-size:11px}
+.admin-shell[data-prototype-mode="true"] .accordion-content{display:grid;gap:12px;padding:12px 0}
+.admin-shell[data-prototype-mode="true"] .admin-subaccordion,.admin-shell[data-prototype-mode="true"] .admin-company-item{border:1px solid var(--ap-line);border-radius:7px;background:var(--ap-surface);overflow:hidden}
+.admin-shell[data-prototype-mode="true"] .admin-subaccordion>summary,.admin-shell[data-prototype-mode="true"] .admin-company-item>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:10px 14px;background:#f6f8fa;color:var(--ap-text);font-size:13px;font-weight:600;cursor:pointer;list-style:none}
+.admin-shell[data-prototype-mode="true"] .admin-subaccordion>summary::-webkit-details-marker,.admin-shell[data-prototype-mode="true"] .admin-company-item>summary::-webkit-details-marker{display:none}
+.admin-shell[data-prototype-mode="true"] .admin-subaccordion>summary:after,.admin-shell[data-prototype-mode="true"] .admin-company-item>summary:after{content:"⌄";color:var(--ap-muted);font-size:14px}
+.admin-shell[data-prototype-mode="true"] .admin-subaccordion[open]>summary,.admin-shell[data-prototype-mode="true"] .admin-company-item[open]>summary{border-bottom:1px solid var(--ap-line)}
+.admin-shell[data-prototype-mode="true"] .admin-company-item .accordion-content,.admin-shell[data-prototype-mode="true"] .admin-subaccordion>.accordion-content{padding:14px}
+.admin-shell[data-prototype-mode="true"] .accordion-meta{margin-left:auto;color:var(--ap-muted);font-size:11px;font-weight:400}
+.admin-shell[data-prototype-mode="true"] .admin-card,.admin-shell[data-prototype-mode="true"] .admin-main-content .workspace-section,.admin-shell[data-prototype-mode="true"] .admin-main-content .workspace{max-width:none;border:1px solid var(--ap-line);border-radius:7px;background:var(--ap-surface);box-shadow:none}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .admin-card{padding:18px}
+.admin-shell[data-prototype-mode="true"] .admin-account{padding:12px 14px;border:1px solid var(--ap-line);border-radius:6px;background:var(--ap-surface);font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-account>div span{font-size:11px;color:var(--ap-muted)}
+.admin-shell[data-prototype-mode="true"] .admin-role{border:1px solid var(--ap-line);border-radius:20px;background:#f6f8fa;color:var(--ap-muted);font-size:10px}
+.admin-shell[data-prototype-mode="true"] .admin-create-form,.admin-shell[data-prototype-mode="true"] .nested-form{padding:16px;border:1px solid var(--ap-line);border-radius:7px;background:#fff}
+.admin-shell[data-prototype-mode="true"] .admin-field{gap:6px;margin:12px 0;color:var(--ap-text);font-size:12px;font-weight:600}
+.admin-shell[data-prototype-mode="true"] .admin-field input,.admin-shell[data-prototype-mode="true"] .admin-field select,.admin-shell[data-prototype-mode="true"] .admin-field textarea,.admin-shell[data-prototype-mode="true"] input:not([type="checkbox"]),.admin-shell[data-prototype-mode="true"] select,.admin-shell[data-prototype-mode="true"] textarea{min-height:36px;padding:7px 10px;border:1px solid var(--ap-line);border-radius:6px;background:#fff;color:var(--ap-text);font:400 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:none}
+.admin-shell[data-prototype-mode="true"] .admin-field textarea{min-height:78px}
+.admin-shell[data-prototype-mode="true"] .admin-field input:focus,.admin-shell[data-prototype-mode="true"] .admin-field select:focus,.admin-shell[data-prototype-mode="true"] .admin-field textarea:focus{outline:2px solid #0969da55;outline-offset:0;border-color:#0969da}
+.admin-shell[data-prototype-mode="true"] .primary-button,.admin-shell[data-prototype-mode="true"] .secondary-button,.admin-shell[data-prototype-mode="true"] .danger-button,.admin-shell[data-prototype-mode="true"] .admin-action-card{width:auto;min-height:34px;padding:7px 12px;border:1px solid var(--ap-line);border-radius:6px;background:#fff;color:var(--ap-text);font:600 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:none}
+.admin-shell[data-prototype-mode="true"] .primary-button{border-color:#1f883d;background:#1f883d;color:#fff}
+.admin-shell[data-prototype-mode="true"] .primary-button:hover{background:#1a7f37}
+.admin-shell[data-prototype-mode="true"] .secondary-button:hover,.admin-shell[data-prototype-mode="true"] .admin-action-card:hover{background:#f3f4f6}
+.admin-shell[data-prototype-mode="true"] .danger-button{border-color:#d1242f;background:#fff;color:#cf222e}
+.admin-shell[data-prototype-mode="true"] .admin-action-card{display:flex;align-items:center;gap:12px;text-align:left}
+.admin-shell[data-prototype-mode="true"] .admin-action-card small{color:var(--ap-muted)}
+.admin-shell[data-prototype-mode="true"] .admin-notice{border:1px solid #a6d8b5;border-radius:6px;background:#dafbe1;color:#1a7f37;font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-error{border:1px solid #ffcecb;border-radius:6px;background:#ffebe9;color:#cf222e;font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-modal-backdrop{z-index:1000;background:rgba(31,35,40,.55);backdrop-filter:blur(2px);padding:20px}
+.admin-shell[data-prototype-mode="true"] .admin-modal{width:min(760px,96vw);max-height:88vh;overflow:auto;padding:24px;border:1px solid var(--ap-line);border-radius:10px;background:#fff;color:var(--ap-text);box-shadow:0 16px 48px rgba(31,35,40,.22)}
+.admin-shell[data-prototype-mode="true"] .admin-modal .eyebrow{color:var(--ap-muted);font-size:10px;letter-spacing:.1em}
+.admin-shell[data-prototype-mode="true"] .admin-modal h2{margin:0 0 8px;font-size:20px;letter-spacing:-.02em}
+.admin-shell[data-prototype-mode="true"] .admin-modal-intro{color:var(--ap-muted);font-size:12px;line-height:1.55}
+.admin-shell[data-prototype-mode="true"] .admin-modal-close{top:12px;right:14px;width:30px;height:30px;border:1px solid var(--ap-line);border-radius:6px;background:#fff;color:var(--ap-muted);font-size:20px}
+.admin-shell[data-prototype-mode="true"] .admin-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.admin-shell[data-prototype-mode="true"] .admin-modal-actions button{width:auto;min-width:100px}
+.admin-shell[data-prototype-mode="true"] .admin-theme-picker,.admin-shell[data-prototype-mode="true"] .admin-preview-settings,.admin-shell[data-prototype-mode="true"] .account-settings-list,.admin-shell[data-prototype-mode="true"] .account-setting-row{border-color:var(--ap-line);border-radius:7px;background:#fff}
+.admin-shell[data-prototype-mode="true"] .admin-preview-settings{padding:15px}
+.admin-shell[data-prototype-mode="true"] .admin-theme-options{gap:8px}
+.admin-shell[data-prototype-mode="true"] .admin-theme-options .theme-option{border:1px solid var(--ap-line);border-radius:6px;background:#fff}
+.admin-shell[data-prototype-mode="true"] .admin-theme-options .theme-option.active{border-color:#0969da;box-shadow:0 0 0 1px #0969da}
+.admin-shell[data-prototype-mode="true"] .workspace{gap:14px;margin-top:12px}
+.admin-shell[data-prototype-mode="true"] .workspace-section h3{margin-bottom:12px}
+.admin-shell[data-prototype-mode="true"] .workspace-service-form{gap:0 12px}
+.admin-shell[data-prototype-mode="true"] .workspace-hour-row,.admin-shell[data-prototype-mode="true"] .workspace-exception{border-color:var(--ap-line);background:#fff}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-tabs{border-color:var(--ap-line)}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table{border-color:var(--ap-line);border-radius:7px}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading,.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-grid-head{background:#f6f8fa}
+.admin-shell[data-prototype-mode="true"] button:focus-visible{outline:2px solid #0969da;outline-offset:2px}
+@media(max-width:900px){
+ .admin-shell[data-prototype-mode="true"]{padding:20px 14px 36px}
+ .admin-shell[data-prototype-mode="true"] .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-shell[data-prototype-mode="true"] .ap-primary-nav{gap:16px}
+ .admin-shell[data-prototype-mode="true"] .ap-nav-label{display:none}
+}
+@media(max-width:600px){
+ .admin-shell[data-prototype-mode="true"] .admin-top{align-items:flex-start}
+ .admin-shell[data-prototype-mode="true"] .admin-top h1{font-size:20px}
+ .admin-shell[data-prototype-mode="true"] .admin-top-actions{flex-wrap:wrap}
+ .admin-shell[data-prototype-mode="true"] .ap-primary-nav{gap:14px;margin-bottom:16px}
+ .admin-shell[data-prototype-mode="true"] .ap-primary-nav button{font-size:12px}
+ .admin-shell[data-prototype-mode="true"] .admin-stats{grid-template-columns:1fr}
+ .admin-shell[data-prototype-mode="true"] .admin-main-content .admin-card{padding:14px}
+ .admin-shell[data-prototype-mode="true"] .admin-modal{padding:20px 16px}
+ .admin-shell[data-prototype-mode="true"] .admin-modal-actions{flex-wrap:wrap}
+ .admin-shell[data-prototype-mode="true"] .admin-modal-actions button{flex:1}
+}
