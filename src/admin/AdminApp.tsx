@@ -507,7 +507,7 @@ export default function AdminApp() {
           {activeSection==='overview' && <section className="admin-overview">
             <h2>Обзор системы</h2>
             <section className="admin-stats" aria-label="Сводная статистика">
-              <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.length}</strong><small>{accounts.filter(account=>!account.disabled_at).length} активных</small></article>
+              <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.filter(account=>account.platform_role!=='owner').length}</strong><small>{accounts.filter(account=>account.platform_role!=='owner'&&!account.disabled_at).length} активных</small></article>
               <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных</small></article>
               <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
             </section>
@@ -517,8 +517,8 @@ export default function AdminApp() {
         <header className="admin-accounts-toolbar">
           <button className="primary-button admin-create-account-button" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}}><span>＋</span> Создать УЗ</button>
           <div className="admin-account-stats">
-            <div className="admin-account-stat"><small>Всего УЗ</small><strong>{accounts.length}</strong></div>
-            <div className="admin-account-stat"><small>Активно УЗ</small><strong>{accounts.filter(account=>!account.disabled_at).length}</strong></div>
+            <div className="admin-account-stat"><small>Всего УЗ</small><strong>{accounts.filter(account=>account.platform_role!=='owner').length}</strong></div>
+            <div className="admin-account-stat"><small>Активно УЗ</small><strong>{accounts.filter(account=>account.platform_role!=='owner'&&!account.disabled_at).length}</strong></div>
           </div>
         </header>
         <div className="admin-account-groups">
