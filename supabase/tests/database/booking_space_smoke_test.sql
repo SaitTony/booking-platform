@@ -295,12 +295,13 @@ select extensions.throws_ok(
 );
 reset role;
 set local role supabase_auth_admin;
-update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001';
+delete from auth.users where id = '10000000-0000-4000-8000-000000000003';
 reset role;
-select extensions.is(
-  (select profile_id from public.masters where id = '30000000-0000-4000-8000-000000000001'),
-  null::uuid,
-  'Auth internal cascade can detach profile ownership'
+select extensions.ok(
+  not exists (select 1 from public.profiles where id = '10000000-0000-4000-8000-000000000003')
+  and not exists (select 1 from public.company_members where profile_id = '10000000-0000-4000-8000-000000000003')
+  and (select profile_id is null from public.masters where id = '30000000-0000-4000-8000-000000000001'),
+  'Auth deletion removes staff profile and membership while retaining the master page'
 );
 
 select * from extensions.finish();
