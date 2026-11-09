@@ -142,17 +142,29 @@ export default function AdminApp() {
 
 
   async function loadProfile() {
-    if (!supabase) return
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setProfile(null); setSessionReady(true); return }
-    const { data, error: profileError } = await supabase.from('profiles')
-      .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
-      .eq('id', user.id).maybeSingle()
-    if (profileError) setError(profileError.message)
-    setProfile(data as Profile | null)
-    const membership=(data as Profile | null)?.company_members?.[0]
-    if(membership){setPageCompanyId(membership.company_id);if(membership.role==='admin')setPageKind('company')}
-    setSessionReady(true)
+    if (!supabase) { setSessionReady(true); return }
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError) throw userError
+      if (!user) { setProfile(null); return }
+      const { data, error: profileError } = await supabase.from('profiles')
+        .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
+        .eq('id', user.id).maybeSingle()
+      if (profileError) throw profileError
+      setProfile(data as Profile | null)
+      const membership=(data as Profile | null)?.company_members?.[0]
+      if(membership){setPageCompanyId(membership.company_id);if(membership.role==='admin')setPageKind('company')}
+      else setProfile(data as Profile | null)
+      setError('')
+    } catch (profileLoadError) {
+      console.error('Workflows profile load failed', profileLoadError)
+      setProfile(null)
+      setError(profileLoadError instanceof Error
+        ? `Не удалось загрузить профиль: ${profileLoadError.message}`
+        : 'Не удалось загрузить профиль. Обновите страницу и попробуйте снова.')
+    } finally {
+      setSessionReady(true)
+    }
   }
 
   async function loadDirectories() {
