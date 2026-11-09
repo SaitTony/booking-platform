@@ -16,6 +16,11 @@ type Profile = {
   company_members?: Member[]
 }
 type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }
+
+function normalizeMembers(value: Member[] | Member | null | undefined): Member[] {
+  if (Array.isArray(value)) return value
+  return value ? [value] : []
+}
 type CompanyOption = { id: string; name: string; slug: string; is_active: boolean }
 type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
@@ -151,8 +156,9 @@ export default function AdminApp() {
         .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
         .eq('id', user.id).maybeSingle()
       if (profileError) throw profileError
-      setProfile(data as Profile | null)
-      const membership=(data as Profile | null)?.company_members?.[0]
+      const normalizedProfile = data ? { ...data, company_members: normalizeMembers((data as Profile).company_members) } as Profile : null
+      setProfile(normalizedProfile)
+      const membership=normalizedProfile?.company_members?.[0]
       if(membership){setPageCompanyId(membership.company_id);if(membership.role==='admin')setPageKind('company')}
       setError('')
     } catch (profileLoadError) {
@@ -182,7 +188,10 @@ export default function AdminApp() {
       .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
       .order('created_at', { ascending: false })
     if (listError) setError(listError.message)
-    setAccounts((data ?? []) as unknown as Account[])
+    setAccounts((data ?? []).map(account => ({
+      ...account,
+      company_members: normalizeMembers((account as unknown as Account).company_members),
+    })) as Account[])
   }
 
   useEffect(() => {
