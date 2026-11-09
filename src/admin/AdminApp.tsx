@@ -148,7 +148,7 @@ export default function AdminApp() {
   const settingsCompany=companies.find(company=>company.id===settingsCompanyId)
   const settingsPage=masterPages.find(page=>page.id===editMasterId)
   const editPageSlug=editRole==='master_pro'&&settingsPage
-    ? (makeSlug(editPageName)+(settingsPage.slug.match(/-[a-z0-9]{6}$/)?.[0]??('-'+settingsPage.id.replace(/-/g,'').slice(0,6))))
+    ? makeSlug(editPageName)
     : ''
   const editPageUrl=editPageSlug? 'https://saittony.github.io/workflows/pro/'+editPageSlug : ''
 
@@ -429,7 +429,7 @@ export default function AdminApp() {
     const assignmentChanged=editRole!==currentRole||editCompanyId!==currentCompanyId||editMasterId!==currentMasterId
     const selectedPage=masterPages.find(page=>page.id===editMasterId)
     const nextPageSlug=selectedPage&&editRole==='master_pro'
-      ? makeSlug(editPageName.trim())+(selectedPage.slug.match(/-[a-z0-9]{6}$/)?.[0]??('-'+selectedPage.id.replace(/-/g,'').slice(0,6)))
+      ? makeSlug(editPageName.trim())
       : selectedPage?.slug??''
     const pageNameChanged=!!selectedPage&&(editPageName.trim()!==selectedPage.display_name||nextPageSlug!==selectedPage.slug)
     const nameChanged=editFullName.trim()!==settingsAccount.full_name
@@ -470,8 +470,7 @@ export default function AdminApp() {
     if (!createRole) { setError('Выберите роль сотрудника.'); return }
     if (createRole === 'admin' && !companyName.trim()) { setError('Укажите название компании для Admin.'); return }
     if (createRole === 'master' && !createCompanyId) { setError('Для Master необходимо выбрать компанию.'); return }
-    const pageBaseSlug = makeSlug(fullName)
-    const pageSlug = pageBaseSlug ? pageBaseSlug + '-' + Math.random().toString(36).slice(2, 8) : ''
+    const pageSlug = makeSlug(fullName)
     const companyBaseSlug = makeSlug(companyName)
     const companySlugForCreate = companyBaseSlug ? companyBaseSlug + '-' + Math.random().toString(36).slice(2, 8) : ''
     if ((createRole === 'master' || createRole === 'master_pro') && !pageSlug) { setError('Добавьте имя, из которого можно сформировать адрес страницы.'); return }
@@ -647,7 +646,7 @@ export default function AdminApp() {
           pages={masterPages.filter(page=>page.kind==='individual')}
           loading={accountsLoading}
           busy={busy}
-          onCreatePage={account=>{setPageKind('individual');setPageProfileId(account.id);setPageName(account.full_name??'');setPageSlug(makeSlug(account.full_name||'master')+'-'+Math.random().toString(36).slice(2,6));setPageDescription('');setActiveModal('masterPro')}}
+          onCreatePage={account=>{setPageKind('individual');setPageProfileId(account.id);setPageName(account.full_name??'');setPageSlug(makeSlug(account.full_name||'master'));setPageDescription('');setActiveModal('masterPro')}}
           onTogglePage={page=>void toggleMasterPage(page)}
           onArchivePage={page=>void archiveMasterPage(page)}
         />
@@ -702,7 +701,7 @@ export default function AdminApp() {
     {activeModal && <div className="admin-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!busy)setActiveModal(null)}}>
       <section className={activeModal === 'accountSettings' ? 'admin-modal admin-modal-compact' : 'admin-modal'} role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
-        <span className="eyebrow">WORKFLOWS PROJECT</span>
+        {!['company','companySettings','masterPro'].includes(activeModal)&&<span className="eyebrow">WORKFLOWS PROJECT</span>}
         {error && <p className="admin-error admin-modal-error" role="alert">{error}</p>}
         {!isAccountsPrototype && activeModal==='settings'&&<div className="admin-settings-modal">
           <h2 id="admin-modal-title">Настройки панели</h2>
