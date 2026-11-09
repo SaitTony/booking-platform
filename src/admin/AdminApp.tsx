@@ -2,6 +2,7 @@ import CompanySettings from './CompanySettings'
 import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import StaffWorkspace from './StaffWorkspace'
 import AccountsPrototype from './AccountsPrototype'
+import CompaniesPrototype from './CompaniesPrototype'
 import MasterProManagementTable from './MasterProManagementTable'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
@@ -24,7 +25,7 @@ function normalizeMembers(value: Member[] | Member | null | undefined): Member[]
   if (Array.isArray(value)) return value
   return value ? [value] : []
 }
-type CompanyOption = { id: string; name: string; slug: string; is_active: boolean }
+type CompanyOption = { id: string; name: string; slug: string; description?: string; is_active: boolean }
 type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
 
@@ -90,7 +91,7 @@ const roleLabel = (profile: Account) => {
 }
 
 export default function AdminApp() {
-  const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'masterPro'|'settings'|'accountSettings'|null>(null)
+  const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'companySettings'|'masterPro'|'settings'|'accountSettings'|null>(null)
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'|'settings'>('overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
   const adminPath = window.location.pathname.replace(/\/+$/, '')
@@ -116,6 +117,10 @@ export default function AdminApp() {
   const [companyName,setCompanyName]=useState('')
   const [companySlug,setCompanySlug]=useState('')
   const [companyDescription,setCompanyDescription]=useState('')
+  const [settingsCompanyId,setSettingsCompanyId]=useState('')
+  const [editCompanyName,setEditCompanyName]=useState('')
+  const [editCompanySlug,setEditCompanySlug]=useState('')
+  const [editCompanyDescription,setEditCompanyDescription]=useState('')
   const [pageKind,setPageKind]=useState<'company'|'individual'>('company')
   const [pageCompanyId,setPageCompanyId]=useState('')
   const [pageName,setPageName]=useState('')
@@ -140,6 +145,7 @@ export default function AdminApp() {
   const displayedProfile:Profile|null=profile?.platform_role==='owner'&&previewAccount?{...previewAccount,platform_role:previewRole==='master_pro'?'master_pro':'pending',company_members:previewMembership?[previewMembership]:[]}:profile
   const viewCompanyId=previewAccount&&previewMembership?previewMembership.company_id:pageCompanyId
   const settingsAccount=accounts.find(account=>account.id===settingsAccountId)
+  const settingsCompany=companies.find(company=>company.id===settingsCompanyId)
   const settingsPage=masterPages.find(page=>page.id===editMasterId)
   const editPageSlug=editRole==='master_pro'&&settingsPage
     ? (makeSlug(editPageName)+(settingsPage.slug.match(/-[a-z0-9]{6}$/)?.[0]??('-'+settingsPage.id.replace(/-/g,'').slice(0,6))))
@@ -192,7 +198,7 @@ export default function AdminApp() {
   async function loadDirectories() {
     if (!supabase) return
     const [{ data: companyData }, { data: masterData }] = await Promise.all([
-      supabase.from('companies').select('id,name,slug,is_active').order('name'),
+      supabase.from('companies').select('id,name,slug,description,is_active').order('name'),
       supabase.from('masters').select('id,display_name,slug,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),
     ])
     setCompanies((companyData ?? []) as CompanyOption[])
@@ -278,6 +284,46 @@ export default function AdminApp() {
     if (updateError) setError(updateError.message)
     else { setNotice(company.is_active ? 'Компания отключена.' : 'Компания включена.'); await loadDirectories() }
     setBusy(false)
+  }
+
+  function openCompanySettings(company:CompanyOption) {
+    setSettingsCompanyId(company.id)
+    setEditCompanyName(company.name)
+    setEditCompanySlug(company.slug)
+    setEditCompanyDescription(company.description??'')
+    setError('')
+    setActiveModal('companySettings')
+  }
+
+  async function saveCompanySettings(event:FormEvent) {
+    event.preventDefault()
+    if(!supabase||!settingsCompany)return
+    if(!editCompanyName.trim()||!editCompanySlug.trim()) {setError('Название и адрес страницы обязательны.');return}
+    if(!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(editCompanySlug.trim())) {setError('Адрес страницы должен содержать только латинские буквы, цифры и дефисы.');return}
+    setBusy(true);setError('');setNotice('')
+    const {error:updateError}=await supabase.from('companies').update({name:editCompanyName.trim(),slug:editCompanySlug.trim(),description:editCompanyDescription.trim()}).eq('id',settingsCompany.id)
+    if(updateError)setError(updateError.message)
+    else{setNotice('Изменения компании сохранены.');setActiveModal(null);setSettingsCompanyId('');await loadDirectories()}
+    setBusy(false)
+  }
+
+  async function deleteCompany(company:CompanyOption) {
+    if(!supabase||busy)return
+    const confirmed=window.confirm('Удалить компанию «'+company.name+'»? Сотрудники останутся в системе без привязки к компании. Страницы с услугами или историей записей будут архивированы, остальные удалены.')
+    if(!confirmed)return
+    setBusy(true);setError('');setNotice('')
+    try {
+      const {data,error:deleteError}=await supabase.functions.invoke('owner-delete-company',{body:{companyId:company.id}})
+      if(deleteError)setError(await getFunctionErrorMessage(deleteError,'Не удалось удалить компанию.'))
+      else {
+        setNotice(data?.message??'Операция с компанией завершена.')
+        setSettingsCompanyId('')
+        setActiveModal(null)
+        await Promise.all([loadAccounts(),loadDirectories()])
+      }
+    } catch(requestError) {
+      setError(requestError instanceof Error?requestError.message:'Не удалось связаться с функцией удаления компании.')
+    } finally {setBusy(false)}
   }
 
   async function deleteAccount() {
@@ -539,7 +585,17 @@ export default function AdminApp() {
         </div>
       </section>}
 
-      {activeSection==='companies' && <section className="admin-accordion admin-panel-section">
+      {activeSection==='companies' && isAccountsPrototype && <CompaniesPrototype
+        companies={companies}
+        pages={masterPages}
+        accounts={accounts.filter(account=>account.platform_role!=='owner')}
+        busy={busy}
+        onCreate={()=>{setCompanyName('');setCompanySlug('');setCompanyDescription('');setActiveModal('company')}}
+        onEdit={openCompanySettings}
+        onToggle={company=>void toggleCompanyStatus(company)}
+        onDelete={company=>void deleteCompany(company)}
+      />}
+      {activeSection==='companies' && !isAccountsPrototype && <section className="admin-accordion admin-panel-section">
         <header className="admin-panel-heading"><h2>Компании</h2><span className="accordion-count">{companies.length}</span></header>
         <div className="accordion-content">
           <details className="admin-subaccordion">
@@ -703,6 +759,17 @@ export default function AdminApp() {
           <label className="admin-field">Адрес страницы (slug)<input value={companySlug} onChange={e=>setCompanySlug(makeSlug(e.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*"/></label>
           <label className="admin-field">Описание<input value={companyDescription} onChange={e=>setCompanyDescription(e.target.value)}/></label>
           <button className="primary-button" disabled={busy}>{busy?'Создаём…':'Создать компанию'}</button>
+        </form>}
+        {activeModal==='companySettings'&&settingsCompany&&<form className="admin-account-settings-modal" onSubmit={saveCompanySettings}>
+          <h2 id="admin-modal-title">Настройки компании</h2>
+          <div className="account-settings-list">
+            <label className="admin-field account-settings-field">Название компании<input value={editCompanyName} onChange={event=>setEditCompanyName(event.target.value)} required/></label>
+            <label className="admin-field account-settings-field">Адрес страницы (slug)<input value={editCompanySlug} onChange={event=>setEditCompanySlug(makeSlug(event.target.value))} required pattern="[a-z0-9]+(-[a-z0-9]+)*"/></label>
+            <label className="admin-field account-settings-field">Описание<textarea rows={4} value={editCompanyDescription} onChange={event=>setEditCompanyDescription(event.target.value)}/></label>
+            <div className="account-setting-row"><div><strong>Статус компании</strong><span>{settingsCompany.is_active?'Компания доступна':'Компания отключена'}</span></div><button type="button" className="secondary-button" disabled={busy} onClick={()=>void toggleCompanyStatus(settingsCompany)}>{settingsCompany.is_active?'Отключить':'Включить'}</button></div>
+            <div className="account-setting-row"><div><strong>Удалить компанию</strong><span>Страницы без истории будут удалены. Страницы с услугами или записями сохранятся в архиве.</span></div><button type="button" className="danger-button" disabled={busy} onClick={()=>void deleteCompany(settingsCompany)}>Удалить</button></div>
+          </div>
+          <div className="admin-modal-actions"><button type="submit" className="primary-button" disabled={busy}>{busy?'Сохраняем…':'Сохранить изменения'}</button></div>
         </form>}
         {activeModal==='masterPro'&&<form onSubmit={createMasterPage}>
           <h2 id="admin-modal-title">Создать страницу Master_pro</h2><p className="admin-modal-intro">Индивидуальная страница специалиста, не привязанная к компании.</p>
