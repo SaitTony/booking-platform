@@ -1,4 +1,4 @@
-name: Deploy create-user Edge Function
+name: Deploy Supabase Edge Functions
 
 on:
   workflow_dispatch:
@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - "supabase/functions/create-user/**"
+      - "supabase/functions/assign-user-role/**"
       - "supabase/functions/owner-set-account-status/**"
       - "supabase/functions/change-password/**"
       - "supabase/functions/owner-reset-access/**"
@@ -31,7 +32,7 @@ jobs:
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 3.0.0
 
       - name: Check deployment credentials
         run: |
@@ -39,6 +40,9 @@ jobs:
             echo "::error::GitHub secret SUPABASE_ACCESS_TOKEN is not configured."
             exit 1
           fi
+
+      - name: Deploy assign-user-role function
+        run: supabase functions deploy assign-user-role --project-ref "$SUPABASE_PROJECT_ID" --yes
 
       - name: Deploy create-user function
         run: supabase functions deploy create-user --project-ref "$SUPABASE_PROJECT_ID" --yes
