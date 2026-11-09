@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(43);
+select extensions.plan(46);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -66,6 +66,21 @@ values
 insert into public.masters (id, kind, display_name, slug, profile_id, timezone)
 values ('30000000-0000-4000-8000-000000000006', 'individual', 'Independent Pro', 'independent-pro',
         '10000000-0000-4000-8000-000000000004', 'UTC');
+
+-- Composite FK prevents assigning a master page to a different company.
+insert into public.companies (id, name, slug, timezone)
+values ('20000000-0000-4000-8000-000000000002', 'Other Test Company', 'other-test-company', 'UTC');
+insert into public.masters (id, kind, company_id, display_name, slug, timezone)
+values ('30000000-0000-4000-8000-000000000008', 'company',
+        '20000000-0000-4000-8000-000000000002', 'Other Company Master', 'other-master', 'UTC');
+select extensions.throws_ok(
+  $insert into public.company_members (company_id, profile_id, role, master_id)
+    values ('20000000-0000-4000-8000-000000000001',
+      '10000000-0000-4000-8000-000000000001', 'master',
+      '30000000-0000-4000-8000-000000000008')$,
+  '23503', null,
+  'A company membership cannot point to a master page owned by another company'
+);
 
 insert into public.services (id, master_id, name, duration, price)
 values
@@ -175,6 +190,23 @@ select extensions.is(
 select extensions.is(
   (select full_name from public.clients where phone_e164 = '+79531234599'),
   'Client One', 'A public booking cannot overwrite an existing client name'
+);
+
+select extensions.throws_ok(
+  $insert into public.bookings (
+      master_id, service_id, client_id, starts_at, ends_at, status,
+      service_name_snapshot, service_duration_snapshot, price_snapshot,
+      client_name_snapshot, client_phone_snapshot
+    )
+    values (
+      '30000000-0000-4000-8000-000000000001',
+      '40000000-0000-4000-8000-000000000002',
+      (select id from public.clients where phone_e164 = '+79531234599'),
+      now() + interval '7 days', now() + interval '7 days 30 minutes', 'cancelled',
+      'Consultation', 30, 50, 'Client One', '+79531234599'
+    )$,
+  '23503', null,
+  'A booking cannot reference a service belonging to another master'
 );
 select extensions.throws_ok(
   $$select public.create_booking(
@@ -350,16 +382,18 @@ select extensions.ok(
 
 -- New schema hardening: indexes, timestamp maintenance and RLS policy shape.
 select extensions.ok(
-  (select count(*) = 5 from pg_indexes
+  (select count(*) = 7 from pg_indexes
    where schemaname = 'public'
      and indexname in (
+       'masters_id_company_id_uq',
+       'services_id_master_id_uq',
        'booking_status_history_booking_id_idx',
        'booking_status_history_changed_by_idx',
        'bookings_cancelled_by_idx',
        'bookings_service_id_idx',
        'company_members_company_id_idx'
      )),
-  'All previously unindexed foreign keys have covering indexes'
+  'Foreign-key support and composite integrity indexes are present'
 );
 
 update public.companies
@@ -383,19 +417,30 @@ select extensions.ok(
   'No table has duplicate permissive policies for the same role and command'
 );
 
+delete from public.services where id = '40000000-0000-4000-8000-000000000002';
+select extensions.ok(
+  exists (
+    select 1 from public.bookings
+    where master_id = '30000000-0000-4000-8000-000000000002'
+      and service_id is null
+      and service_name_snapshot = 'Consultation'
+  ),
+  'Deleting a service clears only the service reference and preserves booking snapshots'
+);
+
 insert into public.company_members (company_id, profile_id, role, master_id)
 values (
   '20000000-0000-4000-8000-000000000001',
   '10000000-0000-4000-8000-000000000001',
   'master',
-  '30000000-0000-4000-8000-000000000002'
+  '30000000-0000-4000-8000-000000000004'
 );
-delete from public.masters where id = '30000000-0000-4000-8000-000000000002';
+delete from public.masters where id = '30000000-0000-4000-8000-000000000004';
 select extensions.ok(
   not exists (
     select 1 from public.company_members
     where profile_id = '10000000-0000-4000-8000-000000000001'
-      and master_id = '30000000-0000-4000-8000-000000000002'
+      and master_id = '30000000-0000-4000-8000-000000000004'
   ),
   'Deleting an assigned master page cascades its Master membership safely'
 );
