@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react'
-
 type MasterProAccount = {
   id: string
   full_name: string
@@ -36,7 +34,7 @@ export default function MasterProManagementTable({
   onTogglePage,
   onArchivePage,
 }: Props) {
-  const masterPros = accounts.filter(account => (account as MasterProAccount & { platform_role?: string }).platform_role === 'master_pro')
+  const masterPros = accounts
 
   return (
     <section className="master-pro-management">
