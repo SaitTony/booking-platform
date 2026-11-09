@@ -26,7 +26,7 @@ The current staff login flow uses **email + password**:
 
 ## Database and migrations
 
-The hosted project currently has 24 applied migrations. The canonical migration files are in `supabase/migrations`; their 14-digit versions must match the versions returned by Supabase migration history.
+The hosted project currently has 26 applied migrations. The canonical migration files are in `supabase/migrations`; their 14-digit versions must match the versions returned by Supabase migration history.
 
 Rules:
 1. Never rerun an already applied migration.
@@ -38,7 +38,7 @@ Rules:
 The current schema has 11 principal public tables:
 `profiles`, `companies`, `company_members`, `masters`, `services`, `working_hours`, `schedule_exceptions`, `booking_settings`, `clients`, `bookings`, `booking_status_history`.
 
-RLS is enabled on all these tables. Foreign keys, uniqueness rules, CHECK constraints and indexes enforce core data integrity. Confirmed booking overlap is prevented by the `bookings_no_overlap` exclusion constraint; do not replace it with a frontend-only check or add a duplicate constraint.
+RLS is enabled on all these tables. Foreign keys (including composite company/master and booking/service relationships), uniqueness rules, CHECK constraints and indexes enforce core data integrity. Confirmed booking overlap is prevented by the `bookings_no_overlap` exclusion constraint; do not replace it with a frontend-only check or add a duplicate constraint.
 
 The migration set includes:
 - initial schema, booking constraints and RLS;
@@ -46,7 +46,7 @@ The migration set includes:
 - Owner bootstrap and account/page lifecycle safeguards;
 - company deletion/archive behavior;
 - unique active individual Master_pro page names;
-- reserved company slugs, FK/index improvements, timestamp triggers, consolidated RLS policies, relocation of btree_gist to the non-exposed extensions schema, and isolation of SECURITY DEFINER access helpers in the non-exposed private schema.
+- reserved company slugs, FK/index improvements, timestamp triggers, consolidated RLS policies, relocation of btree_gist to the non-exposed extensions schema, and isolation of SECURITY DEFINER access helpers in the non-exposed private schema, and composite foreign keys for company memberships and bookings.
 
 ## Edge Functions
 
