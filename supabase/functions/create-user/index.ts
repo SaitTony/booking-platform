@@ -78,6 +78,10 @@ Deno.serve(async (req) => {
     }
     return json({ userId: data.user.id, phone, status: "active", role, assignment });
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "Не удалось создать учётную запись" }, 400);
+    const message = error instanceof Error ? error.message : "Не удалось создать учётную запись";
+    if (message.includes("masters_individual_name_uq")) {
+      return json({ error: "Страница с таким названием уже существует. Измените название страницы и попробуйте снова." }, 409);
+    }
+    return json({ error: message }, 400);
   }
 });
