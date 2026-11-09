@@ -51,10 +51,9 @@ type StaffRole = 'admin' | 'master' | 'master_pro'
 type AccountManagementRowProps = {
   account: Account; companies: CompanyOption[]; pages: MasterOption[]; busy: boolean
   onSettings: (account: Account) => void
-  onSaveAssignment: (userId: string, role: StaffRole, companyId: string | null, masterId: string | null) => void
-  onSavePageName: (masterId: string, name: string) => void
+  onSaveChanges: (account: Account, role: StaffRole, companyId: string | null, masterId: string | null, pageName: string) => void
 }
-function AccountManagementRow({account,companies,pages,busy,onSettings,onSaveAssignment,onSavePageName}:AccountManagementRowProps) {
+function AccountManagementRow({account,companies,pages,busy,onSettings,onSaveChanges}:AccountManagementRowProps) {
   const membership=account.company_members?.[0]
   const individualPage=pages.find(page=>page.kind==='individual'&&page.profile_id===account.id)
   const currentRole:StaffRole|''=account.platform_role==='master_pro'?'master_pro':membership?.role??''
@@ -70,6 +69,9 @@ function AccountManagementRow({account,companies,pages,busy,onSettings,onSaveAss
   const individualPages=pages.filter(page=>page.kind==='individual'&&(!page.profile_id||page.profile_id===account.id)&&page.is_active)
   const assignmentReady=role==='admin'?!!companyId:role==='master'?!!companyId&&!!masterId:role==='master_pro'?!!masterId:false
   const selectedPage=pages.find(page=>page.id===masterId)
+  const initialCompanyId=membership?.company_id??''
+  const initialMasterId=membership?.master_id??individualPage?.id??''
+  const hasChanges=role!==currentRole||companyId!==initialCompanyId||masterId!==initialMasterId||(role==='master_pro'&&!!selectedPage&&pageName.trim()!==selectedPage.display_name)
   return <article className="admin-account admin-account-inline-row">
     <div className="account-inline-fields">
       <div className="account-inline-cell account-name-cell"><small>Сотрудник</small><strong>{account.full_name}</strong></div>
@@ -82,8 +84,7 @@ function AccountManagementRow({account,companies,pages,busy,onSettings,onSaveAss
       {account.force_password_change&&<span className="account-force-change">Требуется смена пароля</span>}
     </div>
     {account.platform_role!=='owner'&&<div className="account-inline-actions">
-      <button type="button" className="primary-button" disabled={busy||!assignmentReady} onClick={()=>role&&onSaveAssignment(account.id,role,role==='master_pro'?null:companyId||null,role==='admin'?null:masterId||null)}>Сохранить роль и связь</button>
-      {role==='master_pro'&&selectedPage&&<button type="button" className="secondary-button" disabled={busy||!pageName.trim()||pageName.trim()===selectedPage.display_name} onClick={()=>onSavePageName(selectedPage.id,pageName)}>Сохранить название страницы</button>}
+      <button type="button" className="account-save-button" aria-label="Сохранить изменения учётной записи" title={hasChanges?'Сохранить изменения':'Нет изменений'} disabled={busy||!hasChanges||!assignmentReady} onClick={()=>role&&onSaveChanges(account,role,role==='master_pro'?null:companyId||null,role==='admin'?null:masterId||null,pageName)}><span aria-hidden="true">✓</span></button>
       <button type="button" className="account-settings-button" aria-label={`Настройки учётной записи ${account.full_name}`} title="Настройки учётной записи" onClick={()=>onSettings(account)}><span aria-hidden="true">⚙</span></button>
     </div>}
   </article>
@@ -240,17 +241,24 @@ export default function AdminApp() {
   async function deleteAccount() {
     if (!supabase || !deleteTargetId || busy) return
     setBusy(true); setError(''); setNotice('')
-    const { error: deleteError } = await supabase.functions.invoke('owner-delete-user', {
-      body: { userId: deleteTargetId },
-    })
-    if (deleteError) setError(await getFunctionErrorMessage(deleteError, 'Не удалось удалить учётную запись.'))
-    else {
-      setNotice('Учётная запись полностью удалена. История записей сохранена.')
-      setDeleteTargetId('')
-      setActiveModal(null)
-      await Promise.all([loadAccounts(), loadDirectories()])
+    try {
+      const { error: deleteError } = await supabase.functions.invoke('owner-delete-user', {
+        body: { userId: deleteTargetId },
+      })
+      if (deleteError) {
+        setError(await getFunctionErrorMessage(deleteError, 'Не удалось удалить учётную запись.'))
+      } else {
+        setNotice('Учётная запись полностью удалена. История записей сохранена.')
+        setDeleteTargetId('')
+        setSettingsAccountId('')
+        setActiveModal(null)
+        await Promise.all([loadAccounts(), loadDirectories()])
+      }
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Не удалось связаться с функцией удаления. Учётная запись не удалена.')
+    } finally {
+      setBusy(false)
     }
-    setBusy(false)
   }
 
   async function resetUserAccess(event: FormEvent) {
@@ -312,16 +320,37 @@ export default function AdminApp() {
   }
 
 
-  async function saveAccountAssignment(userId:string, role:StaffRole, companyId:string|null, masterId:string|null) {
+  async function saveAccountChanges(account:Account,role:StaffRole,companyId:string|null,masterId:string|null,pageName:string) {
     if(!supabase)return
     if(role==='admin'&&!companyId){setError('Для Admin необходимо выбрать компанию.');return}
     if(role==='master'&&(!companyId||!masterId)){setError('Для Master необходимо выбрать компанию и страницу мастера.');return}
     if(role==='master_pro'&&!masterId){setError('Для Master_pro необходимо выбрать индивидуальную страницу.');return}
+    const membership=account.company_members?.[0]
+    const individualPage=masterPages.find(page=>page.kind==='individual'&&page.profile_id===account.id)
+    const currentRole:StaffRole|''=account.platform_role==='master_pro'?'master_pro':membership?.role??''
+    const currentCompanyId=membership?.company_id??''
+    const currentMasterId=membership?.master_id??individualPage?.id??''
+    const assignmentChanged=role!==currentRole||companyId!==currentCompanyId||masterId!==currentMasterId
+    const selectedPage=masterPages.find(page=>page.id===masterId)
+    const pageNameChanged=role==='master_pro'&&!!selectedPage&&pageName.trim()!==selectedPage.display_name
+    if(!assignmentChanged&&!pageNameChanged)return
     setBusy(true);setError('');setNotice('')
-    const {error:assignError}=await supabase.functions.invoke('assign-user-role',{body:{userId,role,companyId:role==='master_pro'?null:companyId,masterId:role==='admin'?null:masterId}})
-    if(assignError)setError(await getFunctionErrorMessage(assignError,'Не удалось изменить роль или привязку учётной записи.'))
-    else{setNotice('Роль и принадлежность учётной записи обновлены.');await Promise.all([loadAccounts(),loadDirectories()])}
-    setBusy(false)
+    try {
+      if(assignmentChanged){
+        const {error:assignError}=await supabase.functions.invoke('assign-user-role',{body:{userId:account.id,role,companyId:role==='master_pro'?null:companyId,masterId:role==='admin'?null:masterId}})
+        if(assignError){setError(await getFunctionErrorMessage(assignError,'Не удалось сохранить роль и привязки учётной записи.'));return}
+      }
+      if(pageNameChanged&&selectedPage){
+        const {error:updateError}=await supabase.from('masters').update({display_name:pageName.trim()}).eq('id',selectedPage.id)
+        if(updateError){setError(updateError.message);return}
+      }
+      setNotice('Изменения учётной записи сохранены.')
+      await Promise.all([loadAccounts(),loadDirectories()])
+    } catch(saveError) {
+      setError(saveError instanceof Error?saveError.message:'Не удалось сохранить изменения учётной записи.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function saveMasterPageName(masterId:string,name:string) {
@@ -423,8 +452,7 @@ export default function AdminApp() {
         <div className="admin-account-list admin-account-list-inline">
           {accounts.length?accounts.map(account=><AccountManagementRow key={account.id} account={account} companies={companies} pages={masterPages} busy={busy}
             onSettings={item=>{setSettingsAccountId(item.id);setActiveModal('accountSettings')}}
-            onSaveAssignment={(userId,role,companyId,masterId)=>void saveAccountAssignment(userId,role,companyId,masterId)}
-            onSavePageName={(masterId,name)=>void saveMasterPageName(masterId,name)}/>):<p className="admin-empty">Учётных записей пока нет.</p>}
+            onSaveChanges={(account,role,companyId,masterId,pageName)=>void saveAccountChanges(account,role,companyId,masterId,pageName)}/>):<p className="admin-empty">Учётных записей пока нет.</p>}
         </div>
       </section>}
 
@@ -541,8 +569,11 @@ export default function AdminApp() {
         </div>}
         {activeModal==='accountSettings'&&settingsAccount&&<div className="admin-account-settings-modal">
           <h2 id="admin-modal-title">Настройки учётной записи</h2><p className="admin-modal-intro"><strong>{settingsAccount.full_name}</strong><br/>{settingsAccount.email}</p>
-          <div className="account-settings-status"><div><strong>Видимость учётной записи</strong><span>{settingsAccount.disabled_at?'Учётная запись отключена':'Учётная запись активна'}</span></div><button type="button" className={`admin-switch ${!settingsAccount.disabled_at?'is-on':''}`} role="switch" aria-checked={!settingsAccount.disabled_at} aria-label={settingsAccount.disabled_at?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>void toggleAccountStatus(settingsAccount)}><span/></button></div>
-          <div className="admin-account-settings-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(settingsAccount.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить пароль</button><button type="button" className="danger-button" disabled={busy} onClick={()=>{setDeleteTargetId(settingsAccount.id);setActiveModal('delete')}}>Удалить УЗ</button></div>
+          <div className="account-settings-list">
+            <div className="account-setting-row"><div><strong>Видимость учётной записи</strong><span>{settingsAccount.disabled_at?'Учётная запись отключена':'Учётная запись активна'}</span></div><button type="button" className={`admin-switch ${!settingsAccount.disabled_at?'is-on':''}`} role="switch" aria-checked={!settingsAccount.disabled_at} aria-label={settingsAccount.disabled_at?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>void toggleAccountStatus(settingsAccount)}><span/></button></div>
+            <div className="account-setting-row"><div><strong>Сбросить пароль</strong><span>Установить сотруднику временный пароль</span></div><button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(settingsAccount.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить</button></div>
+            <div className="account-setting-row"><div><strong>Удалить УЗ</strong><span>Удалить учётную запись и профиль сотрудника</span></div><button type="button" className="danger-button" disabled={busy} onClick={()=>{setDeleteTargetId(settingsAccount.id);setActiveModal('delete')}}>Удалить</button></div>
+          </div>
         </div>}
         {activeModal==='account'&&<form onSubmit={createAccount}>
           <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Заполните данные сотрудника и назначьте ему роль сразу при создании.</p>
