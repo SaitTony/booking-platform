@@ -10,8 +10,8 @@ permissions:
 
 # Avoid pulling multiple disposable Supabase stacks for the same branch at once.
 concurrency:
-  group: workflows-validation-v2-${{ github.event_name }}-${{ github.event.pull_request.head.ref || github.ref_name }}
-  cancel-in-progress: true
+  group: workflows-validation-v3-${{ github.event_name }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   build-and-backend-validation:
@@ -48,6 +48,7 @@ jobs:
           supabase --version
 
       - name: Start disposable local Supabase stack
+        id: start-supabase
         run: supabase start
 
       - name: Apply every migration to the disposable local database
@@ -74,5 +75,6 @@ jobs:
           deno check supabase/functions/owner-delete-user/index.ts
 
       - name: Stop disposable local Supabase stack
-        if: always() && steps.setup-supabase.outcome == 'success'
+        if: always() && steps.start-supabase.outcome == 'success'
+        timeout-minutes: 5
         run: supabase stop --no-backup
