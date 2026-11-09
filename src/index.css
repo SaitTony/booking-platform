@@ -883,3 +883,14 @@
  .admin-shell .account-setting-row{gap:10px;padding:13px 12px}
  .admin-shell .account-setting-row>button:not(.admin-switch){min-width:88px}
 }
+
+
+/* Final account controls icon sizing */
+.admin-shell .admin-settings-trigger{font-size:31px}
+.admin-shell .account-settings-button,.admin-shell .account-settings-button span{font-size:31px}
+.admin-shell .account-save-button,.admin-shell .account-save-button span{font-size:47.6px}
+@media(max-width:700px){
+ .admin-shell .admin-settings-trigger{font-size:31px}
+ .admin-shell .account-settings-button,.admin-shell .account-settings-button span{font-size:31px}
+ .admin-shell .account-save-button,.admin-shell .account-save-button span{font-size:47.6px}
+}
