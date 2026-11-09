@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(41);
+select extensions.plan(43);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -322,6 +322,30 @@ select extensions.ok(
     where e.extname = 'btree_gist' and n.nspname = 'extensions'
   ),
   'btree_gist is installed outside the exposed public schema'
+);
+
+select extensions.ok(
+  not exists (
+    select 1 from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname in ('is_owner', 'is_company_admin', 'can_manage_master', 'can_view_master')
+      and p.prosecdef
+  )
+  and (
+    select count(*) = 4 from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private'
+      and p.proname in ('is_owner', 'is_company_admin', 'can_manage_master', 'can_view_master')
+      and p.prosecdef
+  ),
+  'SECURITY DEFINER access helpers are isolated in the non-exposed private schema'
+);
+
+select extensions.ok(
+  not has_function_privilege('anon', 'public.is_owner()', 'EXECUTE')
+  and has_function_privilege('authenticated', 'public.is_owner()', 'EXECUTE'),
+  'Role helper wrappers are callable by authenticated users but not anonymous visitors'
 );
 
 -- New schema hardening: indexes, timestamp maintenance and RLS policy shape.
