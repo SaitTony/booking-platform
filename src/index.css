@@ -931,3 +931,24 @@
  .admin-shell .account-save-button,.admin-shell .account-save-button span{font-size:31px}
  .admin-shell .account-settings-button,.admin-shell .account-save-button{width:40px;height:40px;min-height:40px;flex-basis:40px}
 }
+
+
+/* Account list: consistent icon size, fixed read-only columns and visible inactive state. */
+.admin-shell .admin-account-inline-row{grid-template-columns:minmax(0,1fr) 46px;gap:12px;min-height:92px}
+.admin-shell .account-inline-fields{grid-template-columns:42px minmax(120px,1.05fr) minmax(150px,1.25fr) minmax(125px,.95fr) minmax(105px,.8fr) minmax(125px,1fr) minmax(125px,1fr) minmax(95px,.7fr);gap:12px}
+.admin-shell .account-inline-cell{min-width:0}
+.admin-shell .account-inline-cell strong{display:block;font-size:13px;font-weight:500;line-height:1.35;overflow-wrap:anywhere}
+.admin-shell .account-number-cell strong{font-variant-numeric:tabular-nums;color:var(--admin-muted)}
+.admin-shell .account-status-active{color:#27804a!important}
+.admin-shell .account-status-disabled{color:#a1a7af!important}
+.admin-shell .admin-account-inline-row.is-disabled{background:color-mix(in srgb,var(--admin-surface) 70%,var(--admin-page));opacity:.58;filter:saturate(.55)}
+.admin-shell .admin-account-inline-row.is-disabled .account-inline-cell strong{color:var(--admin-muted)}
+.admin-shell .admin-account-inline-row.is-disabled .account-status-disabled{color:#9a6262!important;font-weight:700}
+.admin-shell .account-settings-button{width:46px;height:46px;min-height:46px;flex-basis:46px;font-size:31px}
+.admin-shell .account-settings-button span{font-size:31px;line-height:1}
+.admin-shell .admin-settings-trigger{width:46px;height:46px;min-height:46px;font-size:31px}
+.admin-shell .account-settings-list>.admin-field{margin:0;padding:14px 16px;border-bottom:1px solid var(--admin-line)}
+.admin-shell .account-settings-list>.admin-field input,.admin-shell .account-settings-list>.admin-field select{margin-top:7px}
+.admin-shell .admin-account-settings-modal .admin-modal-actions{margin-top:0}
+@media(max-width:1050px){.admin-shell .admin-account-inline-row{min-width:1180px}.admin-shell .account-inline-fields{grid-template-columns:42px 150px 180px 140px 120px 150px 150px 110px}}
+@media(max-width:700px){.admin-shell .account-settings-button,.admin-shell .account-settings-button span{font-size:31px}.admin-shell .account-settings-button{width:46px;height:46px;flex-basis:46px}}
