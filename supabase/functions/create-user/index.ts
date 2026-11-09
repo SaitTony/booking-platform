@@ -13,24 +13,28 @@ Deno.serve(async (req) => {
     const temporaryPassword = String(body.temporaryPassword ?? "");
     const role = String(body.role ?? "");
     const companyId = body.companyId ?? null;
-    const masterId = body.masterId ?? null;
+    const companyName = String(body.companyName ?? "").trim();
+    const companySlug = String(body.companySlug ?? "").trim();
+    const pageName = String(body.pageName ?? fullName).trim();
+    const pageSlug = String(body.pageSlug ?? "").trim();
     if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\+7[0-9]{10}$/.test(phone) || temporaryPassword.length < 6) {
       return json({ error: "Укажите имя, корректный email, телефон в формате +7 и ровно 10 цифр после кода страны, а также временный пароль длиной от 6 символов" }, 400);
     }
     if (!["admin", "master", "master_pro"].includes(role)) {
       return json({ error: "Выберите роль сотрудника" }, 400);
     }
-    if ((role === "admin" || role === "master") && typeof companyId !== "string") {
-      return json({ error: "Для роли сотрудника компании необходимо выбрать компанию" }, 400);
+    if (role === "admin" && (!companyName || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(companySlug))) {
+      return json({ error: "Для Admin укажите название компании" }, 400);
     }
-    if ((role === "master" || role === "master_pro") && typeof masterId !== "string") {
-      return json({ error: "Для выбранной роли необходимо выбрать страницу мастера" }, 400);
-    }
-    if (role === "admin" && masterId !== null) {
-      return json({ error: "Администратору компании не назначается страница мастера" }, 400);
+    if (role === "master" && typeof companyId !== "string") {
+      return json({ error: "Для Master необходимо выбрать компанию" }, 400);
     }
     if (role === "master_pro" && companyId !== null) {
-      return json({ error: "Master_pro назначается на индивидуальную страницу" }, 400);
+      return json({ error: "Master_pro получает индивидуальную страницу без компании" }, 400);
+    }
+    if ((role === "master" || role === "master_pro") &&
+        (!pageName || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(pageSlug))) {
+      return json({ error: "Не удалось сформировать страницу мастера" }, 400);
     }
     const { data, error } = await admin.auth.admin.createUser({
       email, password: temporaryPassword, email_confirm: true,
@@ -44,18 +48,22 @@ Deno.serve(async (req) => {
       await admin.auth.admin.deleteUser(data.user.id);
       throw profileError;
     }
-    const { error: roleError } = await admin.rpc("owner_assign_user_role", {
+    const { data: assignment, error: roleError } = await admin.rpc("owner_create_user_assignment", {
       p_actor_id: actor.id,
       p_user_id: data.user.id,
       p_role: role,
-      p_company_id: companyId,
-      p_master_id: masterId,
+      p_company_id: role === "master" ? companyId : null,
+      p_company_name: role === "admin" ? companyName : null,
+      p_company_slug: role === "admin" ? companySlug : null,
+      p_page_name: role === "master" || role === "master_pro" ? pageName : null,
+      p_page_slug: role === "master" || role === "master_pro" ? pageSlug : null,
     });
     if (roleError) {
-      await admin.auth.admin.deleteUser(data.user.id);
+      const { error: cleanupError } = await admin.auth.admin.deleteUser(data.user.id);
+      if (cleanupError) console.error("create-user rollback could not remove Auth user", cleanupError);
       throw roleError;
     }
-    return json({ userId: data.user.id, phone, status: "active", role });
+    return json({ userId: data.user.id, phone, status: "active", role, assignment });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Не удалось создать учётную запись" }, 400);
   }
