@@ -30,6 +30,9 @@ Deno.serve(async (req) => {
     if (role === "admin" && (!companyName || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(companySlug))) {
       return json({ error: "Для Admin укажите название компании" }, 400);
     }
+    if (role === "admin" && ["admin", "demo", "pro"].includes(companySlug.toLowerCase())) {
+      return json({ error: "Этот адрес зарезервирован системой. Выберите другое имя страницы компании." }, 409);
+    }
     if (role === "master" && typeof companyId !== "string") {
       return json({ error: "Для Master необходимо выбрать компанию" }, 400);
     }
