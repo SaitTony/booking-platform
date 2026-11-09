@@ -3,6 +3,7 @@ import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import StaffWorkspace from './StaffWorkspace'
 import AccountsPrototype from './AccountsPrototype'
 import MasterProManagementTable from './MasterProManagementTable'
+import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -632,7 +633,7 @@ export default function AdminApp() {
       <div className="admin-account-list">{masterPages.filter(page=>page.kind==='company'&&page.company_id===viewCompanyId).map(page=><article className="admin-account" key={page.id}><div><strong>{page.display_name}</strong><span>/{companies.find(item=>item.id===page.company_id)?.name ?? 'company'}/{page.slug}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span>{!previewAccount&&<button className="secondary-button" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить':'Включить'}</button>}</article>)}</div>
       <CompanySettings isOwner={false} companyId={viewCompanyId} readOnly={!!previewAccount}/>
       <StaffWorkspace profile={displayedProfile??profile} kindFilter="company" companyIdFilter={viewCompanyId} readOnly={!!previewAccount}/>
-    </> : <StaffWorkspace profile={displayedProfile??profile} readOnly={!!previewAccount}/>}
+    </> : <>{profile.platform_role==='master_pro'&&!previewAccount&&<section className="admin-card workspace-section"><h2>Конструктор моей страницы</h2><p>Создайте и настройте публичную страницу, сразу проверяя результат в предпросмотре.</p><Link to="/admin/master-pro-builder" className="primary-button">Открыть конструктор</Link></section>}<StaffWorkspace profile={displayedProfile??profile} readOnly={!!previewAccount}/></>}
     {activeModal && <div className="admin-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!busy)setActiveModal(null)}}>
       <section className={activeModal === 'accountSettings' ? 'admin-modal admin-modal-compact' : 'admin-modal'} role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
