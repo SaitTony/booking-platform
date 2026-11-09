@@ -344,7 +344,7 @@ export default function AdminApp() {
         <header className="admin-panel-heading"><h2>Учётные записи</h2><span className="accordion-count">{accounts.length}</span></header>
         <div className="accordion-content">
           <div className="admin-action-grid">
-            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ и сразу назначить роль</small></button>
+            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ и сразу назначить роль</small></button>
             <button className="admin-action-card" onClick={()=>setActiveModal('accounts')}><span className="admin-action-icon">☷</span><strong>Все пользователи</strong><small>Открыть список и управление учётными записями</small></button>
           </div>
         </div>
