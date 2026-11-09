@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 jobs:
-  deploy-create-user:
+  deploy-edge-functions:
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
