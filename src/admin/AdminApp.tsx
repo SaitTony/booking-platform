@@ -89,9 +89,9 @@ const roleLabel = (profile: Account) => {
 
 export default function AdminApp() {
   const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'masterPro'|'settings'|'accountSettings'|null>(null)
-  const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>(() => window.location.pathname.replace(/\\/+$/, '').endsWith('/admin/accounts-prototype') ? 'accounts' : 'overview')
+  const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>(() => window.location.pathname.replace(/\/+$/, '').endsWith('/admin/accounts-prototype') ? 'accounts' : 'overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
-  const isAccountsPrototype = window.location.pathname.replace(/\\/+$/, '').endsWith('/admin/accounts-prototype')
+  const isAccountsPrototype = window.location.pathname.replace(/\/+$/, '').endsWith('/admin/accounts-prototype')
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [email, setEmail] = useState('')
