@@ -1124,3 +1124,76 @@
 }
 
 .admin-shell[data-prototype-mode="true"] > .admin-card{max-width:480px;margin:0 auto;}
+
+/* Prototype-only polish requested for the new admin concept. */
+.admin-shell[data-prototype-mode="true"]{font-size:15px}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav{gap:24px}
+.admin-shell[data-prototype-mode="true"] .ap-nav-label{display:none}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button{gap:8px;font-size:14px}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button svg{width:16px;height:16px;fill:currentColor;flex:none}
+.admin-shell[data-prototype-mode="true"] .admin-top-actions .admin-settings-trigger{display:none}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-heading h2{font-size:27px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-heading p{font-size:14px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 13px;border:1px solid #1f883d;border-radius:6px;background:#1f883d;color:#fff;font-size:14px;font-weight:600;box-shadow:0 1px 0 rgba(31,35,40,.1)}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-primary svg{width:16px;height:16px;fill:currentColor}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-primary:hover{background:#1a7f37;border-color:#1a7f37}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-toolbar select{min-height:34px;padding:6px 30px 6px 10px;border-radius:6px;background-color:#fff;font-size:13px;cursor:pointer}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-toolbar select:hover{border-color:#8c959f;background-color:#f6f8fa}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-role{font-size:11px;font-weight:600;padding:4px 9px;border-width:1px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-role-admin{color:#0969da;background:#ddf4ff;border-color:#80ccff}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-role-master{color:#8250df;background:#fbefff;border-color:#d8b9ff}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-role-master-pro{color:#9a6700;background:#fff8c5;border-color:#d4a72c}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-role-unassigned{color:#59636e;background:#eff1f3;border-color:#d0d7de}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-gear{display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid transparent;border-radius:6px;color:#59636e;font-size:16px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-gear svg{width:16px;height:16px;fill:currentColor}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-gear:hover{border-color:#d0d7de;background:#f6f8fa;color:#1f2328}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page{max-width:100%;gap:18px}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-settings-modal{display:grid;gap:14px}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-theme-picker,
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-preview-settings{padding:18px;border:1px solid var(--ap-line);border-radius:7px;background:#fff}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-theme-heading h3,
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-preview-settings h3{font-size:16px}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-theme-heading p,
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-preview-settings p{font-size:14px;color:var(--ap-muted)}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .theme-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .theme-option{min-height:70px;padding:10px 12px;border:1px solid var(--ap-line);border-radius:6px;background:#fff;text-align:left}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .theme-option b{font-size:13px}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .theme-option small{font-size:12px;color:var(--ap-muted)}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page .admin-field{font-size:13px}
+.admin-shell[data-prototype-mode="true"] .admin-settings-page select{max-width:440px}
+.admin-shell[data-prototype-mode="true"] .admin-modal-compact{width:min(620px,94vw);max-height:82vh;padding:20px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal{gap:9px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal h2{margin-bottom:3px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .admin-modal-intro{margin:0;font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 10px;padding:10px;border:1px solid var(--ap-line);border-radius:7px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .admin-field{margin:1px 0;gap:4px;font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .admin-field input,
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .admin-field select{min-height:31px;padding:4px 8px;font-size:13px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .admin-field small{font-size:11px;line-height:1.3}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-setting-row{grid-column:span 2;min-height:40px;padding:7px 9px;gap:8px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-setting-row strong{font-size:13px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-setting-row span{font-size:11px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-setting-row button{min-height:29px;padding:4px 9px;font-size:12px}
+.admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .admin-modal-actions{margin-top:6px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-grid-head{font-size:11px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-row{font-size:13px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-person strong{font-size:13px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-muted,
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-place{font-size:13px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-tabs button{font-size:14px}
+.admin-shell[data-prototype-mode="true"] .admin-main-content p,
+.admin-shell[data-prototype-mode="true"] .admin-main-content label,
+.admin-shell[data-prototype-mode="true"] .admin-main-content button,
+.admin-shell[data-prototype-mode="true"] .admin-main-content input,
+.admin-shell[data-prototype-mode="true"] .admin-main-content select,
+.admin-shell[data-prototype-mode="true"] .admin-main-content textarea,
+.admin-shell[data-prototype-mode="true"] .admin-main-content summary,
+.admin-shell[data-prototype-mode="true"] .admin-main-content th,
+.admin-shell[data-prototype-mode="true"] .admin-main-content td{font-size:calc(1em + 1px)}
+.admin-shell[data-prototype-mode="true"] .admin-main-content h2{font-size:23px}
+.admin-shell[data-prototype-mode="true"] .admin-main-content h3{font-size:16px}
+@media(max-width:700px){
+ .admin-shell[data-prototype-mode="true"] .admin-settings-page .theme-options{grid-template-columns:1fr}
+ .admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list{grid-template-columns:1fr}
+ .admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-setting-row{grid-column:span 1}
+}
