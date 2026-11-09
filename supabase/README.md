@@ -26,7 +26,7 @@ The current staff login flow uses **email + password**:
 
 ## Database and migrations
 
-The hosted project currently has 28 applied migrations. The canonical migration files are in `supabase/migrations`; their 14-digit versions must match the versions returned by Supabase migration history.
+The hosted project currently has 26 applied migrations. The canonical migration files are in `supabase/migrations`; their 14-digit versions must match the versions returned by Supabase migration history.
 
 Rules:
 1. Never rerun an already applied migration.
