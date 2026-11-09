@@ -42,6 +42,12 @@ function roleOf(account: Account) {
   return role === 'admin' ? 'Admin' : role === 'master' ? 'Master' : 'Не назначена'
 }
 
+function roleClass(account: Account) {
+  if (account.platform_role === 'master_pro') return 'master-pro'
+  const role = account.company_members?.[0]?.role
+  return role === 'admin' ? 'admin' : role === 'master' ? 'master' : 'unassigned'
+}
+
 export default function AccountsPrototype({ accounts, companies, pages, loading, busy, onCreate, onSettings, onToggle,  }: Props) {
   const [tab, setTab] = useState<Tab>('all')
   const [search, setSearch] = useState('')
@@ -86,7 +92,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
   return <section className="accounts-prototype">
     <header className="ap-heading">
       <div><div className="ap-eyebrow">WORKFLOWS / ADMINISTRATION</div><h2>Учётные записи</h2><p>Пользователи, роли и управление доступом</p></div>
-      <button type="button" className="ap-primary" onClick={onCreate}>＋ Создать УЗ</button>
+      <button type="button" className="ap-primary" onClick={onCreate}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>Создать УЗ</button>
     </header>
 
     <div className="ap-toolbar">
@@ -119,7 +125,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
             <div className="ap-person"><strong>{account.full_name || 'Без имени'}</strong>{account.force_password_change && <small className="ap-warning">Ожидает смены пароля</small>}</div>
             <span className="ap-muted">{account.email || '—'}</span>
             <span className="ap-muted">{account.phone_e164 || '—'}</span>
-            <span><i className={'ap-role ap-role-' + roleOf(account).toLowerCase().replace(/[^a-z]+/g, '-')}>{roleOf(account)}</i></span>
+            <span><i className={'ap-role ap-role-' + roleClass(account)}>{roleOf(account)}</i></span>
             <span className="ap-place" title={accountPlace(account)}>{accountPlace(account)}</span>
             <span><button type="button" className={'ap-switch ' + (!account.disabled_at ? 'is-on' : '')} role="switch" aria-checked={!account.disabled_at} aria-label={account.disabled_at ? 'Включить учётную запись' : 'Отключить учётную запись'} disabled={busy} onClick={() => onToggle(account)}><span/></button></span>
             <span><button type="button" className="ap-gear" title="Действия с учётной записью" aria-label={'Действия для ' + account.full_name} disabled={busy} onClick={() => onSettings(account)}><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.25"/><circle cx="8" cy="8" r="1.25"/><circle cx="13" cy="8" r="1.25"/></svg></button></span>
