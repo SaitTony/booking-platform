@@ -382,15 +382,16 @@ select extensions.ok(
 
 -- New schema hardening: indexes, timestamp maintenance and RLS policy shape.
 select extensions.ok(
-  (select count(*) = 7 from pg_indexes
+  (select count(*) = 8 from pg_indexes
    where schemaname = 'public'
      and indexname in (
        'masters_id_company_id_uq',
        'services_id_master_id_uq',
+       'bookings_service_master_idx',
+       'company_members_master_company_idx',
        'booking_status_history_booking_id_idx',
        'booking_status_history_changed_by_idx',
        'bookings_cancelled_by_idx',
-       'bookings_service_id_idx',
        'company_members_company_id_idx'
      )),
   'Foreign-key support and composite integrity indexes are present'
