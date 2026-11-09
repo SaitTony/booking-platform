@@ -62,7 +62,6 @@ export default function AdminApp() {
   const [temporaryPassword,setTemporaryPassword]=useState('000000')
   const [createRole,setCreateRole]=useState<'admin'|'master'|'master_pro'|''>('')
   const [createCompanyId,setCreateCompanyId]=useState('')
-  const [createMasterId,setCreateMasterId]=useState('')
   const [deleteTargetId,setDeleteTargetId]=useState('')
   const [resetTemporaryPassword,setResetTemporaryPassword]=useState('000000')
   const [companyName,setCompanyName]=useState('')
@@ -277,7 +276,7 @@ export default function AdminApp() {
     else {
       setNotice('Учётная запись и связанные страницы созданы.')
       setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('000000')
-      setCreateRole(''); setCreateCompanyId(''); setCreateMasterId(''); setCompanyName(''); setCompanySlug(''); setActiveModal(null)
+      setCreateRole(''); setCreateCompanyId(''); setCompanyName(''); setCompanySlug(''); setActiveModal(null)
       await Promise.all([loadAccounts(), loadDirectories()])
     }
     setBusy(false)
@@ -345,7 +344,7 @@ export default function AdminApp() {
         <header className="admin-panel-heading"><h2>Учётные записи</h2><span className="accordion-count">{accounts.length}</span></header>
         <div className="accordion-content">
           <div className="admin-action-grid">
-            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCreateMasterId('');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ и сразу назначить роль</small></button>
+            <button className="admin-action-card" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setActiveModal('account')}}><span className="admin-action-icon">＋</span><strong>Новая учётная запись</strong><small>Создать доступ и сразу назначить роль</small></button>
             <button className="admin-action-card" onClick={()=>setActiveModal('accounts')}><span className="admin-action-icon">☷</span><strong>Все пользователи</strong><small>Открыть список и управление учётными записями</small></button>
           </div>
         </div>
