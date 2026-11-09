@@ -1,6 +1,7 @@
 import CompanySettings from './CompanySettings'
 import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import StaffWorkspace from './StaffWorkspace'
+import AccountsPrototype from './AccountsPrototype'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -88,7 +89,9 @@ const roleLabel = (profile: Account) => {
 
 export default function AdminApp() {
   const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'masterPro'|'settings'|'accountSettings'|null>(null)
-  const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>('overview')
+  const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>(() => window.location.pathname.replace(/\/+$/, '').endsWith('/admin/accounts-prototype') ? 'accounts' : 'overview')
+  const [accountsLoading, setAccountsLoading] = useState(false)
+  const isAccountsPrototype = window.location.pathname.replace(/\/+$/, '').endsWith('/admin/accounts-prototype')
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [email, setEmail] = useState('')
@@ -189,14 +192,19 @@ export default function AdminApp() {
 
   async function loadAccounts() {
     if (!supabase) return
-    const { data, error: listError } = await supabase.from('profiles')
-      .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
-      .order('created_at', { ascending: false })
-    if (listError) setError(listError.message)
-    setAccounts((data ?? []).map(account => ({
-      ...account,
-      company_members: normalizeMembers((account as unknown as Account).company_members),
-    })) as Account[])
+    setAccountsLoading(true)
+    try {
+      const { data, error: listError } = await supabase.from('profiles')
+        .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
+        .order('created_at', { ascending: false })
+      if (listError) { setError(listError.message); return }
+      setAccounts((data ?? []).map(account => ({
+        ...account,
+        company_members: normalizeMembers((account as unknown as Account).company_members),
+      })) as Account[])
+    } finally {
+      setAccountsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -469,7 +477,8 @@ export default function AdminApp() {
               <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
             </section>
           </section>}
-      {activeSection==='accounts' && <section className="admin-accounts-workspace">
+      {activeSection==='accounts' && isAccountsPrototype && <AccountsPrototype accounts={accounts} companies={companies} pages={masterPages} loading={accountsLoading} busy={busy} onCreate={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}} onSettings={openAccountSettings} onToggle={toggleAccountStatus} onRefresh={()=>void Promise.all([loadAccounts(),loadDirectories()])}/>}
+      {activeSection==='accounts' && !isAccountsPrototype && <section className="admin-accounts-workspace">
         <header className="admin-accounts-toolbar">
           <button className="primary-button admin-create-account-button" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}}><span>＋</span> Создать УЗ</button>
           <div className="admin-account-stats">
