@@ -61,11 +61,11 @@ export default function MasterProBuilder() {
   return <main className="mpb-shell">
     <header className="mpb-topbar">
       <div className="mpb-brand"><span className="mpb-brand-mark">W</span><span>Workflows <small>· Конструктор Master_pro</small></span></div>
-      <div className="mpb-top-actions"><span className="mpb-draft-status"><i/> Черновик · демо-режим</span><Link to="/admin" className="mpb-back-link">Вернуться в админпанель</Link></div>
+      <div className="mpb-top-actions"><span className="mpb-draft-status"><i/> Черновик · демо-режим</span></div>
     </header>
     <div className="mpb-page-head">
       <div><h1>Создание страницы</h1><p>Настройте свою страницу и сразу посмотрите, как её увидят клиенты.</p></div>
-      <div className="mpb-page-actions"><button className="mpb-secondary" onClick={()=>{setSection('profile');setSaved(false)}}>Продолжить настройку</button><button className="mpb-primary" onClick={()=>setShowPublish(true)}>Опубликовать страницу</button></div>
+      <div className="mpb-page-actions"><Link to="/admin" className="mpb-secondary">Вернуться в Админ-панель</Link><button className="mpb-primary" onClick={()=>setShowPublish(true)}>Опубликовать страницу</button></div>
     </div>
     <div className="mpb-workspace">
       <aside className="mpb-sidebar">
