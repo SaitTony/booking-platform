@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(46);
+select extensions.plan(47);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -372,6 +372,22 @@ select extensions.ok(
       and p.prosecdef
   ),
   'SECURITY DEFINER access helpers are isolated in the non-exposed private schema'
+);
+
+select extensions.ok(
+  not exists (
+    select 1
+    from pg_default_acl d
+    join pg_namespace n on n.oid = d.defaclnamespace
+    cross join lateral aclexplode(d.defaclacl) acl
+    join pg_roles grantee on grantee.oid = acl.grantee
+    where d.defaclrole = 'postgres'::regrole
+      and n.nspname = 'public'
+      and d.defaclobjtype = 'f'
+      and grantee.rolname in ('anon', 'authenticated')
+      and acl.privilege_type = 'EXECUTE'
+  ),
+  'New public functions require explicit API-role grants'
 );
 
 select extensions.ok(
