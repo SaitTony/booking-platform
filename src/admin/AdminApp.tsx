@@ -154,7 +154,6 @@ export default function AdminApp() {
       setProfile(data as Profile | null)
       const membership=(data as Profile | null)?.company_members?.[0]
       if(membership){setPageCompanyId(membership.company_id);if(membership.role==='admin')setPageKind('company')}
-      else setProfile(data as Profile | null)
       setError('')
     } catch (profileLoadError) {
       console.error('Workflows profile load failed', profileLoadError)
