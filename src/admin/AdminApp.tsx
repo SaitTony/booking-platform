@@ -76,7 +76,7 @@ function AccountManagementRow({account,companies,pages,index,onSettings,onToggle
       <div className="account-inline-cell account-status-cell"><small>Доступ</small><button type="button" className={`admin-switch account-row-switch ${!disabled?'is-on':''}`} role="switch" aria-checked={!disabled} aria-label={disabled?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>onToggle(account)}><span/></button></div>
     </div>
     <div className="account-inline-actions">
-      <button type="button" className="admin-settings-trigger account-settings-button" aria-label={`Настройки учётной записи ${account.full_name}`} title="Настройки учётной записи" onClick={()=>onSettings(account)}><span aria-hidden="true">⚙</span></button>
+      <button type="button" className="admin-settings-trigger" aria-label={`Настройки учётной записи ${account.full_name}`} title="Настройки учётной записи" onClick={()=>onSettings(account)}><span aria-hidden="true">⚙</span></button>
     </div>
   </article>
 }
