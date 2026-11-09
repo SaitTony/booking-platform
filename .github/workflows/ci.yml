@@ -2,7 +2,7 @@ name: Validate Workflows
 
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
 
 permissions:
@@ -26,12 +26,10 @@ jobs:
           node-version: 22
 
       - name: Install frontend dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Report dependency vulnerabilities
-        run: |
-          npm audit --json > /tmp/npm-audit.json || true
-          node -e "const a=require('/tmp/npm-audit.json'); for (const [name,v] of Object.entries(a.vulnerabilities || {})) console.log(JSON.stringify({name,severity:v.severity,isDirect:v.isDirect,range:v.range,fixAvailable:v.fixAvailable,via:v.via.map(x=>typeof x==='string'?x:{title:x.title,url:x.url,range:x.range})}))"
+      - name: Fail on high or critical dependency vulnerabilities
+        run: npm audit --audit-level=high
 
       - name: TypeScript and Vite build
         run: npm run build
