@@ -193,7 +193,15 @@ Unless this catalog is explicitly amended, do not:
 
 ## 7. Scope and rollout
 
-This catalog is the canonical standard for all future Workflows UI decisions. For the current development stream, implementation work remains limited to the **new Accounts prototype** unless the user explicitly authorizes changes elsewhere. The existing/main admin interface must not be modified as part of prototype work.
+This catalog is the canonical target standard for future Workflows UI decisions.
+
+Current implementation status:
+- `AccountsPrototype.tsx` and `CompaniesPrototype.tsx` are components used by the **main administrative interface**. The word "Prototype" in their filenames is historical and does not mean that these screens live on a separate branch.
+- All ongoing product changes are made on `main`; old prototype/feature branches are not active development targets.
+- `MasterProBuilder.tsx` remains a separate demonstration prototype and does not persist data to Supabase.
+- The existing admin interface is not yet guaranteed to conform fully to every catalog rule. Treat this catalog as the approved standard for future UI work and migrate existing screens only when explicitly requested.
+
+Do not infer that a component is safe to remove or rewrite from its filename alone. Check its imports, routes and runtime usage first.
 
 ---
 
