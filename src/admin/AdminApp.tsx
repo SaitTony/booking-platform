@@ -463,7 +463,7 @@ export default function AdminApp() {
           {createRole==='admin'&&<p className="admin-modal-intro">Страница компании будет создана автоматически и связана с учётной записью Admin.</p>}
           <label className="admin-field">Временный пароль<input type="text" autoComplete="new-password" minLength={6} value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} required/></label>
           <p className="admin-modal-intro">После первого входа сотрудник должен будет задать собственный пароль.</p>
-          <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)||(createRole==='admin'||createRole==='master')&&!createCompanyId||(createRole==='master'||createRole==='master_pro')&&!createMasterId}>{busy?'Создаём…':'Создать учётную запись'}</button>
+          <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)||!createRole||(createRole==='admin'&&!companyName.trim())||(createRole==='master'&&!createCompanyId)}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
         {activeModal==='accounts'&&<div className="admin-modal-account-list">
           <h2 id="admin-modal-title">Все учётные записи</h2>
