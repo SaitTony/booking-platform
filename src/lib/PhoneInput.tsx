@@ -11,8 +11,8 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
   const inputRef = useRef<HTMLInputElement>(null)
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const raw = event.target.value
+    const prefixIndex = raw.indexOf('+7')
     const digits = raw.replace(/\D/g, '')
-    const hasExplicitCountryPrefix = /^\s*\+7/.test(raw)
 
     if (!digits) {
       onChange('+7')
@@ -20,10 +20,16 @@ export default function PhoneInput({ value, onChange, onFocus, ...props }: Phone
     }
 
     let national: string
-    if (hasExplicitCountryPrefix) {
-      national = digits.slice(1)
-      // A domestic 8 typed after the prefilled +7 is a trunk prefix, not a national digit.
+    if (prefixIndex >= 0) {
+      // If the caret is moved before +7, digits typed there are still national digits.
+      const beforePrefix = raw.slice(0, prefixIndex).replace(/\D/g, '')
+      const afterPrefix = raw.slice(prefixIndex + 2).replace(/\D/g, '')
+      national = beforePrefix + afterPrefix
       if (national.startsWith('8')) national = national.slice(1)
+      if (prefixIndex > 0) {
+        const caret = Math.min(2 + beforePrefix.length, 12)
+        window.requestAnimationFrame(() => inputRef.current?.setSelectionRange(caret, caret))
+      }
     } else {
       national = digits
       // Accept 8XXXXXXXXXX, 7XXXXXXXXXX, and 10 national digits.
