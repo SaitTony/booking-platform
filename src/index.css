@@ -963,3 +963,10 @@
 .admin-shell .account-inline-actions{align-items:center;justify-content:center}
 .admin-shell .admin-account-inline-row.is-disabled{opacity:.58;filter:saturate(.5)}
 @media(max-width:1050px){.admin-shell .account-inline-fields{grid-template-columns:42px 150px 180px 140px 120px 150px 150px 76px!important}}
+
+.admin-shell .admin-account-inline-row{grid-template-columns:minmax(0,1fr)!important}
+.admin-shell .account-inline-fields{grid-template-columns:42px minmax(130px,1.1fr) minmax(155px,1.25fr) minmax(130px,1fr) minmax(105px,.8fr) minmax(125px,1fr) minmax(125px,1fr) 76px 54px!important}
+.admin-shell .account-gear-cell{align-items:center;justify-content:center}
+.admin-shell .account-gear-cell .admin-settings-trigger{width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;font-size:31px!important;padding:0!important}
+.admin-shell .account-gear-cell .admin-settings-trigger span{font-size:31px!important;line-height:1!important}
+@media(max-width:1050px){.admin-shell .account-inline-fields{grid-template-columns:42px 150px 180px 140px 120px 150px 150px 76px 54px!important}}
