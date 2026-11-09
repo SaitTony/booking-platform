@@ -27,6 +27,13 @@ Deno.serve(async (req) => {
       return json({ error: "Удаление учётной записи Owner запрещено" }, 403);
     }
 
+    // Clean up pages and an exclusively-owned company before Auth cascades the profile.
+    const { error: cleanupError } = await admin.rpc("owner_cleanup_account_pages", {
+      p_actor_id: actor.id,
+      p_user_id: userId,
+    });
+    if (cleanupError) throw cleanupError;
+
     const { error: deleteError } = await admin.auth.admin.deleteUser(userId);
     if (deleteError) throw deleteError;
 
