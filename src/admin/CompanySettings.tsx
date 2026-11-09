@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 type Company={id:string;name:string;description:string;cover_url:string|null;theme:{id?:string}|null;is_active:boolean}
-export default function CompanySettings({isOwner,companyId,hideSelector=false}:{isOwner:boolean;companyId?:string;hideSelector?:boolean}) {
+export default function CompanySettings({isOwner,companyId,hideSelector=false,readOnly=false}:{isOwner:boolean;companyId?:string;hideSelector?:boolean;readOnly?:boolean}) {
   const [companies,setCompanies]=useState<Company[]>([])
   const [selectedId,setSelectedId]=useState(companyId??'')
   const [name,setName]=useState('')
@@ -40,12 +40,12 @@ export default function CompanySettings({isOwner,companyId,hideSelector=false}:{
   return <section className="admin-card workspace-section">
     <h3>Страница и оформление компании</h3>
     {isOwner&&!hideSelector&&<label className="admin-field">Компания<select value={selectedId} onChange={e=>setSelectedId(e.target.value)}><option value="">Выберите компанию</option>{companies.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
-    <label className="admin-field">Название<input value={name} onChange={e=>setName(e.target.value)} required/></label>
-    <label className="admin-field">Описание<textarea value={description} onChange={e=>setDescription(e.target.value)} rows={3}/></label>
-    <label className="admin-field">URL обложки<input value={coverUrl} onChange={e=>setCoverUrl(e.target.value)} placeholder="https://…"/></label>
-    <label className="admin-field">Общая цветовая тема<select value={theme} onChange={e=>setTheme(e.target.value)}><option value="natural">Natural</option><option value="graphite">Graphite</option><option value="sand">Sand</option><option value="green">Deep Green</option><option value="blue">Midnight Blue</option><option value="dark">Dark</option></select></label>
+    <label className="admin-field">Название<input value={name} onChange={e=>setName(e.target.value)} required disabled={readOnly}/></label>
+    <label className="admin-field">Описание<textarea value={description} onChange={e=>setDescription(e.target.value)} rows={3} disabled={readOnly}/></label>
+    <label className="admin-field">URL обложки<input value={coverUrl} onChange={e=>setCoverUrl(e.target.value)} placeholder="https://…" disabled={readOnly}/></label>
+    <label className="admin-field">Общая цветовая тема<select value={theme} onChange={e=>setTheme(e.target.value)} disabled={readOnly}><option value="natural">Natural</option><option value="graphite">Graphite</option><option value="sand">Sand</option><option value="green">Deep Green</option><option value="blue">Midnight Blue</option><option value="dark">Dark</option></select></label>
     {isOwner&&<label className="admin-field"><span>Компания активна</span><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)}/></label>}
     {error&&<p className="admin-error">{error}</p>}{notice&&<p className="admin-notice">{notice}</p>}
-    <button className="primary-button" disabled={busy||!selectedId} onClick={()=>void save()}>{busy?'Сохраняем…':'Сохранить настройки'}</button>
+    {!readOnly&&<button className="primary-button" disabled={busy||!selectedId} onClick={()=>void save()}>{busy?'Сохраняем…':'Сохранить настройки'}</button>}
   </section>
 }
