@@ -11,7 +11,7 @@ type Booking = { id:string; starts_at:string; ends_at:string; status:string; ser
 
 const weekdays=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота']
 
-export default function StaffWorkspace({profile,kindFilter,companyIdFilter}:{profile:StaffProfile;kindFilter?:'individual'|'company';companyIdFilter?:string}) {
+export default function StaffWorkspace({profile,kindFilter,companyIdFilter,readOnly=false}:{profile:StaffProfile;kindFilter?:'individual'|'company';companyIdFilter?:string;readOnly?:boolean}) {
   const [masters,setMasters]=useState<Master[]>([])
   const [masterId,setMasterId]=useState('')
   const [services,setServices]=useState<Service[]>([])
@@ -32,8 +32,8 @@ export default function StaffWorkspace({profile,kindFilter,companyIdFilter}:{pro
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState('')
   const [notice,setNotice]=useState('')
-  const canEdit=profile.platform_role==='owner'||profile.platform_role==='master_pro'||profile.company_members?.some(m=>m.role==='admin')===true
-  const canCancel=canEdit
+  const canEdit=!readOnly&&(profile.platform_role==='owner'||profile.platform_role==='master_pro'||profile.company_members?.some(m=>m.role==='admin')===true)
+  const canCancel=!readOnly&&canEdit
 
   async function loadMasters(){
     if(!supabase)return
