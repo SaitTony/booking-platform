@@ -360,20 +360,6 @@ export default function AdminApp() {
     setBusy(false)
   }
 
-  function accountRelationLabel(account: Account) {
-    const membership = account.company_members?.[0]
-    if (membership) {
-      const company = companies.find(item => item.id === membership.company_id)
-      if (membership.role === 'admin') return 'Компания: ' + (company?.name ?? 'не найдена') + (company?.slug ? ' · /' + company.slug : '')
-      const page = masterPages.find(item => item.id === membership.master_id)
-      return 'Компания: ' + (company?.name ?? 'не найдена') + ' · Страница: ' + (page?.display_name ?? 'не найдена') + (page?.slug ? ' · /' + page.slug : '')
-    }
-    if (account.platform_role === 'master_pro') {
-      const page = masterPages.find(item => item.profile_id === account.id)
-      return page ? 'Индивидуальная страница: ' + page.display_name + ' · /' + page.slug : 'Индивидуальная страница не найдена'
-    }
-    return 'Связь не назначена'
-  }
   const [emailForCreate, setEmailForCreate] = useState('')
   const [phoneForCreate, setPhoneForCreate] = useState('')
 
