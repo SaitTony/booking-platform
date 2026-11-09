@@ -71,12 +71,11 @@ function AccountManagementRow({account,companies,pages,busy,onSettings,onSaveCha
     setMasterId(membership?.master_id??individualPage?.id??'');setPageName(individualPage?.display_name??'')
   },[account.id,currentRole,membership?.company_id,membership?.master_id,individualPage?.id,individualPage?.display_name])
   const companyPages=pages.filter(page=>page.kind==='company'&&page.company_id===companyId&&(!page.profile_id||page.profile_id===account.id)&&page.is_active)
-  const individualPages=pages.filter(page=>page.kind==='individual'&&(!page.profile_id||page.profile_id===account.id)&&page.is_active)
-  const assignmentReady=role==='admin'?!!companyId:role==='master'?!!companyId&&!!masterId:role==='master_pro'?!!masterId:false
-  const selectedPage=pages.find(page=>page.id===masterId)
+  const assignmentReady=role==='admin'?!!companyId:role==='master'?!!companyId&&!!masterId:role==='master_pro'?!!individualPage:false
+  const selectedPage=role==='master_pro'?individualPage:pages.find(page=>page.id===masterId)
   const initialCompanyId=membership?.company_id??''
   const initialMasterId=membership?.master_id??individualPage?.id??''
-  const hasChanges=role!==currentRole||companyId!==initialCompanyId||masterId!==initialMasterId||(role==='master_pro'&&!!selectedPage&&pageName.trim()!==selectedPage.display_name)
+  const hasChanges=role!==currentRole||companyId!==initialCompanyId||masterId!==initialMasterId||(role==='master_pro'&&!!individualPage&&pageName.trim()!==individualPage.display_name)
   return <article className="admin-account admin-account-inline-row">
     <div className="account-inline-fields">
       <div className="account-inline-cell account-name-cell"><small>Сотрудник</small><strong>{account.full_name}</strong></div>
@@ -85,8 +84,7 @@ function AccountManagementRow({account,companies,pages,busy,onSettings,onSaveCha
       {account.platform_role==='owner'?<div className="account-inline-cell"><small>Роль</small><strong>Owner</strong></div>:<label className="account-inline-field"><small>Роль</small><select value={role} disabled={busy} onChange={event=>{const next=event.target.value as StaffRole|'';setRole(next);if(next==='master_pro'){setCompanyId('');setMasterId(individualPage?.id??individualPages[0]?.id??'')}else if(next==='master'&&!companyId){const first=companies.find(company=>company.is_active);setCompanyId(first?.id??'');setMasterId('')}else if(next==='admin'){setMasterId('')}}}><option value="">Не назначена</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>}
       {(role==='admin'||role==='master')&&<label className="account-inline-field account-company-field"><small>Компания</small><select value={companyId} disabled={busy} onChange={event=>{setCompanyId(event.target.value);setMasterId('')}}><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
       {role==='master'&&<label className="account-inline-field account-page-field"><small>Страница мастера</small><select value={masterId} disabled={busy||!companyId} onChange={event=>setMasterId(event.target.value)}><option value="">Выберите страницу</option>{companyPages.map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
-      {role==='master_pro'&&<><label className="account-inline-field account-page-field"><small>Страница</small><select value={masterId} disabled={busy} onChange={event=>{setMasterId(event.target.value);setPageName(pages.find(page=>page.id===event.target.value)?.display_name??'')}}><option value="">Выберите страницу</option>{individualPages.map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label><label className="account-inline-field account-page-name-field"><small>Название страницы</small><input value={pageName} disabled={busy||!masterId} onChange={event=>setPageName(event.target.value)} /></label></>}
-      {account.force_password_change&&<span className="account-force-change">Требуется смена пароля</span>}
+      {role==='master_pro'&&<label className="account-inline-field account-page-name-field"><small>Название страницы</small><input value={pageName} disabled={busy||!individualPage} onChange={event=>setPageName(event.target.value)} /></label>}
     </div>
     {account.platform_role!=='owner'&&<div className="account-inline-actions">
       <button type="button" className="account-save-button" aria-label="Сохранить изменения учётной записи" title={hasChanges?'Сохранить изменения':'Нет изменений'} disabled={busy||!hasChanges||!assignmentReady} onClick={()=>role&&onSaveChanges(account,role,role==='master_pro'?null:companyId||null,role==='admin'?null:masterId||null,pageName)}><span aria-hidden="true">✓</span></button>
@@ -461,10 +459,25 @@ export default function AdminApp() {
             <div className="admin-account-stat"><small>Активно УЗ</small><strong>{accounts.filter(account=>!account.disabled_at).length}</strong></div>
           </div>
         </header>
-        <div className="admin-account-list admin-account-list-inline">
-          {accounts.length?accounts.map(account=><AccountManagementRow key={account.id} account={account} companies={companies} pages={masterPages} busy={busy}
-            onSettings={item=>{setSettingsAccountId(item.id);setActiveModal('accountSettings')}}
-            onSaveChanges={(account,role,companyId,masterId,pageName)=>void saveAccountChanges(account,role,companyId,masterId,pageName)}/>):<p className="admin-empty">Учётных записей пока нет.</p>}
+        <div className="admin-account-groups">
+          <section className="admin-account-group">
+            <h3>Мастера_pro</h3>
+            <div className="admin-account-list admin-account-list-inline">
+              {accounts.filter(account=>account.platform_role==='master_pro').map(account=><AccountManagementRow key={account.id} account={account} companies={companies} pages={masterPages} busy={busy}
+                onSettings={item=>{setSettingsAccountId(item.id);setActiveModal('accountSettings')}}
+                onSaveChanges={(account,role,companyId,masterId,pageName)=>void saveAccountChanges(account,role,companyId,masterId,pageName)}/>)}
+              {!accounts.some(account=>account.platform_role==='master_pro')&&<p className="admin-empty">Мастеров_pro пока нет.</p>}
+            </div>
+          </section>
+          <section className="admin-account-group">
+            <h3>Сотрудники компаний (админы и мастера)</h3>
+            <div className="admin-account-list admin-account-list-inline">
+              {accounts.filter(account=>account.platform_role!=='master_pro'&&account.platform_role!=='owner').map(account=><AccountManagementRow key={account.id} account={account} companies={companies} pages={masterPages} busy={busy}
+                onSettings={item=>{setSettingsAccountId(item.id);setActiveModal('accountSettings')}}
+                onSaveChanges={(account,role,companyId,masterId,pageName)=>void saveAccountChanges(account,role,companyId,masterId,pageName)}/>)}
+              {!accounts.some(account=>account.platform_role!=='master_pro'&&account.platform_role!=='owner')&&<p className="admin-empty">Сотрудников компаний пока нет.</p>}
+            </div>
+          </section>
         </div>
       </section>}
 
@@ -583,6 +596,7 @@ export default function AdminApp() {
           <h2 id="admin-modal-title">Настройки учётной записи</h2><p className="admin-modal-intro"><strong>{settingsAccount.full_name}</strong><br/>{settingsAccount.email}</p>
           <div className="account-settings-list">
             <div className="account-setting-row"><div><strong>Видимость учётной записи</strong><span>{settingsAccount.disabled_at?'Учётная запись отключена':'Учётная запись активна'}</span></div><button type="button" className={`admin-switch ${!settingsAccount.disabled_at?'is-on':''}`} role="switch" aria-checked={!settingsAccount.disabled_at} aria-label={settingsAccount.disabled_at?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>void toggleAccountStatus(settingsAccount)}><span/></button></div>
+            {settingsAccount.force_password_change&&<div className="account-setting-row"><div><strong>Первый вход</strong><span>Сотрудник ещё не сменил временный пароль</span></div><span className="account-password-warning">Ожидает смены</span></div>}
             <div className="account-setting-row"><div><strong>Сбросить пароль</strong><span>Установить сотруднику временный пароль</span></div><button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(settingsAccount.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить</button></div>
             <div className="account-setting-row"><div><strong>Удалить УЗ</strong><span>Удалить учётную запись и профиль сотрудника</span></div><button type="button" className="danger-button" disabled={busy} onClick={()=>{setDeleteTargetId(settingsAccount.id);setActiveModal('delete')}}>Удалить</button></div>
           </div>
