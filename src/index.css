@@ -1197,3 +1197,48 @@
  .admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-settings-list{grid-template-columns:1fr}
  .admin-shell[data-prototype-mode="true"] .admin-account-settings-modal .account-setting-row{grid-column:span 1}
 }
+
+
+/* Follow-up refinements for the accounts prototype only. */
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav{
+  min-height:56px;
+  height:56px;
+  justify-content:center;
+  align-items:center;
+  gap:28px;
+  margin:0 0 22px;
+  padding:0 12px;
+  border-top:1px solid var(--ap-line);
+  border-bottom:1px solid var(--ap-line);
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav::-webkit-scrollbar{display:none}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button{
+  min-height:54px;
+  align-self:center;
+  gap:10px;
+  padding:0 5px;
+  font-size:15px;
+}
+.admin-shell[data-prototype-mode="true"] .ap-primary-nav button svg{width:19px;height:19px}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-search input{font-size:13px!important}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-primary{
+  min-height:34px;
+  padding:6px 12px;
+  border:1px solid #1f883d;
+  border-radius:6px;
+  background:#1f883d;
+  color:#fff;
+  font:600 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  line-height:20px;
+  box-shadow:0 1px 0 rgba(31,35,40,.1);
+}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-primary:hover{background:#1a7f37;border-color:#1a7f37}
+.admin-shell[data-prototype-mode="true"] .accounts-prototype .ap-grid{
+  grid-template-columns:36px minmax(145px,1.05fr) minmax(165px,1.2fr) minmax(125px,.9fr) minmax(95px,.7fr) minmax(130px,1fr) minmax(140px,1.05fr) 58px 42px;
+}
+@media(max-width:600px){
+  .admin-shell[data-prototype-mode="true"] .ap-primary-nav{justify-content:flex-start;gap:18px}
+}
