@@ -490,7 +490,7 @@ export default function AdminApp() {
           <section className="admin-account-group">
             <h3>Сотрудники компаний (админы и мастера)</h3>
             <div className="admin-account-list admin-account-list-inline">
-              {accounts.filter(account=>account.platform_role!=='master_pro'&&account.platform_role!=='owner').map((account,index)=><AccountManagementRow key={account.id} account={account} index={index+1} companies={companies} pages={masterPages} onSettings={openAccountSettings}/>)}
+              {accounts.filter(account=>account.platform_role!=='master_pro'&&account.platform_role!=='owner').map(account=><AccountManagementRow key={account.id} account={account} index={accounts.indexOf(account)+1} companies={companies} pages={masterPages} onSettings={openAccountSettings}/>)}
               {!accounts.some(account=>account.platform_role!=='master_pro'&&account.platform_role!=='owner')&&<p className="admin-empty">Сотрудников компаний пока нет.</p>}
             </div>
           </section>
