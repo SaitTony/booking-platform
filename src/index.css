@@ -1379,3 +1379,14 @@
   font-size:11px;
   background:var(--admin-hover,var(--hover,#f6f8fa));
 }
+
+
+/* Account settings: label left, control right; public Master_pro URL below. */
+.admin-shell .account-settings-list>.account-settings-field{display:grid;grid-template-columns:minmax(190px, 230px) minmax(0,1fr);align-items:center;gap:18px;padding:14px 16px;margin:0;border-bottom:1px solid var(--admin-line,var(--line));color:var(--admin-text,var(--text));font-size:14px;font-weight:600}
+.admin-shell .account-settings-list>.account-settings-field input,.admin-shell .account-settings-list>.account-settings-field select{width:100%;min-width:0;margin:0}
+.admin-shell .account-settings-list>.account-settings-field small{grid-column:2;color:var(--admin-muted,var(--muted));font-size:12px;font-weight:400}
+.admin-shell .account-page-url{display:grid;gap:7px;padding:14px 16px;border:1px solid var(--admin-line,var(--line));border-radius:12px;background:var(--admin-surface,var(--surface))}
+.admin-shell .account-page-url>.admin-field{display:grid;grid-template-columns:minmax(190px,230px) minmax(0,1fr);align-items:center;gap:18px;margin:0;font-weight:600}
+.admin-shell .account-page-url input{width:100%;min-width:0;font-size:13px;font-weight:500}
+.admin-shell .account-page-url>small{color:var(--admin-muted,var(--muted));font-size:12px;line-height:1.45}
+@media(max-width:700px){.admin-shell .account-settings-list>.account-settings-field,.admin-shell .account-page-url>.admin-field{grid-template-columns:1fr;gap:8px}.admin-shell .account-settings-list>.account-settings-field small{grid-column:1}}
