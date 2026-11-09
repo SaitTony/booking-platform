@@ -670,3 +670,65 @@
   .admin-shell .admin-panel-section>.accordion-content{padding:12px}
   .admin-shell .admin-branding h1{font-size:24px}
 }
+
+
+/* Admin panel — account controls, compact list modal and larger desktop type */
+@media (min-width:681px) {
+  .admin-shell .admin-main-content {font-size:17px}
+  .admin-shell .admin-panel-heading h2 {font-size:25px}
+  .admin-shell .admin-panel-section>.accordion-content {font-size:16px}
+  .admin-shell .admin-action-card strong {font-size:17px}
+  .admin-shell .admin-action-card small {font-size:14px}
+  .admin-shell .admin-field {font-size:16px}
+  .admin-shell .admin-field input,
+  .admin-shell .admin-field select,
+  .admin-shell .admin-field textarea {font-size:16px;min-height:50px}
+  .admin-shell .admin-account>div strong {font-size:17px}
+  .admin-shell .admin-account>div span {font-size:14px}
+}
+.admin-shell .admin-overview {gap:20px}
+.admin-shell .admin-overview h2 {margin:0 0 2px;font-size:26px}
+.admin-shell .admin-stat-card {gap:9px}
+.admin-shell .admin-stat-card span {font-size:15px}
+.admin-shell .admin-stat-card strong {font-size:32px}
+.admin-shell .admin-stat-card small {font-size:14px}
+.admin-shell .admin-modal:has(.admin-modal-account-list) {width:min(100%,820px)}
+.admin-shell .admin-modal-account-list {max-height:min(72vh,720px);overflow:auto;padding-right:4px}
+.admin-shell .admin-account-manage-row {display:flex;align-items:center;justify-content:space-between;gap:18px}
+.admin-shell .admin-account-manage-row .account-main {display:flex;flex:1 1 260px;min-width:0;flex-direction:column;gap:5px}
+.admin-shell .admin-account-manage-row .account-main strong {font-size:16px;color:#263f5b}
+.admin-shell .admin-account-manage-row .account-main span {font-size:13px;overflow-wrap:anywhere}
+.admin-shell .admin-account-manage-row .account-controls {display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.admin-shell .admin-switch {
+  position:relative;display:inline-flex;align-items:center;flex:0 0 52px;width:52px;height:31px;
+  padding:3px;border:0;border-radius:999px;background:#aeb7c2;cursor:pointer;
+  transition:background .18s ease,opacity .18s ease;vertical-align:middle;
+}
+.admin-shell .admin-switch span {
+  display:block;width:25px;height:25px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.22);transform:translateX(0);
+  transition:transform .18s ease;
+}
+.admin-shell .admin-switch.is-on {background:#34c759}
+.admin-shell .admin-switch.is-on span {transform:translateX(21px)}
+.admin-shell .admin-switch:disabled {opacity:.55;cursor:wait}
+.admin-shell .admin-switch:focus-visible {outline:3px solid rgba(52,199,89,.3);outline-offset:3px}
+.admin-shell .company-status-row {justify-content:space-between;align-items:center;padding:15px 17px}
+.admin-shell .company-status-row>div {display:flex;flex-direction:column;gap:5px}
+.admin-shell .company-status-row>div strong {font-size:16px}
+.admin-shell .company-status-row>div span {font-size:13px;color:#718197}
+.admin-shell .danger-button {
+  min-height:39px;padding:9px 13px;border:1px solid #f0cccc;border-radius:9px;
+  background:#fff5f5;color:#b43b3b;font-size:13px;font-weight:700;cursor:pointer;
+}
+.admin-shell .danger-button:hover {background:#ffeaea;border-color:#e8b4b4}
+.admin-shell .danger-button:disabled {opacity:.55;cursor:wait}
+.admin-shell .admin-modal-actions {display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+@media(max-width:760px) {
+  .admin-shell .admin-account-manage-row {align-items:flex-start;flex-direction:column;gap:12px}
+  .admin-shell .admin-account-manage-row .account-controls {justify-content:flex-start;width:100%}
+  .admin-shell .admin-account-manage-row .account-controls .secondary-button,
+  .admin-shell .admin-account-manage-row .account-controls .danger-button {font-size:12px}
+  .admin-shell .admin-modal-account-list {max-height:65vh}
+  .admin-shell .admin-modal-actions {flex-wrap:wrap}
+}
