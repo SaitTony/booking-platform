@@ -140,6 +140,11 @@ export default function AdminApp() {
   const displayedProfile:Profile|null=profile?.platform_role==='owner'&&previewAccount?{...previewAccount,platform_role:previewRole==='master_pro'?'master_pro':'pending',company_members:previewMembership?[previewMembership]:[]}:profile
   const viewCompanyId=previewAccount&&previewMembership?previewMembership.company_id:pageCompanyId
   const settingsAccount=accounts.find(account=>account.id===settingsAccountId)
+  const settingsPage=masterPages.find(page=>page.id===editMasterId)
+  const editPageSlug=editRole==='master_pro'&&settingsPage
+    ? (makeSlug(editPageName)+(settingsPage.slug.match(/-[a-z0-9]{6}$/)?.[0]??('-'+settingsPage.id.replace(/-/g,'').slice(0,6))))
+    : ''
+  const editPageUrl=editPageSlug? 'https://saittony.github.io/workflows/pro/'+editPageSlug : ''
 
   function openAccountSettings(account:Account) {
     const membership=account.company_members?.[0]
@@ -377,9 +382,13 @@ export default function AdminApp() {
     const currentMasterId=membership?.master_id??individualPage?.id??''
     const assignmentChanged=editRole!==currentRole||editCompanyId!==currentCompanyId||editMasterId!==currentMasterId
     const selectedPage=masterPages.find(page=>page.id===editMasterId)
-    const pageNameChanged=!!selectedPage&&editPageName.trim()!==selectedPage.display_name
+    const nextPageSlug=selectedPage&&editRole==='master_pro'
+      ? makeSlug(editPageName.trim())+(selectedPage.slug.match(/-[a-z0-9]{6}$/)?.[0]??('-'+selectedPage.id.replace(/-/g,'').slice(0,6)))
+      : selectedPage?.slug??''
+    const pageNameChanged=!!selectedPage&&(editPageName.trim()!==selectedPage.display_name||nextPageSlug!==selectedPage.slug)
     const nameChanged=editFullName.trim()!==settingsAccount.full_name
     if(!assignmentChanged&&!pageNameChanged&&!nameChanged){setNotice('Изменений нет.');return}
+    if(editRole==='master_pro'&&(!editPageName.trim()||!makeSlug(editPageName.trim()))){setError('Название страницы должно содержать буквы или цифры.');return}
     setBusy(true);setError('');setNotice('')
     try {
       if(nameChanged){
@@ -395,7 +404,7 @@ export default function AdminApp() {
         if(assignError)throw new Error(await getFunctionErrorMessage(assignError,'Не удалось сохранить роль и привязку учётной записи.'))
       }
       if(pageNameChanged&&selectedPage){
-        const {error:updatePageError}=await supabase.from('masters').update({display_name:editPageName.trim()}).eq('id',selectedPage.id)
+        const {error:updatePageError}=await supabase.from('masters').update({display_name:editPageName.trim(),slug:nextPageSlug}).eq('id',selectedPage.id)
         if(updatePageError)throw updatePageError
       }
       setNotice('Данные учётной записи сохранены.')
@@ -652,12 +661,12 @@ export default function AdminApp() {
         </div>}
         {activeModal==='accountSettings'&&settingsAccount&&<form className="admin-account-settings-modal" onSubmit={saveAccountSettings}>
           <h2 id="admin-modal-title">Настройки учётной записи</h2>
-          <p className="admin-modal-intro"><strong>{settingsAccount.email}</strong></p>
           <div className="account-settings-list">
-            <label className="admin-field">Имя пользователя<input value={editFullName} onChange={event=>setEditFullName(event.target.value)} required/></label>
-            <label className="admin-field">Роль<select value={editRole} onChange={event=>{const next=event.target.value as StaffRole;setEditRole(next);setEditCompanyId(next==='master_pro'?'':settingsAccount.company_members?.[0]?.company_id??'');const linkedPage=masterPages.find(page=>page.profile_id===settingsAccount.id&&(next==='master_pro'?page.kind==='individual':page.kind==='company'));setEditMasterId(linkedPage?.id??'');setEditPageName(linkedPage?.display_name??'')}}><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
-            {(editRole==='admin'||editRole==='master')&&<label className="admin-field">Компания<select value={editCompanyId} onChange={event=>{setEditCompanyId(event.target.value);setEditMasterId('')}}><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
-            {(editRole==='master'||editRole==='master_pro')&&<label className="admin-field">Название собственной страницы<input value={editPageName} onChange={event=>setEditPageName(event.target.value)} disabled={!editMasterId}/>{!editMasterId&&<small>У этой учётной записи пока нет страницы соответствующего типа.</small>}</label>}
+            <label className="admin-field account-settings-field">Имя пользователя<input value={editFullName} onChange={event=>setEditFullName(event.target.value)} required/></label>
+            <label className="admin-field account-settings-field">Роль<select value={editRole} onChange={event=>{const next=event.target.value as StaffRole;setEditRole(next);setEditCompanyId(next==='master_pro'?'':settingsAccount.company_members?.[0]?.company_id??'');const linkedPage=masterPages.find(page=>page.profile_id===settingsAccount.id&&(next==='master_pro'?page.kind==='individual':page.kind==='company'));setEditMasterId(linkedPage?.id??'');setEditPageName(linkedPage?.display_name??'')}}><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
+            {(editRole==='admin'||editRole==='master')&&<label className="admin-field account-settings-field">Компания<select value={editCompanyId} onChange={event=>{setEditCompanyId(event.target.value);setEditMasterId('')}}><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
+            {(editRole==='master'||editRole==='master_pro')&&<label className="admin-field account-settings-field">Название собственной страницы<input value={editPageName} onChange={event=>setEditPageName(event.target.value)} disabled={!editMasterId}/>{!editMasterId&&<small>У этой учётной записи пока нет страницы соответствующего типа.</small>}</label>}
+            {editRole==='master_pro'&&editPageUrl&&<div className="account-page-url"><label className="admin-field">Полный адрес страницы<input value={editPageUrl} readOnly onFocus={event=>event.currentTarget.select()}/></label><small>Адрес автоматически обновится при изменении названия страницы. Скопируйте его и передайте владельцу страницы.</small></div>}
             {settingsAccount.force_password_change&&<div className="account-setting-row"><div><strong>Первый вход</strong><span>Сотрудник ещё не сменил временный пароль</span></div><span className="account-password-warning">Ожидает смены</span></div>}
             <div className="account-setting-row"><div><strong>Сбросить пароль</strong><span>Установить сотруднику временный пароль</span></div><button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(settingsAccount.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить</button></div>
             <div className="account-setting-row"><div><strong>Удалить УЗ</strong><span>Удалить учётную запись и профиль сотрудника</span></div><button type="button" className="danger-button" disabled={busy} onClick={()=>{setDeleteTargetId(settingsAccount.id);setActiveModal('delete')}}>Удалить</button></div>
