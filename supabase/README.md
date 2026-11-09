@@ -1,33 +1,88 @@
-# Supabase setup for Booking Space
+# Supabase — Workflows
 
-The frontend is hosted on GitHub Pages. Supabase provides Auth, PostgreSQL, Edge Functions and Storage.
+Supabase backend for the Workflows application.
 
-## Before applying migrations
+## Project
 
-1. Open the intended Supabase project and verify its region and project URL.
-2. In Authentication > Sign In / Providers, enable Email sign-in and disable Phone sign-in. Disable email confirmations for this staff-only password workflow; public self-registration must remain disabled.
-3. Do not enable anonymous account creation. Staff accounts are created only by the Owner Edge Function.
-4. Review the SQL migration files in `supabase/migrations` in ascending filename order. Run them in the Supabase SQL Editor only after reviewing the target project. Do not run them twice.
-5. Configure Edge Function secrets. Supabase normally supplies the project URL and service role key to Edge Functions; verify the names exist:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `ALLOWED_ORIGIN=https://saittony.github.io`
-6. Deploy the functions:
-   - `create-user`
-   - `assign-user-role`
-   - `change-password`
-   - `owner-reset-access`
+- Project name: `workflows-DB`
+- Project ref: `cetcxttaqtberrntsntr`
+- API URL: `https://cetcxttaqtberrntsntr.supabase.co`
+- Hosted schema: PostgreSQL, schema `public`
+- Frontend: GitHub Pages at `https://saittony.github.io/workflows/`
 
-All functions verify the caller's access token and check the Owner role server-side. The service role key must never be exposed to the browser, committed to Git, or placed in a `VITE_*` variable.
+Never expose the Supabase service-role/secret key to the browser or commit it to Git. The frontend uses the project's publishable key.
 
-## Bootstrap the first Owner
+## Authentication settings
 
-The first Owner must be provisioned through a trusted administrative session, not through a public endpoint.
+The current staff login flow uses **email + password**:
+- Enable Email sign-in.
+- Disable Phone sign-in as an authentication provider.
+- Disable email confirmation for the Owner-provisioned staff workflow.
+- Keep public sign-up and anonymous sign-in disabled.
+- Staff accounts are created only by the Owner Edge Function.
+- The phone number is stored as a contact field in E.164 format `+7XXXXXXXXXX`; it is not the login identifier.
 
-1. In Supabase Dashboard > Authentication > Users, create a user with the Owner's email and a strong temporary password. Enable **Auto Confirm User**. In User Metadata, set `full_name` and `phone_e164` (E.164 format, e.g. `+358XXXXXXXXX`).
-2. The database trigger creates a profile with the safe `pending` role and stores the email and contact phone.
-3. In SQL Editor, replace the placeholder with the Owner's exact email and run this one-time statement:
+**Security setting still requiring Dashboard action:** enable **Leaked Password Protection** in Authentication → Settings → Password Security. The connected Supabase tools do not expose this Auth setting for direct update. After enabling it, run the Security Advisor again.
+
+## Database and migrations
+
+The hosted project currently has 22 applied migrations. The canonical migration files are in `supabase/migrations`; their 14-digit versions must match the versions returned by Supabase migration history.
+
+Rules:
+1. Never rerun an already applied migration.
+2. Never edit an already-applied migration to change hosted schema.
+3. Add each future schema change as a new migration.
+4. Before a production migration, run the local disposable Supabase CI workflow and review the SQL.
+5. Keep migration files and the hosted `supabase_migrations.schema_migrations` history synchronized.
+
+The current schema has 11 principal public tables:
+`profiles`, `companies`, `company_members`, `masters`, `services`, `working_hours`, `schedule_exceptions`, `booking_settings`, `clients`, `bookings`, `booking_status_history`.
+
+RLS is enabled on all these tables. Foreign keys, uniqueness rules, CHECK constraints and indexes enforce core data integrity. Confirmed booking overlap is prevented by the `bookings_no_overlap` exclusion constraint; do not replace it with a frontend-only check or add a duplicate constraint.
+
+The migration set includes:
+- initial schema, booking constraints and RLS;
+- email/password authentication and phone validation;
+- Owner bootstrap and account/page lifecycle safeguards;
+- company deletion/archive behavior;
+- unique active individual Master_pro page names;
+- reserved company slugs, FK/index improvements, timestamp triggers and consolidated RLS read/write policies.
+
+## Edge Functions
+
+All eight functions are deployed with JWT verification enabled:
+
+- `create-user`
+- `assign-user-role`
+- `change-password`
+- `owner-reset-access`
+- `owner-set-account-status`
+- `owner-delete-user`
+- `owner-update-account-name`
+- `owner-delete-company`
+
+The deployment workflow is `.github/workflows/deploy-create-user.yml`. It deploys the full function set when any function source, the workflow, or relevant deployment configuration changes. The Supabase CLI version is pinned to 3.0.0 in that workflow.
+
+Owner-only functions verify the caller's JWT and then verify the active Owner profile server-side. Do not trust role or company identifiers supplied by the frontend.
+
+## Required Edge Function secrets
+
+Supabase supplies the project URL and API keys to Edge Functions. Verify that these environment variables are present:
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ALLOWED_ORIGIN=https://saittony.github.io`
+
+The shared helper `supabase/functions/_shared/auth.ts` constructs anonymous and service-role clients and validates Owner access. Do not copy service-role credentials into GitHub source or Vite environment variables.
+
+## First Owner bootstrap
+
+For a new environment only:
+
+1. In Supabase Dashboard → Authentication → Users, create the first user with email and a strong temporary password; enable Auto Confirm User.
+2. Supply `full_name` and `phone_e164` user metadata. The contact phone must match `+7` plus 10 digits.
+3. The database trigger creates a profile with the safe `pending` role.
+4. In SQL Editor, replace the placeholder with the exact Owner email and run:
 
 ```sql
 update public.profiles
@@ -36,39 +91,36 @@ where lower(email) = lower('owner@example.com')
 returning id, full_name, email, phone_e164, platform_role, force_password_change;
 ```
 
-4. Verify exactly one row was returned and `force_password_change` is `true`. If zero or more than one row is returned, stop and investigate.
-5. Sign in at `/workflows/admin` using that email and temporary password. The first login will require a password change; after changing it, the Owner permissions become active.
+5. Verify exactly one row was returned and `force_password_change = true`.
+6. Sign in at `/workflows/admin` using the email and temporary password, then complete the forced password change.
 
-Never create an endpoint that lets a user promote their own account to Owner.
+Never create a public endpoint that lets a user promote their own profile to Owner.
 
 ## Frontend environment
 
-Copy `.env.example` to a local `.env` for development and set:
+For local development, configure:
 - `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_KEY` (or the project's publishable key)
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-For GitHub Pages builds, add repository Actions secrets with those same names and expose them to the Vite build step. The anon/publishable key is designed for frontend use and is protected by RLS. Do not use the service role key.
+The GitHub Pages workflow currently supplies the project URL and publishable key to the Vite build. Publishable keys are intended for browser use and rely on RLS. Service-role keys must never be included.
 
-## Current implementation status
+## Local and CI validation
 
-The initial schema, access-control helpers, booking RPCs, public company/booking pages, staff sign-in, first-login password change, Owner account creation, role assignment, Owner-initiated temporary password reset, company and master page management, service and schedule editing, booking/client workspaces, and role-scoped operational views are present in this branch.
+CI runs on GitHub-hosted runners:
+1. Node.js 22 installs the pinned frontend dependency tree.
+2. TypeScript and Vite build the frontend.
+3. Supabase CLI 3.0.0 starts a disposable local Supabase stack.
+4. `supabase db reset` applies all repository migrations to a clean local database.
+5. `supabase test db` runs pgTAP tests.
+6. Deno type-checks all eight Edge Functions.
+7. The disposable local stack is stopped.
 
-The six core database migrations and security function-grant migration are applied to the hosted Supabase project. The email-auth migration is included in this branch and must be applied after its checks pass. The four Edge Functions are deployed with JWT verification enabled. Automated local database smoke tests cover role scoping, the five-page company limit, availability, booking validation, client identity, and booking overlap. Email sign-in settings and the first Owner bootstrap still require the Dashboard steps below. Real-user end-to-end testing is required before production use. Remaining product gaps include photo upload to Supabase Storage, slug-change redirects, PWA support, and an editable booking-rules/settings interface.
+The local stack is not the hosted `workflows-DB` project and does not create a paid Supabase branch.
 
-
-## Free local validation (recommended before touching the hosted project)
-
-The repository CI pins Supabase CLI v3.0.0 and validates the backend without creating a paid Supabase branch:
-
-1. GitHub Actions starts a disposable local Supabase stack on its free GitHub-hosted runner.
-2. `supabase db reset` applies every migration from a clean local database.
-3. The workflow checks migration status, runs the pgTAP functional database tests, and type-checks all four Edge Functions with Deno.
-4. The local stack is stopped after the job. It is not your hosted `booking-space` project and does not create an hourly Supabase branch.
-
-You can run the same checks on your own computer for free after installing Docker Desktop, the Supabase CLI and Deno:
+Commands for a developer workstation (requires Docker Desktop, Node.js 22, Supabase CLI 3.0.0 and Deno):
 
 ```bash
-npm install
+npm ci
 npm run build
 supabase start
 supabase db reset
@@ -78,7 +130,19 @@ deno check supabase/functions/create-user/index.ts
 deno check supabase/functions/assign-user-role/index.ts
 deno check supabase/functions/change-password/index.ts
 deno check supabase/functions/owner-reset-access/index.ts
+deno check supabase/functions/owner-set-account-status/index.ts
+deno check supabase/functions/owner-delete-user/index.ts
+deno check supabase/functions/owner-update-account-name/index.ts
+deno check supabase/functions/owner-delete-company/index.ts
 supabase stop --no-backup
 ```
 
-Do not apply migrations to the hosted project until the local migration and function checks pass and the resulting SQL has been reviewed.
+Do not point destructive local commands at the hosted project. Use the exact project ref only for explicitly reviewed remote operations.
+
+## Current product gaps
+
+- Master_pro Builder is still a local interactive prototype; it does not persist data.
+- Photo and cover URL fields exist, but image upload to Supabase Storage is not implemented.
+- The `booking_settings.rules_text` field exists; an editable settings interface is not yet available.
+- PostHog project exists, but frontend SDK and event instrumentation are not connected.
+- Leaked Password Protection must still be enabled in the Supabase Dashboard.
