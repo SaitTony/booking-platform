@@ -39,7 +39,7 @@ insert into public.companies (id, name, slug, timezone)
 values ('20000000-0000-4000-8000-000000000001', 'Test Company', 'test-company', 'UTC');
 
 select extensions.throws_ok(
-  $insert into public.companies (name, slug) values ('Reserved route', 'admin')$,
+  $ into public.companies (name, slug) values ('Reserved route', 'admin')$,
   '23514', null,
   'System route slugs cannot be used by companies'
 );
@@ -74,7 +74,7 @@ insert into public.masters (id, kind, company_id, display_name, slug, timezone)
 values ('30000000-0000-4000-8000-000000000008', 'company',
         '20000000-0000-4000-8000-000000000002', 'Other Company Master', 'other-master', 'UTC');
 select extensions.throws_ok(
-  $insert into public.company_members (company_id, profile_id, role, master_id)
+  $ into public.company_members (company_id, profile_id, role, master_id)
     values ('20000000-0000-4000-8000-000000000001',
       '10000000-0000-4000-8000-000000000001', 'master',
       '30000000-0000-4000-8000-000000000008')$,
@@ -193,7 +193,7 @@ select extensions.is(
 );
 
 select extensions.throws_ok(
-  $insert into public.bookings (
+  $ into public.bookings (
       master_id, service_id, client_id, starts_at, ends_at, status,
       service_name_snapshot, service_duration_snapshot, price_snapshot,
       client_name_snapshot, client_phone_snapshot
