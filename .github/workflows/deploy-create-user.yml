@@ -11,6 +11,7 @@ on:
       - "supabase/functions/change-password/**"
       - "supabase/functions/owner-reset-access/**"
       - "supabase/functions/owner-delete-user/**"
+      - "supabase/functions/owner-delete-company/**"
       - "supabase/functions/owner-update-account-name/**"
       - ".github/workflows/deploy-create-user.yml"
 
@@ -53,6 +54,9 @@ jobs:
 
       - name: Deploy owner-delete-user function
         run: supabase functions deploy owner-delete-user --project-ref "$SUPABASE_PROJECT_ID" --yes
+
+      - name: Deploy owner-delete-company function
+        run: supabase functions deploy owner-delete-company --project-ref "$SUPABASE_PROJECT_ID" --yes
 
       - name: Deploy owner-update-account-name function
         run: supabase functions deploy owner-update-account-name --project-ref "$SUPABASE_PROJECT_ID" --yes
