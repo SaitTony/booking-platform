@@ -72,6 +72,7 @@ function AccountManagementRow({account,companies,pages,busy,onToggle,onReset,onD
   const selectedPage=pages.find(page=>page.id===masterId)
   return <article className="admin-account admin-account-inline-row">
     <div className="account-inline-fields">
+      <div className="account-inline-cell account-name-cell"><small>Сотрудник</small><strong>{account.full_name}</strong></div>
       <div className="account-inline-cell account-email-cell"><small>Email</small><strong>{account.email}</strong></div>
       <div className="account-inline-cell account-phone-cell"><small>Телефон</small><strong>{account.phone_e164}</strong></div>
       {account.platform_role==='owner'?<div className="account-inline-cell"><small>Роль</small><strong>Owner</strong></div>:<label className="account-inline-field"><small>Роль</small><select value={role} disabled={busy} onChange={event=>{const next=event.target.value as StaffRole|'';setRole(next);if(next==='master_pro'){setCompanyId('');setMasterId(individualPage?.id??individualPages[0]?.id??'')}else if(next==='master'&&!companyId){const first=companies.find(company=>company.is_active);setCompanyId(first?.id??'');setMasterId('')}else if(next==='admin'){setMasterId('')}}}><option value="">Не назначена</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>}
