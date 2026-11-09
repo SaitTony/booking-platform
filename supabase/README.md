@@ -71,7 +71,8 @@ Supabase supplies the project URL and API keys to Edge Functions. Verify that th
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `ALLOWED_ORIGIN=https://saittony.github.io`
+
+`ALLOWED_ORIGIN` is optional; the shared helper defaults it to `https://saittony.github.io`.
 
 The shared helper `supabase/functions/_shared/auth.ts` constructs anonymous and service-role clients and validates Owner access. Do not copy service-role credentials into GitHub source or Vite environment variables.
 
