@@ -2,6 +2,7 @@ import CompanySettings from './CompanySettings'
 import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import StaffWorkspace from './StaffWorkspace'
 import AccountsPrototype from './AccountsPrototype'
+import MasterProManagementTable from './MasterProManagementTable'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -119,6 +120,7 @@ export default function AdminApp() {
   const [pageName,setPageName]=useState('')
   const [pageSlug,setPageSlug]=useState('')
   const [pageDescription,setPageDescription]=useState('')
+  const [pageProfileId,setPageProfileId]=useState('')
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -306,17 +308,23 @@ export default function AdminApp() {
   }
 
   async function archiveMasterPage(page:MasterOption) {
-    if(!supabase||!window.confirm('Переместить страницу мастера в архив? История записей сохранится.'))return
-    const {error:updateError}=await supabase.from('masters').update({is_active:false,archived_at:new Date().toISOString()}).eq('id',page.id)
-    if(updateError)setError(updateError.message)
-    else{setNotice('Страница архивирована, история записей сохранена.');await loadDirectories()}
+    if(!supabase||busy||!window.confirm('Удалить страницу мастера? Она будет перемещена в архив, а история записей сохранится.'))return
+    setBusy(true);setError('');setNotice('')
+    try {
+      const {error:updateError}=await supabase.from('masters').update({is_active:false,archived_at:new Date().toISOString(),...(page.kind==='individual'?{profile_id:null}:{})}).eq('id',page.id)
+      if(updateError)setError(updateError.message)
+      else{setNotice('Страница архивирована, история записей сохранена.');await loadDirectories()}
+    } finally { setBusy(false) }
   }
 
   async function toggleMasterPage(page:MasterOption) {
-    if(!supabase)return
-    const {error:updateError}=await supabase.from('masters').update({is_active:!page.is_active}).eq('id',page.id)
-    if(updateError)setError(updateError.message)
-    else{setNotice('Статус страницы изменён.');await loadDirectories()}
+    if(!supabase||busy)return
+    setBusy(true);setError('');setNotice('')
+    try {
+      const {error:updateError}=await supabase.from('masters').update({is_active:!page.is_active}).eq('id',page.id)
+      if(updateError)setError(updateError.message)
+      else{setNotice(page.is_active?'Страница отключена.':'Страница включена.');await loadDirectories()}
+    } finally { setBusy(false) }
   }
 
   async function createCompany(event: FormEvent) {
@@ -334,10 +342,10 @@ export default function AdminApp() {
     if(!supabase)return
     if(!pageName.trim()||!pageSlug.trim()){setError('Имя и адрес страницы обязательны.');return}
     setBusy(true);setError('');setNotice('')
-    const payload={kind:pageKind,company_id:pageKind==='company'?pageCompanyId:null,display_name:pageName.trim(),slug:pageSlug.trim(),public_description:pageDescription}
+    const payload={kind:pageKind,company_id:pageKind==='company'?pageCompanyId:null,profile_id:pageKind==='individual'?pageProfileId||null:null,display_name:pageName.trim(),slug:pageSlug.trim(),public_description:pageDescription}
     const {error:createError}=await supabase.from('masters').insert(payload)
     if(createError)setError(createError.message)
-    else{setNotice('Страница мастера создана. Учётную запись можно связать с ней после создания пользователя.');setPageName('');setPageSlug('');setPageDescription('');setActiveModal(null);await loadDirectories()}
+    else{setNotice(pageProfileId?'Индивидуальная страница создана и связана с учётной записью Master_pro.':'Страница мастера создана.');setPageName('');setPageSlug('');setPageDescription('');setPageProfileId('');setActiveModal(null);await loadDirectories()}
     setBusy(false)
   }
 
@@ -568,6 +576,15 @@ export default function AdminApp() {
 
       {activeSection==='masterPro' && <section className="admin-accordion admin-panel-section">
         <header className="admin-panel-heading"><h2>Master_pro</h2><span className="accordion-count">{masterPages.filter(page=>page.kind==='individual').length}</span></header>
+        <MasterProManagementTable
+          accounts={accounts.filter(account=>account.platform_role==='master_pro')}
+          pages={masterPages.filter(page=>page.kind==='individual')}
+          loading={accountsLoading}
+          busy={busy}
+          onCreatePage={account=>{setPageKind('individual');setPageProfileId(account.id);setPageName(account.full_name??'');setPageSlug(makeSlug(account.full_name||'master')+'-'+Math.random().toString(36).slice(2,6));setPageDescription('');setActiveModal('masterPro')}}
+          onTogglePage={page=>void toggleMasterPage(page)}
+          onArchivePage={page=>void archiveMasterPage(page)}
+        />
         <div className="accordion-content">
           <details className="admin-subaccordion">
             <summary>Управлять</summary>
@@ -595,7 +612,7 @@ export default function AdminApp() {
           <details className="admin-subaccordion">
             <summary>Создать</summary>
             <div className="accordion-content">
-              <button className="admin-action-card admin-action-card-wide" onClick={()=>{setPageKind('individual');setActiveModal('masterPro')}}><span className="admin-action-icon">＋</span><strong>Создать страницу Master_pro</strong><small>Новая индивидуальная страница специалиста</small></button>
+              <button className="admin-action-card admin-action-card-wide" onClick={()=>{setPageKind('individual');setPageProfileId('');setActiveModal('masterPro')}}><span className="admin-action-icon">＋</span><strong>Создать страницу Master_pro</strong><small>Новая индивидуальная страница специалиста</small></button>
             </div>
           </details>
         </div>

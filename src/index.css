@@ -1242,3 +1242,140 @@
 @media(max-width:600px){
   .admin-shell[data-prototype-mode="true"] .ap-primary-nav{justify-content:flex-start;gap:18px}
 }
+
+/* Master_pro page management — GitHub Primer-aligned table. */
+.admin-shell[data-prototype-mode="true"] .master-pro-management{
+  margin:0 0 20px;
+  border:1px solid var(--ap-line);
+  border-radius:7px;
+  overflow:hidden;
+  background:var(--admin-surface,var(--surface,#fff));
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-management-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--ap-line);
+  background:var(--admin-hover,var(--hover,#f6f8fa));
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-management-heading h3{
+  margin:0 0 4px;
+  font-size:15px;
+  font-weight:600;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-management-heading p{
+  margin:0;
+  color:var(--ap-muted);
+  font-size:12px;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-management-count{
+  min-width:25px;
+  height:25px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--ap-line);
+  border-radius:20px;
+  color:var(--ap-muted);
+  background:var(--admin-surface,var(--surface,#fff));
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-table-wrap{overflow-x:auto}
+.admin-shell[data-prototype-mode="true"] .master-pro-table{
+  width:100%;
+  min-width:900px;
+  border-collapse:collapse;
+  text-align:left;
+  font-size:13px;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-table th{
+  padding:10px 12px;
+  color:var(--ap-muted);
+  background:var(--admin-hover,var(--hover,#f6f8fa));
+  border-bottom:1px solid var(--ap-line);
+  font-size:11px;
+  font-weight:600;
+  white-space:nowrap;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-table td{
+  padding:12px;
+  border-bottom:1px solid var(--ap-line);
+  vertical-align:middle;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-table tbody tr:last-child td{border-bottom:0}
+.admin-shell[data-prototype-mode="true"] .master-pro-table tbody tr:hover{background:var(--admin-hover,var(--hover,#f6f8fa))}
+.admin-shell[data-prototype-mode="true"] .master-pro-col-number{width:42px}
+.admin-shell[data-prototype-mode="true"] .master-pro-col-actions{width:280px}
+.admin-shell[data-prototype-mode="true"] .master-pro-number{
+  color:var(--ap-muted);
+  font-variant-numeric:tabular-nums;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-account-name{font-weight:600;color:var(--ap-text)}
+.admin-shell[data-prototype-mode="true"] .master-pro-account-muted{
+  display:block;
+  margin-top:3px;
+  color:var(--ap-muted);
+  font-size:11px;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-email{color:var(--ap-muted)}
+.admin-shell[data-prototype-mode="true"] .master-pro-page-name{display:grid;gap:3px}
+.admin-shell[data-prototype-mode="true"] .master-pro-page-name strong{font-weight:600}
+.admin-shell[data-prototype-mode="true"] .master-pro-page-name span,
+.admin-shell[data-prototype-mode="true"] .master-pro-no-page,
+.admin-shell[data-prototype-mode="true"] .master-pro-status-empty{color:var(--ap-muted);font-size:12px}
+.admin-shell[data-prototype-mode="true"] .master-pro-page-status{
+  display:inline-flex;
+  align-items:center;
+  padding:3px 8px;
+  border:1px solid var(--ap-line);
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+  white-space:nowrap;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-page-status.is-active{
+  color:#1a7f37;
+  background:#dafbe1;
+  border-color:#aceebb;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-page-status.is-disabled{
+  color:#59636e;
+  background:#eff1f3;
+  border-color:#d0d7de;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-row-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.admin-shell[data-prototype-mode="true"] .master-pro-action{
+  min-height:30px;
+  padding:5px 9px;
+  border:1px solid var(--ap-line);
+  border-radius:6px;
+  background:var(--admin-surface,var(--surface,#fff));
+  color:var(--ap-text);
+  font:600 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-action:hover{background:var(--admin-hover,var(--hover,#f6f8fa))}
+.admin-shell[data-prototype-mode="true"] .master-pro-action-primary{
+  color:#0969da;
+  border-color:#80ccff;
+  background:#f6f8fa;
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-action-primary:hover{background:#ddf4ff}
+.admin-shell[data-prototype-mode="true"] .master-pro-action-danger{color:#cf222e}
+.admin-shell[data-prototype-mode="true"] .master-pro-action-danger:hover{background:#ffebe9;border-color:#ff8182}
+.admin-shell[data-prototype-mode="true"] .master-pro-action:disabled{opacity:.55;cursor:wait}
+.admin-shell[data-prototype-mode="true"] .master-pro-table-empty{
+  padding:24px!important;
+  text-align:center;
+  color:var(--ap-muted);
+}
+.admin-shell[data-prototype-mode="true"] .master-pro-table-footer{
+  padding:9px 12px;
+  border-top:1px solid var(--ap-line);
+  color:var(--ap-muted);
+  font-size:11px;
+  background:var(--admin-hover,var(--hover,#f6f8fa));
+}
