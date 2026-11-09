@@ -144,7 +144,7 @@ select extensions.isnt(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
     (((now() at time zone 'UTC')::date + 2)::timestamp + time '09:10') at time zone 'UTC',
-    'Client One', '+358401234599', true
+    'Client One', '+79531234599', true
   ),
   null::uuid, 'A valid booking is created'
 );
@@ -158,16 +158,16 @@ select extensions.isnt(
     '30000000-0000-4000-8000-000000000002',
     '40000000-0000-4000-8000-000000000002',
     (((now() at time zone 'UTC')::date + 2)::timestamp + time '09:10') at time zone 'UTC',
-    'Client One Updated', '+358401234599', true
+    'Client One Updated', '+79531234599', true
   ),
   null::uuid, 'The same client can book another master'
 );
 select extensions.is(
-  (select count(*)::integer from public.clients where phone_e164 = '+358401234599'),
+  (select count(*)::integer from public.clients where phone_e164 = '+79531234599'),
   1, 'The same E.164 phone maps to one client record'
 );
 select extensions.is(
-  (select full_name from public.clients where phone_e164 = '+358401234599'),
+  (select full_name from public.clients where phone_e164 = '+79531234599'),
   'Client One', 'A public booking cannot overwrite an existing client name'
 );
 select extensions.throws_ok(
@@ -175,7 +175,7 @@ select extensions.throws_ok(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
     ((((now() at time zone 'UTC')::date + 2)::timestamp + time '09:10') at time zone 'UTC'),
-    'Duplicate Client', '+358401234598', true
+    'Duplicate Client', '+79531234598', true
   )$$,
   '23P01', null, 'Overlapping confirmed bookings are rejected by the database'
 );
@@ -207,7 +207,7 @@ select extensions.throws_ok(
   $$select public.create_booking(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
-    now() + interval '5 minutes', 'Too Soon', '+358401234597', true
+    now() + interval '5 minutes', 'Too Soon', '+79531234597', true
   )$$,
   'P0001', 'До начала записи должно оставаться не менее 10 минут',
   'Minimum ten-minute lead time is enforced'
@@ -216,7 +216,7 @@ select extensions.throws_ok(
   $$select public.create_booking(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
-    now() + interval '31 days', 'Too Far', '+358401234596', true
+    now() + interval '31 days', 'Too Far', '+79531234596', true
   )$$,
   'P0001', 'Запись доступна не более чем на 30 дней вперёд',
   'Thirty-day booking horizon is enforced'
@@ -226,7 +226,7 @@ select extensions.throws_ok(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
     ((((now() at time zone 'UTC')::date + 2)::timestamp + time '10:10') at time zone 'UTC'),
-    'No Consent', '+358401234595', false
+    'No Consent', '+79531234595', false
   )$$,
   'P0001', 'Необходимо подтвердить ознакомление с правилами записи',
   'Booking requires rules acceptance'
@@ -255,7 +255,7 @@ select extensions.throws_ok(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
     ((((now() at time zone 'UTC')::date + 3)::timestamp + time '23:45') at time zone 'UTC'),
-    'Cross Midnight', '+358401234594', true
+    'Cross Midnight', '+79531234594', true
   )$$,
   'P0001', 'Выбранное время вне рабочего расписания',
   'Booking duration cannot cross the end of the working window'
