@@ -16,7 +16,7 @@ type Profile = {
   company_members?: Member[]
 }
 type Member = { role: 'admin' | 'master'; company_id: string; master_id: string | null }
-type CompanyOption = { id: string; name: string; is_active: boolean }
+type CompanyOption = { id: string; name: string; slug: string; is_active: boolean }
 type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
 
@@ -25,6 +25,17 @@ function makeSlug(value: string) {
   return value.toLowerCase().split('').map(char=>map[char] ?? char).join('').normalize('NFKD')
     .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
 }
+async function getFunctionErrorMessage(error: unknown, fallback: string) {
+  const context = (error as { context?: Response } | null)?.context
+  if (context && typeof context.clone === 'function') {
+    try {
+      const payload = await context.clone().json() as { error?: string; message?: string }
+      if (payload.error || payload.message) return payload.error ?? payload.message ?? fallback
+    } catch { /* Keep the SDK message when the response is not JSON. */ }
+  }
+  return error instanceof Error ? error.message : fallback
+}
+
 const roleLabel = (profile: Account) => {
   if (profile.platform_role === 'owner') return 'Owner'
   if (profile.platform_role === 'master_pro') return 'Master_pro'
@@ -83,7 +94,7 @@ export default function AdminApp() {
   async function loadDirectories() {
     if (!supabase) return
     const [{ data: companyData }, { data: masterData }] = await Promise.all([
-      supabase.from('companies').select('id,name,is_active').order('name'),
+      supabase.from('companies').select('id,name,slug,is_active').order('name'),
       supabase.from('masters').select('id,display_name,slug,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),
     ])
     setCompanies((companyData ?? []) as CompanyOption[])
@@ -169,7 +180,7 @@ export default function AdminApp() {
     const { error: deleteError } = await supabase.functions.invoke('owner-delete-user', {
       body: { userId: deleteTargetId },
     })
-    if (deleteError) setError(deleteError.message)
+    if (deleteError) setError(await getFunctionErrorMessage(deleteError, 'Не удалось удалить учётную запись.'))
     else {
       setNotice('Учётная запись полностью удалена. История записей сохранена.')
       setDeleteTargetId('')
@@ -242,27 +253,50 @@ export default function AdminApp() {
     if (!supabase) return
     if (!isValidRussianPhone(phoneForCreate.trim())) { setError('Введите номер в формате +7 и ровно 10 цифр после кода страны.'); return }
     if (!createRole) { setError('Выберите роль сотрудника.'); return }
-    if ((createRole === 'admin' || createRole === 'master') && !createCompanyId) { setError('Выберите компанию.'); return }
-    if ((createRole === 'master' || createRole === 'master_pro') && !createMasterId) { setError('Выберите страницу мастера.'); return }
+    if (createRole === 'admin' && !companyName.trim()) { setError('Укажите название компании для Admin.'); return }
+    if (createRole === 'master' && !createCompanyId) { setError('Для Master необходимо выбрать компанию.'); return }
+    const pageBaseSlug = makeSlug(fullName)
+    const pageSlug = pageBaseSlug ? pageBaseSlug + '-' + Math.random().toString(36).slice(2, 8) : ''
+    const companyBaseSlug = makeSlug(companyName)
+    const companySlugForCreate = companyBaseSlug ? companyBaseSlug + '-' + Math.random().toString(36).slice(2, 8) : ''
+    if ((createRole === 'master' || createRole === 'master_pro') && !pageSlug) { setError('Добавьте имя, из которого можно сформировать адрес страницы.'); return }
+    if (createRole === 'admin' && !companySlugForCreate) { setError('Название компании должно содержать буквы или цифры.'); return }
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
       body: {
         fullName, email: emailForCreate, phone: phoneForCreate, temporaryPassword,
         role: createRole,
-        companyId: createRole === 'master_pro' ? null : createCompanyId,
-        masterId: createRole === 'admin' ? null : createMasterId,
+        companyId: createRole === 'master' ? createCompanyId : null,
+        companyName: createRole === 'admin' ? companyName.trim() : null,
+        companySlug: createRole === 'admin' ? companySlugForCreate : null,
+        pageName: fullName.trim(),
+        pageSlug: createRole === 'master' || createRole === 'master_pro' ? pageSlug : null,
       },
     })
-    if (createError) setError(createError.message)
+    if (createError) setError(await getFunctionErrorMessage(createError, 'Не удалось создать учётную запись.'))
     else {
-      setNotice('Учётная запись создана, роль назначена.')
+      setNotice('Учётная запись и связанные страницы созданы.')
       setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('000000')
-      setCreateRole(''); setCreateCompanyId(''); setCreateMasterId(''); setActiveModal(null)
-      await loadAccounts()
+      setCreateRole(''); setCreateCompanyId(''); setCreateMasterId(''); setCompanyName(''); setCompanySlug(''); setActiveModal(null)
+      await Promise.all([loadAccounts(), loadDirectories()])
     }
     setBusy(false)
   }
 
+  function accountRelationLabel(account: Account) {
+    const membership = account.company_members?.[0]
+    if (membership) {
+      const company = companies.find(item => item.id === membership.company_id)
+      if (membership.role === 'admin') return 'Компания: ' + (company?.name ?? 'не найдена') + (company?.slug ? ' · /' + company.slug : '')
+      const page = masterPages.find(item => item.id === membership.master_id)
+      return 'Компания: ' + (company?.name ?? 'не найдена') + ' · Страница: ' + (page?.display_name ?? 'не найдена') + (page?.slug ? ' · /' + page.slug : '')
+    }
+    if (account.platform_role === 'master_pro') {
+      const page = masterPages.find(item => item.profile_id === account.id)
+      return page ? 'Индивидуальная страница: ' + page.display_name + ' · /' + page.slug : 'Индивидуальная страница не найдена'
+    }
+    return 'Связь не назначена'
+  }
   const [emailForCreate, setEmailForCreate] = useState('')
   const [phoneForCreate, setPhoneForCreate] = useState('')
 
@@ -288,7 +322,7 @@ export default function AdminApp() {
 
   return <main className="admin-shell"><section className="admin-wide">
     <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{profile.full_name} · {profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}</p></div><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></header>
-    {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error">{error}</p>}
+    {notice && <p className="admin-notice">{notice}</p>}{error && !activeModal && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' ? <>
       <div className="admin-workspace-layout">
         <aside className="admin-sidebar" aria-label="Разделы панели">
@@ -416,15 +450,17 @@ export default function AdminApp() {
       <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
         <span className="eyebrow">WORKFLOWS PROJECT</span>
+        {error && <p className="admin-error admin-modal-error" role="alert">{error}</p>}
         {activeModal==='account'&&<form onSubmit={createAccount}>
           <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Заполните данные сотрудника и назначьте ему роль сразу при создании.</p>
           <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/></label>
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
           <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
-          <label className="admin-field">Роль<select value={createRole} onChange={e=>{setCreateRole(e.target.value as 'admin'|'master'|'master_pro'|'');setCreateCompanyId('');setCreateMasterId('')}} required><option value="">Выберите роль</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
-          {(createRole==='admin'||createRole==='master')&&<label className="admin-field">Компания<select value={createCompanyId} onChange={e=>{setCreateCompanyId(e.target.value);setCreateMasterId('')}} required><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
-          {createRole==='master'&&<label className="admin-field">Страница мастера<select value={createMasterId} onChange={e=>setCreateMasterId(e.target.value)} required><option value="">Выберите страницу</option>{masterPages.filter(page=>page.kind==='company'&&page.company_id===createCompanyId&&page.is_active&&!page.profile_id).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
-          {createRole==='master_pro'&&<label className="admin-field">Индивидуальная страница<select value={createMasterId} onChange={e=>setCreateMasterId(e.target.value)} required><option value="">Выберите страницу</option>{masterPages.filter(page=>page.kind==='individual'&&page.is_active&&!page.profile_id).map(page=><option key={page.id} value={page.id}>{page.display_name}</option>)}</select></label>}
+          <label className="admin-field">Роль<select value={createRole} onChange={e=>{setCreateRole(e.target.value as 'admin'|'master'|'master_pro'|'');setCreateCompanyId('');setCreateMasterId('');setCompanyName('');setCompanySlug('')}} required><option value="">Выберите роль</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
+          {createRole==='admin'&&<label className="admin-field">Название компании<input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="Название новой компании" required/></label>}
+          {createRole==='master'&&<label className="admin-field">Компания<select value={createCompanyId} onChange={e=>setCreateCompanyId(e.target.value)} required><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select><small>Страница мастера будет создана автоматически в выбранной компании.</small></label>}
+          {createRole==='master_pro'&&<p className="admin-modal-intro">Индивидуальная страница будет создана автоматически и связана с учётной записью.</p>}
+          {createRole==='admin'&&<p className="admin-modal-intro">Страница компании будет создана автоматически и связана с учётной записью Admin.</p>}
           <label className="admin-field">Временный пароль<input type="text" autoComplete="new-password" minLength={6} value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} required/></label>
           <p className="admin-modal-intro">После первого входа сотрудник должен будет задать собственный пароль.</p>
           <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)||(createRole==='admin'||createRole==='master')&&!createCompanyId||(createRole==='master'||createRole==='master_pro')&&!createMasterId}>{busy?'Создаём…':'Создать учётную запись'}</button>
@@ -433,7 +469,7 @@ export default function AdminApp() {
           <h2 id="admin-modal-title">Все учётные записи</h2>
           <p className="admin-modal-intro">Здесь можно управлять доступом, сбрасывать пароли и удалять учётные записи.</p>
           <div className="admin-account-list">{accounts.map(account=><article className="admin-account admin-account-manage-row" key={account.id}>
-            <div className="account-main"><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span><span>{roleLabel(account)}{account.force_password_change?' · требуется смена пароля':''}</span></div>
+            <div className="account-main"><strong>{account.full_name}</strong><span>{account.email} · {account.phone_e164}</span><span>{roleLabel(account)}{account.force_password_change?' · требуется смена пароля':''}</span><span>{accountRelationLabel(account)}</span></div>
             {account.platform_role!=='owner'&&<div className="account-controls">
               <button type="button" className={`admin-switch ${!account.disabled_at?'is-on':''}`} role="switch" aria-checked={!account.disabled_at} aria-label={account.disabled_at?'Включить учётную запись':'Отключить учётную запись'} disabled={busy} onClick={()=>void toggleAccountStatus(account)}><span/></button>
               <button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(account.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить пароль</button>
