@@ -732,3 +732,28 @@
   .admin-shell .admin-modal-account-list {max-height:65vh}
   .admin-shell .admin-modal-actions {flex-wrap:wrap}
 }
+
+
+/* Account management modal: expanded workspace and visible in-dialog errors */
+.admin-shell .admin-modal:has(.admin-modal-account-list) {
+  display:flex;flex-direction:column;width:min(96vw,1120px);height:min(90vh,1100px);
+  max-height:90vh;overflow:hidden;padding:30px 34px 28px;
+}
+.admin-shell .admin-modal-account-list {
+  display:flex;flex:1 1 auto;flex-direction:column;min-height:0;max-height:none;overflow:hidden;
+}
+.admin-shell .admin-modal-account-list>.admin-account-list {
+  flex:1 1 auto;min-height:0;max-height:none;overflow:auto;padding:4px 8px 8px 0;
+}
+.admin-shell .admin-modal-error {
+  position:sticky;top:0;z-index:5;flex:0 0 auto;margin:10px 0 14px;
+  padding:13px 16px;border:1px solid #f1caca;border-radius:11px;
+  background:#fff1f1;color:#a72f36;box-shadow:0 8px 24px rgba(85,25,30,.12);
+  font-size:14px;line-height:1.45;
+}
+@media(max-width:760px) {
+  .admin-shell .admin-modal:has(.admin-modal-account-list) {
+    width:96vw;height:90vh;max-height:90vh;padding:24px 16px 18px;
+  }
+  .admin-shell .admin-modal-account-list>.admin-account-list {padding-right:2px}
+}
