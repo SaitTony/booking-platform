@@ -288,7 +288,7 @@ select extensions.is(
 -- Ordinary authenticated staff cannot detach profile ownership.
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select extensions.throws_ok(
-  $update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001'$,
+  $test$update public.masters set profile_id = null where id = '30000000-0000-4000-8000-000000000001'$test$,
   'P0001', 'Только Owner может менять привязку аккаунта, тип, компанию или архивировать страницу',
   'Company Admin cannot detach a staff profile'
 );
@@ -298,7 +298,7 @@ reset role;
 -- auth.users -> profiles deletion, without trying to SET ROLE to an internal
 -- Supabase Auth database role from the restricted pgTAP test connection.
 select extensions.lives_ok(
-  $delete from public.profiles where id = '10000000-0000-4000-8000-000000000003'$,
+  $test$delete from public.profiles where id = '10000000-0000-4000-8000-000000000003'$test$,
   'Profile deletion can cascade to the master page without being blocked by the Owner guard'
 );
 select extensions.ok(
