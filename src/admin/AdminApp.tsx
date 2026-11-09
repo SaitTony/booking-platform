@@ -89,7 +89,7 @@ const roleLabel = (profile: Account) => {
 
 export default function AdminApp() {
   const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'masterPro'|'settings'|'accountSettings'|null>(null)
-  const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'>(() => window.location.pathname.replace(/\/+$/, '').endsWith('/admin/accounts-prototype') ? 'accounts' : 'overview')
+  const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'|'settings'>('overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
   const isAccountsPrototype = window.location.pathname.replace(/\/+$/, '').endsWith('/admin/accounts-prototype')
   const [sessionReady, setSessionReady] = useState(false)
@@ -457,18 +457,28 @@ export default function AdminApp() {
   if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
-    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions"><button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
+    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions"><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
     {notice && <p className="admin-notice">{notice}</p>}{error && !activeModal && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' && !previewAccount ? <>
       <div className="admin-workspace-layout">
         <nav className={isAccountsPrototype ? 'ap-primary-nav' : 'admin-sidebar'} aria-label="Разделы панели">
-          {isAccountsPrototype && <span className="ap-nav-label">WORKFLOWS / ADMIN</span>}
-          <button type="button" className={activeSection==='overview'?'active':''} aria-current={activeSection==='overview'?'page':undefined} onClick={()=>setActiveSection('overview')}><span aria-hidden="true">⌂</span>Обзор</button>
-          <button type="button" className={activeSection==='accounts'?'active':''} aria-current={activeSection==='accounts'?'page':undefined} onClick={()=>setActiveSection('accounts')}><span aria-hidden="true">♙</span>Учётные записи</button>
-          <button type="button" className={activeSection==='companies'?'active':''} aria-current={activeSection==='companies'?'page':undefined} onClick={()=>setActiveSection('companies')}><span aria-hidden="true">▦</span>Компании</button>
-          <button type="button" className={activeSection==='masterPro'?'active':''} aria-current={activeSection==='masterPro'?'page':undefined} onClick={()=>setActiveSection('masterPro')}><span aria-hidden="true">✦</span>Master_pro</button>
+          <button type="button" className={activeSection==='overview'?'active':''} aria-current={activeSection==='overview'?'page':undefined} onClick={()=>setActiveSection('overview')}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 1.5 6.25 5.2a.75.75 0 0 1-.96 1.15L13 7.72V13a1 1 0 0 1-1 1H9.5V9.5h-3V14H4a1 1 0 0 1-1-1V7.72l-.29.13a.75.75 0 1 1-.96-1.15L8 1.5Z"/></svg>Обзор</button>
+          <button type="button" className={activeSection==='accounts'?'active':''} aria-current={activeSection==='accounts'?'page':undefined} onClick={()=>setActiveSection('accounts')}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm5.25-.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM1.5 13.2c0-2.1 2-3.7 4.5-3.7s4.5 1.6 4.5 3.7v.3h-9v-.3Zm9.5.3v-.3c0-1.1-.45-2.1-1.2-2.8.55-.3 1.15-.4 1.7-.4 1.7 0 3 .95 3 2.5v1h-3.5Z"/></svg>Учётные записи</button>
+          <button type="button" className={activeSection==='companies'?'active':''} aria-current={activeSection==='companies'?'page':undefined} onClick={()=>setActiveSection('companies')}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14V2.75A.75.75 0 0 1 2.75 2h7.5a.75.75 0 0 1 .75.75V5h2.25a.75.75 0 0 1 .75.75V14h-4v-2.5h-3V14H2Zm2-9h2V3.5H4V5Zm0 3h2V6.5H4V8Zm4-3h2V3.5H8V5Zm0 3h2V6.5H8V8Zm4 1.5V8h-1.5v1.5H12Z"/></svg>Компании</button>
+          <button type="button" className={activeSection==='masterPro'?'active':''} aria-current={activeSection==='masterPro'?'page':undefined} onClick={()=>setActiveSection('masterPro')}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 1 .95 4.05L13 4l-2.1 3.5L14 10l-4.1.2L8 14l-1.9-3.8L2 10l3.1-2.5L3 4l4.05 1.05L8 1Z"/></svg>Master_pro</button>
+          <button type="button" className={activeSection==='settings'?'active':''} aria-current={activeSection==='settings'?'page':undefined} onClick={()=>setActiveSection('settings')}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.7 1h2.6l.35 1.55c.4.15.77.36 1.1.63l1.52-.45 1.3 2.25-1.17 1.1c.05.42.05.84 0 1.26l1.17 1.1-1.3 2.25-1.52-.45c-.33.27-.7.48-1.1.63L9.3 13h-2.6l-.35-1.55c-.4-.15-.77-.36-1.1-.63l-1.52.45-1.3-2.25 1.17-1.1a5.3 5.3 0 0 1 0-1.26l-1.17-1.1 1.3-2.25 1.52.45c.33-.27.7-.48 1.1-.63L6.7 1ZM8 9.75a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5Z"/></svg>Настройки</button>
         </nav>
         <div className="admin-main-content">
+      {activeSection==='settings' && <section className="admin-panel-section admin-settings-page"><header className="admin-panel-heading"><h2>Настройки</h2></header><div className="admin-settings-modal">
+          <h2 id="admin-modal-title">Настройки панели</h2>
+          <section className="admin-theme-picker"><div className="admin-theme-heading"><div><span className="eyebrow">ОФОРМЛЕНИЕ ПАНЕЛИ</span><h3>Цветовая тема</h3><p>Выберите палитру административной панели.</p></div><span className="admin-theme-current">{adminPalettes.find(item=>item.id===adminTheme)?.name}</span></div>
+            <div className="theme-options admin-theme-options">{adminPalettes.map(item=><button type="button" key={item.id} className={`theme-option ${adminTheme===item.id?'active':''}`} onClick={()=>{setAdminTheme(item.id);localStorage.setItem('workflows-admin-theme',item.id)}}><span className={`palette palette-${item.id}`}><i/><i/><i/><i/></span><span><b>{item.name}</b><small>{item.desc}</small></span>{adminTheme===item.id&&<em>✓</em>}</button>)}</div>
+          </section>
+          {profile.platform_role==='owner'&&<section className="admin-preview-settings"><h3>Просмотр панели от лица сотрудника</h3><p>Выберите роль и конкретную учётную запись. Это предварительный просмотр: реальные права и данные не меняются.</p>
+            <label className="admin-field">Тип учётной записи<select value={previewRole} onChange={event=>{setPreviewRole(event.target.value as 'admin'|'master_pro'|'master');setPreviewAccountId('')}}><option value="admin">Admin</option><option value="master_pro">Master_pro</option><option value="master">Master</option></select></label>
+            <label className="admin-field">Конкретная учётная запись<select value={previewAccountId} onChange={event=>setPreviewAccountId(event.target.value)}><option value="">Не выбрана — режим Owner</option>{previewAccounts.map(account=><option key={account.id} value={account.id}>{account.full_name} · {account.email}</option>)}</select></label>
+            {previewAccount&&<button type="button" className="secondary-button" onClick={()=>{setPreviewAccountId('');setActiveModal(null)}}>Вернуться к панели Owner</button>}
+          </section>}</div></section>}
           {activeSection==='overview' && <section className="admin-overview">
             <h2>Обзор системы</h2>
             <section className="admin-stats" aria-label="Сводная статистика">
@@ -477,7 +487,7 @@ export default function AdminApp() {
               <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
             </section>
           </section>}
-      {activeSection==='accounts' && isAccountsPrototype && <AccountsPrototype accounts={accounts} companies={companies} pages={masterPages} loading={accountsLoading} busy={busy} onCreate={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}} onSettings={openAccountSettings} onToggle={toggleAccountStatus} onRefresh={()=>void Promise.all([loadAccounts(),loadDirectories()])}/>}
+      {activeSection==='accounts' && isAccountsPrototype && <AccountsPrototype accounts={accounts} companies={companies} pages={masterPages} loading={accountsLoading} busy={busy} onCreate={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}} onSettings={openAccountSettings} onToggle={toggleAccountStatus} />}
       {activeSection==='accounts' && !isAccountsPrototype && <section className="admin-accounts-workspace">
         <header className="admin-accounts-toolbar">
           <button className="primary-button admin-create-account-button" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}}><span>＋</span> Создать УЗ</button>
