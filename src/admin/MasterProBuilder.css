@@ -64,3 +64,30 @@
  .mpb-nav-copy strong{font-size:13px}
  .mpb-nav-copy small{font-size:11px}
 }
+
+
+/* Latest requested builder refinements */
+.mpb-sidebar nav button:not(:last-child)::after{content:none}
+.mpb-custom-tag{display:flex;gap:8px;align-items:center;margin-top:10px}
+.mpb-custom-tag input{flex:1;min-width:0;border:1px solid #d1d9e0;border-radius:6px;padding:9px 10px;font:inherit;font-size:13px}
+.mpb-custom-tag input:focus{outline:2px solid #54aeff;outline-offset:-1px;border-color:#0969da}
+.mpb-custom-tag .mpb-secondary{white-space:nowrap}
+.mpb-device-switch{display:flex;align-items:center;gap:4px;border:0;padding:0;background:transparent}
+.mpb-device-switch button{width:auto;height:auto;min-height:32px;padding:6px 9px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #d1d9e0;border-radius:6px;background:#fff;color:#57606a;font-size:11px;font-weight:600;white-space:nowrap}
+.mpb-device-switch button.active{border-color:#54aeff;background:#ddf4ff;color:#0969da}
+.mpb-device-icon{position:relative;display:inline-block;flex:0 0 auto;color:currentColor}
+.mpb-device-desktop{width:17px;height:12px;border:1.7px solid currentColor;border-radius:2px;margin-bottom:3px}
+.mpb-device-desktop::before{content:'';position:absolute;width:5px;height:2px;left:4.5px;bottom:-4px;background:currentColor}
+.mpb-device-desktop::after{content:'';position:absolute;width:11px;height:1.7px;left:2px;bottom:-5px;background:currentColor;border-radius:2px}
+.mpb-device-mobile{width:9px;height:16px;border:1.7px solid currentColor;border-radius:2.5px}
+.mpb-device-mobile::after{content:'';position:absolute;width:2px;height:2px;left:2px;bottom:1px;border-radius:50%;background:currentColor}
+.mpb-public-profile{position:relative;display:block;padding:16px 16px 13px}
+.mpb-public-avatar{position:absolute;right:16px;top:-34px;width:64px;height:64px;flex-basis:64px;border:3px solid var(--preview-panel);box-sizing:border-box;z-index:2}
+.mpb-public-profile>div:last-child{padding-right:82px}
+.mpb-editor-footer{display:none}
+@media(max-width:760px){
+ .mpb-public-avatar{right:12px;top:-30px;width:58px;height:58px}
+ .mpb-public-profile>div:last-child{padding-right:72px}
+ .mpb-device-switch button{padding:5px 7px;font-size:10px}
+ .mpb-device-icon{transform:scale(.92)}
+}
