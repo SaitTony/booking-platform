@@ -14,6 +14,7 @@ on:
       - "supabase/functions/owner-delete-user/**"
       - "supabase/functions/owner-delete-company/**"
       - "supabase/functions/owner-update-account-name/**"
+      - "supabase/config.toml"
       - ".github/workflows/deploy-create-user.yml"
 
 permissions:
