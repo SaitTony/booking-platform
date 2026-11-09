@@ -483,7 +483,7 @@ export default function AdminApp() {
           <section className="admin-account-group">
             <h3>Мастера_pro</h3>
             <div className="admin-account-list admin-account-list-inline">
-              {accounts.filter(account=>account.platform_role==='master_pro').map((account,index)=><AccountManagementRow key={account.id} account={account} index={accounts.indexOf(account)+1} companies={companies} pages={masterPages} onSettings={openAccountSettings}/>)}
+              {accounts.filter(account=>account.platform_role==='master_pro').map(account=><AccountManagementRow key={account.id} account={account} index={accounts.indexOf(account)+1} companies={companies} pages={masterPages} onSettings={openAccountSettings}/>)}
               {!accounts.some(account=>account.platform_role==='master_pro')&&<p className="admin-empty">Мастеров_pro пока нет.</p>}
             </div>
           </section>
