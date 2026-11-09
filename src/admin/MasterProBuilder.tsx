@@ -64,12 +64,12 @@ export default function MasterProBuilder() {
       <div className="mpb-top-actions"><span className="mpb-draft-status"><i/> Черновик · демо-режим</span><Link to="/admin" className="mpb-back-link">Вернуться в админпанель</Link></div>
     </header>
     <div className="mpb-page-head">
-      <div><div className="mpb-breadcrumb">MASTER_PRO <span>/</span> МОЯ СТРАНИЦА <span>/</span> КОНСТРУКТОР</div><h1>Создание страницы</h1><p>Настройте свою страницу и сразу посмотрите, как её увидят клиенты.</p></div>
+      <div><h1>Создание страницы</h1><p>Настройте свою страницу и сразу посмотрите, как её увидят клиенты.</p></div>
       <div className="mpb-page-actions"><button className="mpb-secondary" onClick={()=>{setSection('profile');setSaved(false)}}>Продолжить настройку</button><button className="mpb-primary" onClick={()=>setShowPublish(true)}>Опубликовать страницу</button></div>
     </div>
     <div className="mpb-workspace">
       <aside className="mpb-sidebar">
-        <div className="mpb-sidebar-caption">НАСТРОЙКА СТРАНИЦЫ</div>
+        
         <nav>{sections.map(item=><button key={item.id} className={section===item.id?'is-active':''} onClick={()=>setSection(item.id)}><span className="mpb-step-symbol" aria-hidden="true">{item.symbol}</span><span className="mpb-step">{item.number}</span><span className="mpb-nav-copy"><strong>{item.title}</strong><small>{item.sub}</small></span></button>)}</nav>
         <div className="mpb-sidebar-bottom"><div className="mpb-completion"><div><strong>Готовность страницы</strong><b>60%</b></div><span><i/></span><small>Заполните разделы и проверьте предпросмотр</small></div><div className="mpb-help"><strong>Нужна помощь?</strong><span>Подсказки по настройке страницы</span></div></div>
       </aside>
