@@ -29,6 +29,15 @@ type CompanyOption = { id: string; name: string; slug: string; description?: str
 type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
 type Account = Profile & { company_members?: Member[] }
 
+
+function normalizePageName(value: string) {
+  return value.trim().replace(/\\s+/g, ' ').toLowerCase()
+}
+function hasDuplicateIndividualPageName(pages: MasterOption[], name: string, excludeId?: string) {
+  const normalized = normalizePageName(name)
+  return !!normalized && pages.some(page => page.kind === 'individual' && page.id !== excludeId && normalizePageName(page.display_name) === normalized)
+}
+
 function makeSlug(value: string) {
   const map: Record<string,string> = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'i',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}
   return value.toLowerCase().split('').map(char=>map[char] ?? char).join('').normalize('NFKD')
@@ -432,6 +441,10 @@ export default function AdminApp() {
       ? makeSlug(editPageName.trim())
       : selectedPage?.slug??''
     const pageNameChanged=!!selectedPage&&(editPageName.trim()!==selectedPage.display_name||nextPageSlug!==selectedPage.slug)
+    if(editRole==='master_pro'&&selectedPage&&hasDuplicateIndividualPageName(masterPages,editPageName,selectedPage.id)){
+      setError('Страница с таким названием уже существует. Измените название страницы и попробуйте снова.')
+      return
+    }
     const nameChanged=editFullName.trim()!==settingsAccount.full_name
     if(!assignmentChanged&&!pageNameChanged&&!nameChanged){setNotice('Изменений нет.');return}
     if(editRole==='master_pro'&&(!editPageName.trim()||!makeSlug(editPageName.trim()))){setError('Название страницы должно содержать буквы или цифры.');return}
@@ -456,7 +469,8 @@ export default function AdminApp() {
       setNotice('Данные учётной записи сохранены.')
       await Promise.all([loadAccounts(),loadDirectories()])
     } catch(saveError) {
-      setError(saveError instanceof Error?saveError.message:'Не удалось сохранить данные учётной записи.')
+      const message=saveError instanceof Error?saveError.message:''
+      setError(message.includes('masters_individual_name_uq')?'Страница с таким названием уже существует. Измените название страницы и попробуйте снова.':message||'Не удалось сохранить данные учётной записи.')
     } finally {
       setBusy(false)
     }
@@ -474,6 +488,7 @@ export default function AdminApp() {
     const companyBaseSlug = makeSlug(companyName)
     const companySlugForCreate = companyBaseSlug ? companyBaseSlug + '-' + Math.random().toString(36).slice(2, 8) : ''
     if ((createRole === 'master' || createRole === 'master_pro') && !pageSlug) { setError('Добавьте имя, из которого можно сформировать адрес страницы.'); return }
+    if (createRole === 'master_pro' && hasDuplicateIndividualPageName(masterPages, fullName)) { setError('Страница с таким названием уже существует. Измените название страницы и попробуйте снова.'); return }
     if (createRole === 'admin' && !companySlugForCreate) { setError('Название компании должно содержать буквы или цифры.'); return }
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
@@ -701,7 +716,6 @@ export default function AdminApp() {
     {activeModal && <div className="admin-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!busy)setActiveModal(null)}}>
       <section className={activeModal === 'accountSettings' ? 'admin-modal admin-modal-compact' : 'admin-modal'} role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
-        {!['company','companySettings','masterPro'].includes(activeModal)&&<span className="eyebrow">WORKFLOWS PROJECT</span>}
         {error && <p className="admin-error admin-modal-error" role="alert">{error}</p>}
         {!isAccountsPrototype && activeModal==='settings'&&<div className="admin-settings-modal">
           <h2 id="admin-modal-title">Настройки панели</h2>
@@ -720,7 +734,7 @@ export default function AdminApp() {
             <label className="admin-field account-settings-field">Имя пользователя<input value={editFullName} onChange={event=>setEditFullName(event.target.value)} required/></label>
             <label className="admin-field account-settings-field">Роль<select value={editRole} onChange={event=>{const next=event.target.value as StaffRole;setEditRole(next);setEditCompanyId(next==='master_pro'?'':settingsAccount.company_members?.[0]?.company_id??'');const linkedPage=masterPages.find(page=>page.profile_id===settingsAccount.id&&(next==='master_pro'?page.kind==='individual':page.kind==='company'));setEditMasterId(linkedPage?.id??'');setEditPageName(linkedPage?.display_name??'')}}><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
             {(editRole==='admin'||editRole==='master')&&<label className="admin-field account-settings-field">Компания<select value={editCompanyId} onChange={event=>{setEditCompanyId(event.target.value);setEditMasterId('')}}><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select></label>}
-            {(editRole==='master'||editRole==='master_pro')&&<label className="admin-field account-settings-field">Название собственной страницы<input value={editPageName} onChange={event=>setEditPageName(event.target.value)} disabled={!editMasterId}/>{!editMasterId&&<small>У этой учётной записи пока нет страницы соответствующего типа.</small>}</label>}
+            {(editRole==='master'||editRole==='master_pro')&&<label className="admin-field account-settings-field">Название собственной страницы<input value={editPageName} onChange={event=>setEditPageName(event.target.value)} disabled={!editMasterId}/>{!editMasterId&&<small>У этой учётной записи пока нет страницы соответствующего типа.</small>}{editRole==='master_pro'&&settingsPage&&hasDuplicateIndividualPageName(masterPages,editPageName,settingsPage.id)&&<small>Страница с таким названием уже существует. Измените название.</small>}</label>}
             {editRole==='master_pro'&&editPageUrl&&<div className="account-page-url"><label className="admin-field">Полный адрес страницы<input value={editPageUrl} readOnly onFocus={event=>event.currentTarget.select()}/></label><small>Адрес автоматически обновится при изменении названия страницы. Скопируйте его и передайте владельцу страницы.</small></div>}
             {settingsAccount.force_password_change&&<div className="account-setting-row"><div><strong>Первый вход</strong><span>Сотрудник ещё не сменил временный пароль</span></div><span className="account-password-warning">Ожидает смены</span></div>}
             <div className="account-setting-row"><div><strong>Сбросить пароль</strong><span>Установить сотруднику временный пароль</span></div><button type="button" className="secondary-button" disabled={busy} onClick={()=>{setResetUserId(settingsAccount.id);setResetTemporaryPassword('000000');setActiveModal('reset')}}>Сбросить</button></div>
@@ -730,7 +744,7 @@ export default function AdminApp() {
         </form>}
         {activeModal==='account'&&<form onSubmit={createAccount}>
           <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Заполните данные сотрудника и назначьте ему роль сразу при создании.</p>
-          <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/></label>
+          <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/>{createRole==='master_pro'&&hasDuplicateIndividualPageName(masterPages,fullName)&&<small>Страница с таким названием уже существует. Измените имя страницы.</small>}</label>
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
           <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
           <label className="admin-field">Роль<select value={createRole} onChange={e=>{setCreateRole(e.target.value as 'admin'|'master'|'master_pro'|'');setCreateCompanyId('');setCompanyName('');setCompanySlug('')}} required><option value="">Выберите роль</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
