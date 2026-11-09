@@ -34,3 +34,33 @@
  .mpb-preview-panel{position:static}
  .mpb-service-actions{gap:6px;flex-direction:column;align-items:flex-end}
 }
+
+
+/* Owner-managed profile tags and clearer wizard navigation */
+.mpb-sidebar nav{gap:18px}
+.mpb-sidebar nav button{position:relative;padding:14px 12px;gap:8px}
+.mpb-sidebar nav button:not(:last-child)::after{content:'→';position:absolute;right:-16px;top:50%;transform:translate(50%,-50%);color:#8c959f;font-size:20px;font-weight:400;pointer-events:none}
+.mpb-step-symbol{display:inline-grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border-radius:6px;background:#f6f8fa;color:#57606a;font-size:14px;line-height:1}
+.mpb-sidebar nav button.is-active .mpb-step-symbol{background:#0969da;color:#fff}
+.mpb-step{font-size:12px;font-weight:650}
+.mpb-nav-copy strong{font-size:14px}
+.mpb-nav-copy small{font-size:12px}
+.mpb-sidebar-caption{font-size:12px}
+.mpb-tag-options{display:flex;flex-wrap:wrap;gap:8px}
+.mpb-tag-options label{display:inline-flex;align-items:center;gap:7px;border:1px solid #d1d9e0;border-radius:6px;padding:8px 10px;background:#fff;color:#57606a;font-size:13px;cursor:pointer}
+.mpb-tag-options label.is-selected{border-color:#54aeff;background:#ddf4ff;color:#0969da}
+.mpb-tag-options input{width:14px;height:14px;margin:0;accent-color:#0969da}
+.mpb-upload-controls{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mpb-upload-controls .mpb-text-button{padding:8px 0}
+.mpb-public-profile p{margin-bottom:7px}
+@media(max-width:1250px){
+ .mpb-sidebar nav{gap:8px}
+ .mpb-sidebar nav button:not(:last-child)::after{display:none}
+}
+@media(max-width:760px){
+ .mpb-sidebar nav{gap:7px}
+ .mpb-sidebar nav button{gap:6px}
+ .mpb-step-symbol{width:19px;height:19px;flex-basis:19px;font-size:12px}
+ .mpb-nav-copy strong{font-size:13px}
+ .mpb-nav-copy small{font-size:11px}
+}
