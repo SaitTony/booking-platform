@@ -79,19 +79,22 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
   const proCount = accounts.filter(account => account.platform_role === 'master_pro').length
   const allCount = accounts.filter(account => account.platform_role !== 'owner').length
 
-  function accountPlace(account: Account) {
+  function accountCompany(account: Account) {
+    if (roleOf(account) === 'Master_pro') return '—'
     const membership = account.company_members?.[0]
-    const company = companies.find(item => item.id === membership?.company_id)
+    return companies.find(item => item.id === membership?.company_id)?.name ?? '—'
+  }
+
+  function accountPage(account: Account) {
+    const membership = account.company_members?.[0]
     const ownPage = pages.find(item => item.kind === 'individual' && item.profile_id === account.id)
     const page = pages.find(item => item.id === (membership?.master_id ?? ownPage?.id))
-    if (roleOf(account) === 'Admin') return company?.name ?? '—'
-    if (roleOf(account) === 'Master_pro') return page?.display_name ?? 'Индивидуальная страница не создана'
-    return page?.display_name ?? company?.name ?? '—'
+    return page?.display_name ?? (roleOf(account) === 'Master_pro' ? 'Индивидуальная страница не создана' : '—')
   }
 
   return <section className="accounts-prototype">
     <header className="ap-heading">
-      <div><div className="ap-eyebrow">WORKFLOWS / ADMINISTRATION</div><h2>Учётные записи</h2><p>Пользователи, роли и управление доступом</p></div>
+      <div><h2>Учётные записи</h2><p>Пользователи, роли и управление доступом</p></div>
       <button type="button" className="ap-primary" onClick={onCreate}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>Создать УЗ</button>
     </header>
 
@@ -117,7 +120,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
     <section className="ap-table">
       <div className="ap-table-heading"><strong>{tab === 'all' ? 'Все учётные записи' : tab === 'pro' ? 'Мастера_pro' : 'Сотрудники компаний'}</strong><span>{visibleAccounts.length} из {allCount}</span></div>
       <div className="ap-table-scroll">
-        <div className="ap-grid ap-grid-head"><span>№</span><span>Пользователь</span><span>Email</span><span>Телефон</span><span>Роль</span><span>Компания / страница</span><span>Доступ</span><span></span></div>
+        <div className="ap-grid ap-grid-head"><span>№</span><span>Пользователь</span><span>Email</span><span>Телефон</span><span>Роль</span><span>Компания</span><span>Страница</span><span>Доступ</span><span></span></div>
         {loading && accounts.length === 0 ? <div className="ap-empty">Загружаем реальные учётные записи…</div>
           : visibleAccounts.length === 0 ? <div className="ap-empty">{accounts.length === 0 ? 'В базе пока нет учётных записей сотрудников.' : 'По заданным условиям ничего не найдено.'}</div>
           : visibleAccounts.map((account, index) => <div className={'ap-grid ap-row ' + (account.disabled_at ? 'is-disabled' : '')} key={account.id}>
@@ -126,7 +129,8 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
             <span className="ap-muted">{account.email || '—'}</span>
             <span className="ap-muted">{account.phone_e164 || '—'}</span>
             <span><i className={'ap-role ap-role-' + roleClass(account)}>{roleOf(account)}</i></span>
-            <span className="ap-place" title={accountPlace(account)}>{accountPlace(account)}</span>
+            <span className="ap-place" title={accountCompany(account)}>{accountCompany(account)}</span>
+            <span className="ap-place" title={accountPage(account)}>{accountPage(account)}</span>
             <span><button type="button" className={'ap-switch ' + (!account.disabled_at ? 'is-on' : '')} role="switch" aria-checked={!account.disabled_at} aria-label={account.disabled_at ? 'Включить учётную запись' : 'Отключить учётную запись'} disabled={busy} onClick={() => onToggle(account)}><span/></button></span>
             <span><button type="button" className="ap-gear" title="Действия с учётной записью" aria-label={'Действия для ' + account.full_name} disabled={busy} onClick={() => onSettings(account)}><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.25"/><circle cx="8" cy="8" r="1.25"/><circle cx="13" cy="8" r="1.25"/></svg></button></span>
           </div>)}
