@@ -612,7 +612,7 @@ export default function AdminApp() {
           <details className="admin-subaccordion">
             <summary>Создать</summary>
             <div className="accordion-content">
-              <button className="admin-action-card admin-action-card-wide" onClick={()=>{setPageKind('individual');setActiveModal('masterPro')}}><span className="admin-action-icon">＋</span><strong>Создать страницу Master_pro</strong><small>Новая индивидуальная страница специалиста</small></button>
+              <button className="admin-action-card admin-action-card-wide" onClick={()=>{setPageKind('individual');setPageProfileId('');setActiveModal('masterPro')}}><span className="admin-action-icon">＋</span><strong>Создать страницу Master_pro</strong><small>Новая индивидуальная страница специалиста</small></button>
             </div>
           </details>
         </div>
