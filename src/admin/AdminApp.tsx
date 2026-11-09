@@ -88,7 +88,7 @@ const roleLabel = (profile: Account) => {
 }
 
 export default function AdminApp() {
-  const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'masterPro'|'settings'|'accountSettings'|null>(null)
+  const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'masterPro'|'accountSettings'|null>(null)
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'|'settings'>('overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
   const isAccountsPrototype = window.location.pathname.replace(/\/+$/, '').endsWith('/admin/accounts-prototype')
@@ -610,21 +610,10 @@ export default function AdminApp() {
       <StaffWorkspace profile={displayedProfile??profile} kindFilter="company" companyIdFilter={viewCompanyId} readOnly={!!previewAccount}/>
     </> : <StaffWorkspace profile={displayedProfile??profile} readOnly={!!previewAccount}/>}
     {activeModal && <div className="admin-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!busy)setActiveModal(null)}}>
-      <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+      <section className={activeModal === 'accountSettings' ? 'admin-modal admin-modal-compact' : 'admin-modal'} role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
         <span className="eyebrow">WORKFLOWS PROJECT</span>
         {error && <p className="admin-error admin-modal-error" role="alert">{error}</p>}
-        {activeModal==='settings'&&<div className="admin-settings-modal">
-          <h2 id="admin-modal-title">Настройки панели</h2>
-          <section className="admin-theme-picker"><div className="admin-theme-heading"><div><span className="eyebrow">ОФОРМЛЕНИЕ ПАНЕЛИ</span><h3>Цветовая тема</h3><p>Выберите палитру административной панели.</p></div><span className="admin-theme-current">{adminPalettes.find(item=>item.id===adminTheme)?.name}</span></div>
-            <div className="theme-options admin-theme-options">{adminPalettes.map(item=><button type="button" key={item.id} className={`theme-option ${adminTheme===item.id?'active':''}`} onClick={()=>{setAdminTheme(item.id);localStorage.setItem('workflows-admin-theme',item.id)}}><span className={`palette palette-${item.id}`}><i/><i/><i/><i/></span><span><b>{item.name}</b><small>{item.desc}</small></span>{adminTheme===item.id&&<em>✓</em>}</button>)}</div>
-          </section>
-          {profile.platform_role==='owner'&&<section className="admin-preview-settings"><h3>Просмотр панели от лица сотрудника</h3><p>Выберите роль и конкретную учётную запись. Это предварительный просмотр: реальные права и данные не меняются.</p>
-            <label className="admin-field">Тип учётной записи<select value={previewRole} onChange={event=>{setPreviewRole(event.target.value as 'admin'|'master_pro'|'master');setPreviewAccountId('')}}><option value="admin">Admin</option><option value="master_pro">Master_pro</option><option value="master">Master</option></select></label>
-            <label className="admin-field">Конкретная учётная запись<select value={previewAccountId} onChange={event=>setPreviewAccountId(event.target.value)}><option value="">Не выбрана — режим Owner</option>{previewAccounts.map(account=><option key={account.id} value={account.id}>{account.full_name} · {account.email}</option>)}</select></label>
-            {previewAccount&&<button type="button" className="secondary-button" onClick={()=>{setPreviewAccountId('');setActiveModal(null)}}>Вернуться к панели Owner</button>}
-          </section>}
-        </div>}
         {activeModal==='accountSettings'&&settingsAccount&&<form className="admin-account-settings-modal" onSubmit={saveAccountSettings}>
           <h2 id="admin-modal-title">Настройки учётной записи</h2>
           <p className="admin-modal-intro"><strong>{settingsAccount.email}</strong></p>
