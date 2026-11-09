@@ -1390,3 +1390,18 @@
 .admin-shell .account-page-url input{width:100%;min-width:0;font-size:13px;font-weight:500}
 .admin-shell .account-page-url>small{color:var(--admin-muted,var(--muted));font-size:12px;line-height:1.45}
 @media(max-width:700px){.admin-shell .account-settings-list>.account-settings-field,.admin-shell .account-page-url>.admin-field{grid-template-columns:1fr;gap:8px}.admin-shell .account-settings-list>.account-settings-field small{grid-column:1}}
+
+
+/* Company management table: same compact workspace pattern as Accounts. */
+.admin-shell .ap-company-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.admin-shell .ap-company-grid{grid-template-columns:36px minmax(180px,1.25fr) minmax(160px,1.1fr) 90px 110px 95px 62px 42px 42px;min-width:1120px}
+.admin-shell .ap-company-grid .ap-person small{font-size:10px;color:var(--ap-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.admin-shell .ap-company-active{border-color:#a6d8b5;background:#dafbe1;color:#116329}
+.admin-shell .ap-company-inactive{border-color:var(--ap-line);background:var(--admin-hover,var(--hover,#f6f8fa));color:var(--ap-muted)}
+.admin-shell .ap-delete{display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:6px;background:transparent;color:#cf222e;cursor:pointer}
+.admin-shell .ap-delete svg{width:16px;height:16px;fill:currentColor}
+.admin-shell .ap-delete:hover{background:#ffebe9;color:#a40e26}
+.admin-shell .ap-delete:disabled{opacity:.45;cursor:wait}
+.admin-shell .companies-prototype .ap-toolbar{margin-top:-3px}
+@media(max-width:850px){.admin-shell .ap-company-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.admin-shell .ap-company-stats{grid-template-columns:1fr}.admin-shell .ap-company-stats article{padding:11px 13px}}
