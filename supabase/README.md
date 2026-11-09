@@ -26,7 +26,7 @@ The current staff login flow uses **email + password**:
 
 ## Database and migrations
 
-The hosted project currently has 27 applied migrations. The canonical migration files are in `supabase/migrations`; their 14-digit versions must match the versions returned by Supabase migration history.
+The hosted project currently has 28 applied migrations. The canonical migration files are in `supabase/migrations`; their 14-digit versions must match the versions returned by Supabase migration history.
 
 Rules:
 1. Never rerun an already applied migration.
@@ -46,7 +46,7 @@ The migration set includes:
 - Owner bootstrap and account/page lifecycle safeguards;
 - company deletion/archive behavior;
 - unique active individual Master_pro page names;
-- reserved company slugs, FK/index improvements, timestamp triggers, consolidated RLS policies, relocation of btree_gist to the non-exposed extensions schema, and isolation of SECURITY DEFINER access helpers in the non-exposed private schema, and composite foreign keys for company memberships and bookings, plus their child-side indexes.
+- reserved company slugs, FK/index improvements, timestamp triggers, consolidated RLS policies, relocation of btree_gist to the non-exposed extensions schema, and isolation of SECURITY DEFINER access helpers in the non-exposed private schema, composite foreign keys for company memberships and bookings, their child-side indexes, and safer default EXECUTE privileges for future public functions.
 
 ## Edge Functions
 
