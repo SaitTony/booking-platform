@@ -19,6 +19,7 @@ export default function CompanySettings({isOwner,companyId,hideSelector=false,re
     supabase.from('companies').select('id,name,description,cover_url,theme,is_active').order('name')
       .then(({data,error:queryError})=>{if(queryError)setError(queryError.message);else setCompanies((data??[]) as Company[])})
   },[])
+  useEffect(()=>{if(companyId)setSelectedId(companyId)},[companyId])
   useEffect(()=>{
     const company=companies.find(item=>item.id===selectedId)
     if(company){setName(company.name);setDescription(company.description);setCoverUrl(company.cover_url??'');setTheme(company.theme?.id??'natural');setActive(company.is_active)}
