@@ -31,7 +31,7 @@ type Account = Profile & { company_members?: Member[] }
 
 
 function normalizePageName(value: string) {
-  return value.trim().replace(/\\s+/g, ' ').toLowerCase()
+  return value.trim().replace(/\s+/g, ' ').toLowerCase()
 }
 function hasDuplicateIndividualPageName(pages: MasterOption[], name: string, excludeId?: string) {
   const normalized = normalizePageName(name)
