@@ -32,6 +32,12 @@ export default function StaffWorkspace({profile,kindFilter,companyIdFilter,readO
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState('')
   const [notice,setNotice]=useState('')
+
+  useEffect(()=>{
+    if(!notice)return
+    const timeout=window.setTimeout(()=>setNotice(''),3000)
+    return ()=>window.clearTimeout(timeout)
+  },[notice])
   const canEdit=!readOnly&&(profile.platform_role==='owner'||profile.platform_role==='master_pro'||profile.company_members?.some(m=>m.role==='admin')===true)
   const canCancel=!readOnly&&canEdit
 
