@@ -78,6 +78,8 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
   const staffCount = accounts.filter(account => account.platform_role !== 'owner' && account.platform_role !== 'master_pro').length
   const proCount = accounts.filter(account => account.platform_role === 'master_pro').length
   const allCount = accounts.filter(account => account.platform_role !== 'owner').length
+  const activeCount = accounts.filter(account => account.platform_role !== 'owner' && !account.disabled_at).length
+  const disabledCount = allCount - activeCount
 
   function accountCompany(account: Account) {
     if (roleOf(account) === 'Master_pro') return '—'
@@ -97,6 +99,14 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
       <div><h2>Учётные записи</h2><p>Пользователи, роли и управление доступом</p></div>
       <button type="button" className="ap-primary" onClick={onCreate}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>Создать УЗ</button>
     </header>
+
+    <div className="ap-stats ap-account-overview-stats" aria-label="Статистика учётных записей">
+      <article><span>Всего учётных записей</span><strong>{allCount}</strong><small>Все пользователи платформы</small></article>
+      <article><span>Активные учётные записи</span><strong>{activeCount}</strong><small>Доступ к панели открыт</small></article>
+      <article><span>Master_pro</span><strong>{proCount}</strong><small>Индивидуальные специалисты</small></article>
+      <article><span>Сотрудники компаний</span><strong>{staffCount}</strong><small>Администраторы и мастера</small></article>
+      <article><span>Отключённые учётные записи</span><strong>{disabledCount}</strong><small>Доступ временно закрыт</small></article>
+    </div>
 
     <div className="ap-toolbar">
       <label className="ap-search"><span aria-hidden="true">⌕</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Поиск по имени, email, телефону…" aria-label="Поиск учётных записей"/></label>
