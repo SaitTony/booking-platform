@@ -112,7 +112,7 @@
 - статусы записей в корпоративном кабинете переведены на понятные подписи, добавлено пустое состояние;
 - обзор Master_pro рассчитывает число записей за текущий день с учётом часового пояса специалиста.
 
-Последняя CI-проверка на актуальном HEAD `8d74d74b2375787e14a27123e49411368c520de7` завершилась успешно (workflow run `42803768151`, job `129787938648`): TypeScript/Vite build, dependency audit, запуск локального Supabase, применение всех миграций, migration status, DB functional tests, Edge Functions typecheck и остановка тестового стека.
+Последняя CI-проверка на актуальном HEAD `56cd736f4bf334534056e67d05aa55b3624719cc` завершилась успешно (workflow run `42804491182`, job `129790063997`): TypeScript/Vite build, dependency audit, запуск локального Supabase, применение всех миграций, migration status, DB functional tests, Edge Functions typecheck и остановка тестового стека. Все 14 основных шагов и завершающие cleanup-шаги имеют статус success.
 
 Оставшиеся обязательные пункты до перехода:
 1. Проверка матрицы доступа Owner / Admin / Master / Master_pro, включая read-only preview.
