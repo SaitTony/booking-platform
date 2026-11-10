@@ -15,6 +15,7 @@ type MasterPage = {
   company_id: string | null
   profile_id: string | null
   is_active: boolean
+  archived_at: string | null
 }
 
 type Props = {
@@ -22,24 +23,24 @@ type Props = {
   pages: MasterPage[]
   loading: boolean
   busy: boolean
-  onCreatePage: (account: MasterProAccount) => void
-  onCreateAccount: () => void
   onTogglePage: (page: MasterPage) => void
   onArchivePage: (page: MasterPage) => void
 }
 
-type Filter = 'all' | 'published' | 'draft' | 'missing' | 'disabled'
+type Filter = 'all' | 'published' | 'draft' | 'missing' | 'disabled' | 'archived'
 
-export default function MasterProManagementTable({ accounts, pages, loading, busy, onCreatePage, onCreateAccount, onTogglePage, onArchivePage }: Props) {
+export default function MasterProManagementTable({ accounts, pages, loading, busy, onTogglePage, onArchivePage }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
   const masterPros = accounts
   const individualPages = pages.filter(page => page.kind === 'individual')
+  const archivedPages = individualPages.filter(page => !!page.archived_at)
   const pageFor = (account: MasterProAccount) => individualPages.find(page => page.profile_id === account.id)
   const publishedCount = masterPros.filter(account => pageFor(account)?.is_active).length
   const draftCount = masterPros.filter(account => pageFor(account) && !pageFor(account)?.is_active).length
   const missingCount = masterPros.filter(account => !pageFor(account)).length
   const disabledCount = masterPros.filter(account => account.disabled_at).length
+  const archivedCount = archivedPages.length
 
   const visible = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('ru')
@@ -50,6 +51,7 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
         || (filter === 'draft' && !!page && !page.is_active)
         || (filter === 'missing' && !page)
         || (filter === 'disabled' && !!account.disabled_at)
+        || (filter === 'archived' && !!page?.archived_at)
       const matchesSearch = !query || [account.full_name, account.email, page?.display_name, page?.slug]
         .some(value => String(value ?? '').toLocaleLowerCase('ru').includes(query))
       return matchesFilter && matchesSearch
@@ -62,11 +64,12 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
     {id:'draft',label:'Черновики',count:draftCount},
     {id:'missing',label:'Без страницы',count:missingCount},
     {id:'disabled',label:'Отключённые УЗ',count:disabledCount},
+    {id:'archived',label:'Архив',count:archivedCount},
   ]
 
   return <section className="accounts-prototype master-pro-management">
     <header className="ap-heading">
-      <div><h2>Master_pro</h2><p>Индивидуальные специалисты и их публичные страницы вне компаний</p></div><button type="button" className="ap-primary" onClick={onCreateAccount}>＋ Создать Master_pro</button>
+      <div><h2>Master_pro</h2><p>Индивидуальные специалисты и их публичные страницы вне компаний</p></div>
     </header>
 
     <div className="ap-stats ap-company-stats mp-management-stats">
@@ -74,6 +77,7 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
       <article><span>Опубликовано страниц</span><strong>{publishedCount}</strong><small>Доступны клиентам</small></article>
       <article><span>Черновики</span><strong>{draftCount + missingCount}</strong><small>{missingCount} ещё не созданы</small></article>
       <article><span>Отключённые УЗ</span><strong>{disabledCount}</strong><small>Доступ к кабинету закрыт</small></article>
+      <article><span>В архиве</span><strong>{archivedCount}</strong><small>Страницы можно восстановить</small></article>
     </div>
 
     <div className="ap-toolbar">
@@ -87,7 +91,7 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
     <section className="ap-table">
       <div className="ap-table-heading"><strong>{tabs.find(tab => tab.id === filter)?.label ?? 'Все специалисты'}</strong><span>{visible.length} из {masterPros.length}</span></div>
       <div className="ap-table-scroll">
-        <div className="ap-grid mp-management-grid ap-grid-head"><span>№</span><span>Специалист</span><span>Email</span><span>Индивидуальная страница</span><span>Публикация</span><span>Доступ</span><span>Действия</span></div>
+        <div className="ap-grid mp-management-grid ap-grid-head"><span>№</span><span>Специалист</span><span>Email</span><span>Индивидуальная страница</span><span>Публикация</span><span>Доступ</span><span>Архивация</span></div>
         {loading && masterPros.length === 0 ? <div className="ap-empty">Загружаем учётные записи…</div>
           : visible.length === 0 ? <div className="ap-empty">{masterPros.length ? 'По заданным условиям ничего не найдено.' : 'Учётных записей Master_pro пока нет.'}</div>
           : visible.map((account, index) => {
@@ -96,13 +100,10 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
               <span className="ap-number">{index + 1}</span>
               <div className="ap-person"><strong>{account.full_name || 'Без имени'}</strong><small>{account.disabled_at ? 'Учётная запись отключена' : 'Индивидуальный специалист'}</small></div>
               <span className="ap-muted">{account.email || '—'}</span>
-              <div className="mp-management-page">{page ? <><strong>{page.display_name}</strong><a href={`https://saittony.github.io/workflows/pro/${page.slug}`} target="_blank" rel="noreferrer">/pro/{page.slug}</a></> : <span>Страница не создана</span>}</div>
-              <span><i className={'ap-role ' + (page?.is_active ? 'ap-company-active' : 'ap-company-inactive')}>{page ? page.is_active ? 'Опубликована' : 'Черновик' : 'Нет страницы'}</i></span>
+              <div className="mp-management-page">{page ? <><strong>{page.display_name}</strong><a href={`https://saittony.github.io/workflows/pro/${page.slug}`} target="_blank" rel="noreferrer">/pro/{page.slug}</a>{page.archived_at && <small className="mp-archived-label">В архиве</small>}</> : <span>Нет связанной страницы</span>}</div>
+              <span>{page ? <button type="button" className={'ap-switch ' + (page.is_active && !page.archived_at ? 'is-on' : '')} role="switch" aria-checked={page.is_active && !page.archived_at} aria-label={page.is_active && !page.archived_at ? 'Отключить страницу' : 'Включить страницу'} disabled={busy || !!page.archived_at} onClick={() => onTogglePage(page)}><span/></button> : <i className="ap-role ap-company-inactive">Нет страницы</i>}</span>
               <span><i className={'ap-role ' + (!account.disabled_at ? 'ap-company-active' : 'ap-company-inactive')}>{account.disabled_at ? 'Отключён' : 'Активен'}</i></span>
-              <span className="mp-management-actions">{!page
-                ? <button type="button" className="ap-primary mp-management-create" disabled={busy || !!account.disabled_at} onClick={() => onCreatePage(account)}>Создать страницу</button>
-                : <><button type="button" className="ap-gear" title={page.is_active ? 'Отключить публикацию' : 'Опубликовать страницу'} aria-label={page.is_active ? 'Отключить публикацию' : 'Опубликовать страницу'} disabled={busy} onClick={() => onTogglePage(page)}>{page.is_active ? 'Ⅱ' : '▶'}</button><button type="button" className="ap-delete" title="Переместить страницу в архив" aria-label="Переместить страницу в архив" disabled={busy} onClick={() => onArchivePage(page)}>⌫</button></>}
-              </span>
+              <span className="mp-management-actions">{page ? <button type="button" className="ap-secondary mp-archive-action" disabled={busy} onClick={() => onArchivePage(page)}>{page.archived_at ? 'Вернуть из архива' : 'В архив'}</button> : '—'}</span>
             </div>
           })}
       </div>
