@@ -33,8 +33,6 @@ type Props = {
   onToggle: (account: Account) => void
 }
 
-type Tab = 'all' | 'pro' | 'staff'
-
 function roleOf(account: Account) {
   if (account.platform_role === 'owner') return 'Owner'
   if (account.platform_role === 'master_pro') return 'Master_pro'
@@ -49,7 +47,6 @@ function roleClass(account: Account) {
 }
 
 export default function AccountsPrototype({ accounts, companies, pages, loading, busy, onCreate, onSettings, onToggle,  }: Props) {
-  const [tab, setTab] = useState<Tab>('all')
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -59,9 +56,6 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
     const query = search.trim().toLocaleLowerCase('ru')
     return accounts
       .filter(account => account.platform_role !== 'owner')
-      .filter(account => tab === 'all'
-        || (tab === 'pro' && account.platform_role === 'master_pro')
-        || (tab === 'staff' && account.platform_role !== 'master_pro'))
       .filter(account => !roleFilter || roleOf(account) === roleFilter)
       .filter(account => !statusFilter || (statusFilter === 'active' ? !account.disabled_at : !!account.disabled_at))
       .filter(account => !companyFilter || account.company_members?.some(member => member.company_id === companyFilter))
@@ -73,7 +67,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
         return [account.full_name, account.email, account.phone_e164, roleOf(account), company?.name, page?.display_name]
           .some(value => String(value ?? '').toLocaleLowerCase('ru').includes(query))
       })
-  }, [accounts, companies, pages, tab, search, roleFilter, statusFilter, companyFilter])
+  }, [accounts, companies, pages, search, roleFilter, statusFilter, companyFilter])
 
   const staffCount = accounts.filter(account => account.platform_role !== 'owner' && account.platform_role !== 'master_pro').length
   const proCount = accounts.filter(account => account.platform_role === 'master_pro').length
@@ -117,14 +111,8 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
       <button type="button" className="ap-primary ap-toolbar-create" onClick={onCreate}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>Создать УЗ</button>
     </div>
 
-    <nav className="ap-tabs" aria-label="Категории учётных записей">
-      <button type="button" className={tab === 'all' ? 'active' : ''} onClick={() => setTab('all')}>Все <span>{allCount}</span></button>
-      <button type="button" className={tab === 'pro' ? 'active' : ''} onClick={() => setTab('pro')}>Мастера_pro <span>{proCount}</span></button>
-      <button type="button" className={tab === 'staff' ? 'active' : ''} onClick={() => setTab('staff')}>Сотрудники компаний <span>{staffCount}</span></button>
-    </nav>
-
     <section className="ap-table">
-      <div className="ap-table-heading"><strong>{tab === 'all' ? 'Все учётные записи' : tab === 'pro' ? 'Мастера_pro' : 'Сотрудники компаний'}</strong><span>{visibleAccounts.length} из {allCount}</span></div>
+      <div className="ap-table-heading"><strong>Все учётные записи</strong><span>{visibleAccounts.length} из {allCount}</span></div>
       <div className="ap-table-scroll">
         <div className="ap-grid ap-grid-head"><span>№</span><span>Пользователь</span><span>Email</span><span>Телефон</span><span>Роль</span><span>Компания</span><span>Страница</span><span>Доступ</span><span></span></div>
         {loading && accounts.length === 0 ? <div className="ap-empty">Загружаем реальные учётные записи…</div>
