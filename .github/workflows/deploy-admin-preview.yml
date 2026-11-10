@@ -52,6 +52,8 @@ jobs:
           npm run build
           mkdir -p ../production/dist/admin-preview
           cp -R dist/. ../production/dist/admin-preview/
+          mkdir -p ../production/dist/admin-preview/admin
+          cp dist/index.html ../production/dist/admin-preview/admin/index.html
 
       - name: Preserve SPA fallback
         working-directory: production
