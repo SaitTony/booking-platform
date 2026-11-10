@@ -5,6 +5,7 @@ import StaffWorkspace from './StaffWorkspace'
 import AccountsPrototype from './AccountsPrototype'
 import CompaniesPrototype from './CompaniesPrototype'
 import MasterProManagementTable from './MasterProManagementTable'
+import MasterProBuilder from './MasterProBuilder'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
@@ -723,7 +724,7 @@ export default function AdminApp() {
       </section>}
         </div>
       </div>
-    </> : displayedProfile?.company_members?.some(member=>member.role==='admin') ? <>
+    </> : profile.platform_role==='master_pro'&&!previewAccount ? <MasterProBuilder/> : displayedProfile?.company_members?.some(member=>member.role==='admin') ? <>
       <div className="admin-section-head"><div><span className="eyebrow">УПРАВЛЕНИЕ КОМПАНИЕЙ</span><h2>Страницы мастеров</h2></div></div>
       {!previewAccount&&<form className="admin-card admin-create-form" onSubmit={createMasterPage}>
         <h3>Создать страницу мастера</h3>
