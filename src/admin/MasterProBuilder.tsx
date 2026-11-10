@@ -89,6 +89,20 @@ export default function MasterProBuilder() {
     setServices(current=>[...current,item]);setSelectedService(item.id);setNewService({name:'',description:'',duration:'60',price:'0'});setSaved(false)
   }
 
+  async function fetchMasterBookings(id:string):Promise<Booking[]>{
+    if(!supabase)return []
+    const all:Booking[]=[]
+    const pageSize=500
+    for(let from=0;;from+=pageSize){
+      const {data,error}=await supabase.from('bookings')
+        .select('id,starts_at,ends_at,status,service_name_snapshot,price_snapshot,client_name_snapshot,client_phone_snapshot')
+        .eq('master_id',id).order('starts_at',{ascending:false}).range(from,from+pageSize-1)
+      if(error)throw error
+      all.push(...((data??[]) as Booking[]))
+      if(!data||data.length<pageSize)return all
+    }
+  }
+
   useEffect(()=>{
     let cancelled=false
     async function loadPage(){
@@ -106,10 +120,10 @@ export default function MasterProBuilder() {
           supabase.from('services').select('id,name,description,duration,price,is_active').eq('master_id',master.id).order('sort_order'),
           supabase.from('working_hours').select('weekday,opens_at,closes_at,is_day_off').eq('master_id',master.id),
           supabase.from('booking_settings').select('booking_horizon_days,buffer_minutes').eq('master_id',master.id).maybeSingle(),
-          supabase.from('bookings').select('id,starts_at,ends_at,status,service_name_snapshot,price_snapshot,client_name_snapshot,client_phone_snapshot').eq('master_id',master.id).order('starts_at',{ascending:false}).limit(500),
+          fetchMasterBookings(master.id),
           supabase.from('schedule_exceptions').select('id,exception_date,is_day_off,opens_at,closes_at,note').eq('master_id',master.id).gte('exception_date',new Date().toLocaleDateString('en-CA')).order('exception_date').limit(100),
         ])
-        for(const result of [serviceResult,hourResult,settingsResult,bookingResult,exceptionResult])if(result.error)throw result.error
+        for(const result of [serviceResult,hourResult,settingsResult,exceptionResult])if(result.error)throw result.error
         if(cancelled) return
         setMasterId(master.id)
         setMasterSlug(master.slug)
@@ -131,7 +145,7 @@ export default function MasterProBuilder() {
           return row?{enabled:!row.is_day_off,opens:row.opens_at.slice(0,5),closes:row.closes_at.slice(0,5)}:{enabled:false,opens:'09:00',closes:'18:00'}
         }))
         if(settingsResult.data){setHorizon(String(settingsResult.data.booking_horizon_days));setBufferMinutes(String(settingsResult.data.buffer_minutes??0))}
-        setBookings((bookingResult.data??[]) as Booking[])
+        setBookings(bookingResult)
         setExceptions((exceptionResult.data??[]) as ScheduleException[])
       }catch(error){if(!cancelled)setSaveMessage(error instanceof Error?error.message:'Не удалось загрузить страницу')}
       finally{if(!cancelled)setLoading(false)}
