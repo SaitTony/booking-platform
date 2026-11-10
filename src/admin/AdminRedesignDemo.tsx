@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 
 type Section = 'overview'|'accounts'|'companies'|'masterPro'|'settings'
 type Account = {id:number;name:string;email:string;phone:string;role:'Admin'|'Master'|'Master_pro';company:string;page:string;active:boolean}
@@ -32,12 +33,11 @@ export default function AdminRedesignDemo(){
  const [preview,setPreview]=useState('Owner')
  const [toast,setToast]=useState('')
  const [archived,setArchived]=useState<number[]>([])
- const visibleAccounts=useMemo(()=>accounts.filter(a=>(filter==='all'||(filter==='active'?a.active:filter==='disabled'?!a.active:a.role===filter)).filter?false:true),[accounts,filter])
  const accountRows=useMemo(()=>accounts.filter(a=>(filter==='all'||(filter==='active'&&a.active)||(filter==='disabled'&&!a.active)||(filter===a.role))).filter(a=>!query||[a.name,a.email,a.phone,a.role,a.company,a.page].join(' ').toLowerCase().includes(query.toLowerCase())),[accounts,filter,query])
  const companyRows=companies.filter(c=>!query||[c.name,c.slug].join(' ').toLowerCase().includes(query.toLowerCase()))
  const showToast=(s:string)=>{setToast(s);window.setTimeout(()=>setToast(''),2400)}
  const startAccount=(id?:number)=>{const a=accounts.find(x=>x.id===id);setEditing(id??null);setName(a?.name??'');setEmail(a?.email??'');setRole(a?.role??'Master');setCompany(a?.company==='—'?'Aura Studio':a?.company??'Aura Studio');setModal('account')}
- const saveAccount=(e:React.FormEvent)=>{e.preventDefault();if(editing!==null){setAccounts(v=>v.map(a=>a.id===editing?{...a,name,email,role,company:role==='Master_pro'?'—':company}:a));showToast('Учётная запись обновлена')}else{setAccounts(v=>[...v,{id:Math.max(0,...v.map(a=>a.id))+1,name,email,phone:'Не указан',role,company:role==='Master_pro'?'—':company,page:name.toLowerCase().replace(/\\s+/g,'-'),active:true}]);showToast('Учётная запись создана')}setModal(null)}
+ const saveAccount=(e:FormEvent)=>{e.preventDefault();if(editing!==null){setAccounts(v=>v.map(a=>a.id===editing?{...a,name,email,role,company:role==='Master_pro'?'—':company}:a));showToast('Учётная запись обновлена')}else{setAccounts(v=>[...v,{id:Math.max(0,...v.map(a=>a.id))+1,name,email,phone:'Не указан',role,company:role==='Master_pro'?'—':company,page:name.toLowerCase().replace(/\\s+/g,'-'),active:true}]);showToast('Учётная запись создана')}setModal(null)}
  const startCompany=(id?:number)=>{const c=companies.find(x=>x.id===id);setEditing(id??null);setName(c?.name??'');setEmail(c?.slug??'');setModal('company')}
  const saveCompany=(e:React.FormEvent)=>{e.preventDefault();if(editing!==null){setCompanies(v=>v.map(c=>c.id===editing?{...c,name,slug:email}:c));showToast('Компания обновлена')}else{setCompanies(v=>[...v,{id:Math.max(0,...v.map(c=>c.id))+1,name,slug:email,staff:0,pages:0,active:true}]);showToast('Компания создана')}setModal(null)}
  return <main className="admin-shell" data-redesign="true" data-admin-theme={theme}>
