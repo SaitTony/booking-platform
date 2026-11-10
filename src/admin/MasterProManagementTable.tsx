@@ -32,6 +32,7 @@ type Filter = 'all' | 'published' | 'draft' | 'missing' | 'disabled' | 'archived
 export default function MasterProManagementTable({ accounts, pages, loading, busy, onTogglePage, onArchivePage }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
   const masterPros = accounts
   const individualPages = pages.filter(page => page.kind === 'individual')
   const archivedPages = individualPages.filter(page => !!page.archived_at)
@@ -47,8 +48,8 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
     return masterPros.filter(account => {
       const page = pageFor(account)
       const matchesFilter = filter === 'all'
-        || (filter === 'published' && !!page?.is_active)
-        || (filter === 'draft' && !!page && !page.is_active)
+        || (filter === 'published' && !!page?.is_active && !page.archived_at)
+        || (filter === 'draft' && !!page && !page.is_active && !page.archived_at)
         || (filter === 'missing' && !page)
         || (filter === 'disabled' && !!account.disabled_at)
         || (filter === 'archived' && !!page?.archived_at)
@@ -98,7 +99,7 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
             const page = pageFor(account)
             return <div className={'ap-grid mp-management-grid ap-row ' + (account.disabled_at ? 'is-disabled' : '')} key={account.id}>
               <span className="ap-number">{index + 1}</span>
-              <div className="ap-person"><strong>{account.full_name || 'Без имени'}</strong><small>{account.disabled_at ? 'Учётная запись отключена' : 'Индивидуальный специалист'}</small></div>
+              <div className="ap-person"><strong>{account.full_name || 'Без имени'}</strong><small>{account.disabled_at ? 'Учётная запись отключена' : 'Индивидуальный специалист'}</small><button type="button" className="ap-detail-trigger" onClick={() => setSelectedAccountId(current => current === account.id ? null : account.id)} aria-expanded={selectedAccountId === account.id}>Подробнее</button></div>
               <span className="ap-muted">{account.email || '—'}</span>
               <div className="mp-management-page">{page ? <><strong>{page.display_name}</strong><a href={`https://saittony.github.io/workflows/pro/${page.slug}`} target="_blank" rel="noreferrer">/pro/{page.slug}</a>{page.archived_at && <small className="mp-archived-label">В архиве</small>}</> : <span>Нет связанной страницы</span>}</div>
               <span>{page ? <button type="button" className={'ap-switch ' + (page.is_active && !page.archived_at ? 'is-on' : '')} role="switch" aria-checked={page.is_active && !page.archived_at} aria-label={page.is_active && !page.archived_at ? 'Отключить страницу' : 'Включить страницу'} disabled={busy || !!page.archived_at} onClick={() => onTogglePage(page)}><span/></button> : <i className="ap-role ap-company-inactive">Нет страницы</i>}</span>
@@ -109,5 +110,29 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
       </div>
       <footer className="ap-footer">Индивидуальные страницы не входят в структуру компаний. Admin компаний не имеет к ним доступа.</footer>
     </section>
+    {visible.find(account => account.id === selectedAccountId) && (() => {
+      const account = visible.find(item => item.id === selectedAccountId)!
+      const page = pageFor(account)
+      const isPublished = !!page?.is_active && !page.archived_at
+      return <aside className="ap-account-detail mp-account-detail" aria-label="Карточка Master_pro">
+        <div className="ap-account-detail-heading">
+          <div><span className="rd-kicker">ИНДИВИДУАЛЬНЫЙ СПЕЦИАЛИСТ</span><h3>{account.full_name || 'Без имени'}</h3><p>{account.disabled_at ? 'Доступ к кабинету отключён' : 'Доступ к кабинету активен'}</p></div>
+          <button type="button" className="ap-detail-close" onClick={() => setSelectedAccountId(null)} aria-label="Закрыть карточку">×</button>
+        </div>
+        <div className="ap-account-detail-grid">
+          <div><small>Email</small><strong>{account.email || '—'}</strong></div>
+          <div><small>Доступ к кабинету</small><strong>{account.disabled_at ? 'Отключён' : 'Активен'}</strong></div>
+          <div><small>Публичная страница</small><strong>{page?.display_name || 'Не создана'}</strong></div>
+          <div><small>Адрес страницы</small><strong>{page ? '/pro/' + page.slug : '—'}</strong></div>
+          <div><small>Публикация</small><strong>{!page ? 'Нет страницы' : page.archived_at ? 'В архиве' : isPublished ? 'Опубликована' : 'Черновик'}</strong></div>
+          <div><small>Тип профиля</small><strong>Независимый Master_pro</strong></div>
+        </div>
+        <div className="ap-account-detail-actions">
+          {page && !page.archived_at && <button type="button" className="ap-secondary" disabled={busy} onClick={() => onTogglePage(page)}>{isPublished ? 'Снять с публикации' : 'Опубликовать страницу'}</button>}
+          {page && <button type="button" className="ap-secondary" disabled={busy} onClick={() => onArchivePage(page, account.id)}>{page.archived_at ? 'Вернуть из архива' : 'В архив'}</button>}
+          {page && !page.archived_at && <a className="ap-secondary mp-open-page" href={'https://saittony.github.io/workflows/pro/' + page.slug} target="_blank" rel="noreferrer">Открыть публичную страницу ↗</a>}
+        </div>
+      </aside>
+    })()}
   </section>
 }
