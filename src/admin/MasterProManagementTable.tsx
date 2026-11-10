@@ -32,7 +32,7 @@ type Filter = 'all' | 'published' | 'draft' | 'missing' | 'disabled'
 export default function MasterProManagementTable({ accounts, pages, loading, busy, onCreatePage, onTogglePage, onArchivePage }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
-  const masterPros = accounts.filter(account => true)
+  const masterPros = accounts
   const individualPages = pages.filter(page => page.kind === 'individual')
   const pageFor = (account: MasterProAccount) => individualPages.find(page => page.profile_id === account.id)
   const publishedCount = masterPros.filter(account => pageFor(account)?.is_active).length
