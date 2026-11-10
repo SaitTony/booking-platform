@@ -592,7 +592,7 @@ export default function AdminApp() {
     {profile.platform_role === 'owner' && !previewAccount ? <>
       <div className="admin-workspace-layout">
         <aside className="admin-sidebar" aria-label="Разделы панели">
-          <span className="admin-sidebar-label">МЕНЮ</span>
+          
           <button type="button" className={activeSection==='overview'?'active':''} aria-current={activeSection==='overview'?'page':undefined} onClick={()=>setActiveSection('overview')}><span>⌂</span>Обзор</button>
           <button type="button" className={activeSection==='accounts'?'active':''} aria-current={activeSection==='accounts'?'page':undefined} onClick={()=>setActiveSection('accounts')}><span>♙</span>Учётные записи</button>
           <button type="button" className={activeSection==='companies'?'active':''} aria-current={activeSection==='companies'?'page':undefined} onClick={()=>setActiveSection('companies')}><span>▦</span>Компании</button>
