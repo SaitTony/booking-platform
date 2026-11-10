@@ -110,7 +110,7 @@ export default function AdminApp() {
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'|'settings'>('overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
   const adminPath = window.location.pathname.replace(/\/+$/, '')
-  const isAccountsPrototype = adminPath.endsWith('/admin') || adminPath.endsWith('/admin/accounts-prototype') || adminPath.endsWith('/admin/redesign')
+  const isAccountsPrototype = adminPath.endsWith('/admin/accounts-prototype') || adminPath.endsWith('/admin/redesign')
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [email, setEmail] = useState('')
