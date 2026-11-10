@@ -155,7 +155,7 @@ export default function MasterProBuilder() {
   return <main className="mpb-shell">
     <header className="mpb-topbar">
       <div className="mpb-brand"><span className="mpb-brand-mark">W</span><span>Workflows <small>· Конструктор Master_pro</small></span></div>
-      <div className="mpb-top-actions"><span className="mpb-draft-status"><i/> {saving?'Сохранение…':'Черновик'}</span></div>
+      <div className="mpb-top-actions"><span className={`mpb-draft-status ${pageActive?'is-published':''}`}><i/> {saving?'Сохранение…':pageActive?'Опубликована':'Черновик'}</span></div>
     </header>
     <div className="mpb-page-head">
       <div><h1>Создание страницы</h1><p>Настройте свою страницу и сразу посмотрите, как её увидят клиенты.</p></div>
