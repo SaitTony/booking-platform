@@ -47,6 +47,7 @@ The migration set includes:
 - company deletion/archive behavior;
 - unique active individual Master_pro page names;
 - Owner/Master_pro-only publication control for individual Master_pro pages (database trigger enforcement);
+- Master_pro booking buffer (`booking_settings.buffer_minutes`) enforced by both available-slot discovery and booking creation, plus atomic completion of confirmed bookings;
 - reserved company slugs, FK/index improvements, timestamp triggers, consolidated RLS policies, relocation of btree_gist to the non-exposed extensions schema, and isolation of SECURITY DEFINER access helpers in the non-exposed private schema, composite foreign keys for company memberships and bookings, their child-side indexes, and safer default EXECUTE privileges for future public functions.
 
 ## Product access model — two independent specialist branches
@@ -153,8 +154,9 @@ Do not point destructive local commands at the hosted project. Use the exact pro
 ## Current product gaps
 
 - Master_pro Builder loads the authenticated user's individual master page and persists profile fields, theme metadata, services, weekly working hours, booking horizon, and image URLs via the `SECURITY INVOKER` RPC `public.save_master_pro_builder`. The RPC checks `private.can_manage_master` and runs database writes in one transaction. Profile and cover images upload to the public `master-assets` bucket (JPG/PNG/WebP, max 5 MiB); Storage INSERT is restricted to the manager's master-id folder.
-- The Master_pro Builder can enable or disable publication of the authenticated Master_pro user's own individual page. Owner can manage publication for all individual Master_pro pages from the admin panel. Admin cannot see individual Master_pro pages or change their `masters.is_active` value; a database trigger enforces this restriction independently of the UI. The builder displays the real publication status and `/pro/{slug}` public URL.
+- The Master_pro Builder is a personal workspace with a first-visit welcome, horizontal navigation, page/profile editing, services, weekly schedule, date exceptions, booking list and settings. It can enable or disable publication of the authenticated Master_pro user's own individual page. Owner can manage publication for all individual Master_pro pages from the admin panel. Admin cannot see individual Master_pro pages or change their `masters.is_active` value; a database trigger enforces this restriction independently of the UI. The builder displays the real publication status and `/pro/{slug}` public URL.
 - `masters.photo_url` and `masters.cover_url` store public URLs from the `master-assets` Storage bucket.
 - The `booking_settings.rules_text` field exists; an editable settings interface is not yet available.
+- Master_pro can set a 0–240 minute buffer between appointments. The value is persisted and enforced by both `get_available_slots` and `create_booking`. Master_pro can filter own bookings and mark confirmed bookings completed or cancelled.
 - PostHog project exists, but frontend SDK and event instrumentation are not connected.
 - Leaked Password Protection must still be enabled in the Supabase Dashboard.
