@@ -1849,3 +1849,82 @@
 .admin-shell[data-redesign="true"] .rd-actions button.danger,.admin-shell[data-redesign="true"] .rd-company-actions button.danger{color:#b54848}
 .admin-shell[data-redesign="true"] .rd-company-actions button{flex:1}
 @media(max-width:760px){.admin-shell[data-redesign="true"] .rd-actions{flex-wrap:wrap}}
+
+
+/* Layout and scale refinement requested for the standalone prototype */
+.admin-shell[data-redesign="true"]{
+  width:100%;min-width:0;box-sizing:border-box;
+}
+.admin-shell[data-redesign="true"] .admin-wide{
+  width:min(1540px,calc(100% - 72px));max-width:1540px;
+  margin-left:auto!important;margin-right:auto!important;
+  padding:34px 0 64px;box-sizing:border-box;
+}
+.admin-shell[data-redesign="true"] .admin-workspace-layout{
+  grid-template-columns:260px minmax(0,1fr);gap:30px;
+}
+.admin-shell[data-redesign="true"] .ap-primary-nav{padding:14px;border-radius:16px}
+.admin-shell[data-redesign="true"] .ap-primary-nav button{min-height:50px;padding:0 14px;font-size:14px;gap:13px}
+.admin-shell[data-redesign="true"] .ap-primary-nav button svg{width:19px;height:19px}
+.admin-shell[data-redesign="true"] .admin-top h1{font-size:29px}
+.admin-shell[data-redesign="true"] .admin-top p{font-size:14px}
+.admin-shell[data-redesign="true"] .admin-top-actions button{min-height:44px;font-size:13px}
+.admin-shell[data-redesign="true"] .rd-page-title h2{font-size:32px}
+.admin-shell[data-redesign="true"] .rd-page-title p{font-size:14px}
+.admin-shell[data-redesign="true"] .rd-kicker{font-size:10px}
+.admin-shell[data-redesign="true"] .rd-kpis{gap:15px}
+.admin-shell[data-redesign="true"] .rd-kpis article{padding:22px;min-height:146px}
+.admin-shell[data-redesign="true"] .rd-kpis article>span{font-size:13px}
+.admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:36px}
+.admin-shell[data-redesign="true"] .rd-kpis article>small{font-size:11px}
+.admin-shell[data-redesign="true"] .rd-card{padding:23px}
+.admin-shell[data-redesign="true"] .rd-card-head h3{font-size:16px}
+.admin-shell[data-redesign="true"] .rd-card-head p{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-quick-actions button{padding:15px 0}
+.admin-shell[data-redesign="true"] .rd-quick-actions button>i{width:40px;height:40px;font-size:18px}
+.admin-shell[data-redesign="true"] .rd-quick-actions button b{font-size:13px}
+.admin-shell[data-redesign="true"] .rd-quick-actions button small{font-size:11px}
+.admin-shell[data-redesign="true"] .rd-recent{padding:13px 0}
+.admin-shell[data-redesign="true"] .rd-recent b{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-recent small{font-size:10px}
+.admin-shell[data-redesign="true"] .rd-person-avatar,.admin-shell[data-redesign="true"] .rd-avatar{width:38px;height:38px;font-size:11px}
+.admin-shell[data-redesign="true"] .rd-mini-stats>div{padding:16px 18px}
+.admin-shell[data-redesign="true"] .rd-mini-stats small{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-mini-stats b{font-size:23px}
+.admin-shell[data-redesign="true"] .rd-toolbar select{min-height:46px;font-size:13px}
+.admin-shell[data-redesign="true"] .rd-table-title{padding:17px 19px}
+.admin-shell[data-redesign="true"] .rd-table-title b{font-size:13px}
+.admin-shell[data-redesign="true"] .rd-table-title span{font-size:11px}
+.admin-shell[data-redesign="true"] .rd-table th{padding:14px 16px;font-size:10px}
+.admin-shell[data-redesign="true"] .rd-table td{padding:15px 16px;font-size:12px}
+.admin-shell[data-redesign="true"] .rd-user b{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-user small{font-size:10px}
+.admin-shell[data-redesign="true"] .rd-role{font-size:10px;padding:5px 9px}
+.admin-shell[data-redesign="true"] .rd-actions button{padding:8px 9px;font-size:10px}
+.admin-shell[data-redesign="true"] .rd-company-card{padding:21px}
+.admin-shell[data-redesign="true"] .rd-company-title h3{font-size:15px}
+.admin-shell[data-redesign="true"] .rd-company-card>p{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-company-meta{font-size:11px}
+.admin-shell[data-redesign="true"] .rd-company-actions button{padding:9px 11px;font-size:11px}
+.admin-shell[data-redesign="true"] .rd-palettes button{padding:14px}
+.admin-shell[data-redesign="true"] .rd-palettes button>i{width:26px;height:26px}
+.admin-shell[data-redesign="true"] .rd-palettes b{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-palettes small{font-size:10px}
+.admin-shell[data-redesign="true"] .rd-field{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-field input,.admin-shell[data-redesign="true"] .rd-field select{height:44px;font-size:13px}
+.admin-shell[data-redesign="true"] .rd-preview-note b{font-size:13px}
+.admin-shell[data-redesign="true"] .rd-preview-note p{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-disclaimer{font-size:10px}
+@media(max-width:900px){
+ .admin-shell[data-redesign="true"] .admin-wide{width:calc(100% - 40px);padding:24px 0 44px}
+ .admin-shell[data-redesign="true"] .admin-workspace-layout{grid-template-columns:1fr;gap:20px}
+}
+@media(max-width:600px){
+ .admin-shell[data-redesign="true"] .admin-wide{width:calc(100% - 28px);padding:18px 0 32px}
+ .admin-shell[data-redesign="true"] .admin-top h1{font-size:23px}
+ .admin-shell[data-redesign="true"] .rd-page-title h2{font-size:26px}
+ .admin-shell[data-redesign="true"] .rd-kpis article{padding:15px;min-height:122px}
+ .admin-shell[data-redesign="true"] .rd-kpis article>span{font-size:11px}
+ .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:27px}
+ .admin-shell[data-redesign="true"] .rd-table td{padding:12px}
+}
