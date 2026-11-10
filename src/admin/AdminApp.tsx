@@ -585,13 +585,25 @@ export default function AdminApp() {
             <label className="admin-field">Конкретная учётная запись<select value={previewAccountId} onChange={event=>setPreviewAccountId(event.target.value)}><option value="">Не выбрана — режим Owner</option>{previewAccounts.map(account=><option key={account.id} value={account.id}>{account.full_name} · {account.email}</option>)}</select></label>
             {previewAccount&&<button type="button" className="secondary-button" onClick={()=>{setPreviewAccountId('');setActiveModal(null)}}>Вернуться к панели Owner</button>}
           </section>}</div></section>}
-          {activeSection==='overview' && <section className="admin-overview">
-            <h2>Обзор системы</h2>
-            <section className="admin-stats" aria-label="Сводная статистика">
-              <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.filter(account=>account.platform_role!=='owner').length}</strong><small>{accounts.filter(account=>account.platform_role!=='owner'&&!account.disabled_at).length} активных</small></article>
-              <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных</small></article>
-              <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
-            </section>
+          {activeSection==='overview' && <section className="rd-page">
+            <div className="rd-page-title"><div><span className="rd-kicker">СИСТЕМА / СВОДКА</span><h2>Добро пожаловать</h2><p>Ключевые показатели платформы и быстрый доступ к управлению.</p></div><span className="rd-live"><i/> Данные панели загружены</span></div>
+            <div className="rd-kpis">
+              <article><span>Учётные записи</span><strong>{accounts.filter(account=>account.platform_role!=='owner').length}</strong><small>{accounts.filter(account=>account.platform_role!=='owner'&&!account.disabled_at).length} активных аккаунтов</small><b>↗</b></article>
+              <article><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных компаний</small><b>▦</b></article>
+              <article><span>Master_pro</span><strong>{accounts.filter(account=>account.platform_role==='master_pro').length}</strong><small>Индивидуальные специалисты</small><b>✦</b></article>
+              <article><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных страниц</small><b>⌘</b></article>
+            </div>
+            <div className="rd-overview-grid">
+              <section className="rd-card"><div className="rd-card-head"><div><h3>Быстрые действия</h3><p>Часто используемые операции</p></div></div><div className="rd-quick-actions">
+                <button type="button" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setMasterProPageName('');setActiveModal('account')}}><i>＋</i><span><b>Создать учётную запись</b><small>Добавить нового пользователя</small></span><em>→</em></button>
+                <button type="button" onClick={()=>setActiveModal('company')}><i>▦</i><span><b>Создать компанию</b><small>Новое пространство компании</small></span><em>→</em></button>
+                <button type="button" onClick={()=>setActiveSection('masterPro')}><i>✦</i><span><b>Управление Master_pro</b><small>Индивидуальные страницы специалистов</small></span><em>→</em></button>
+              </div></section>
+              <section className="rd-card"><div className="rd-card-head"><div><h3>Последние учётные записи</h3><p>Недавно добавленные пользователи</p></div><button type="button" className="rd-link" onClick={()=>setActiveSection('accounts')}>Все записи →</button></div>
+                {accounts.filter(account=>account.platform_role!=='owner').slice(0,4).map(account=><div className="rd-recent" key={account.id}><span className="rd-person-avatar">{account.full_name.split(/\\s+/).map(part=>part[0]).slice(0,2).join('').toUpperCase()}</span><div><b>{account.full_name}</b><small>{account.email}</small></div><i className={account.disabled_at?'is-off':'is-active'}>{account.disabled_at?'Отключён':roleLabel(account)}</i></div>)}
+                {!accounts.some(account=>account.platform_role!=='owner')&&<p className="rd-empty">Пока нет созданных учётных записей.</p>}
+              </section>
+            </div>
           </section>}
       {activeSection==='accounts' && isAccountsPrototype && <AccountsPrototype accounts={accounts} companies={companies} pages={masterPages} loading={accountsLoading} busy={busy} onCreate={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setMasterProPageName('');setActiveModal('account')}} onSettings={openAccountSettings} onToggle={toggleAccountStatus} />}
       {activeSection==='accounts' && !isAccountsPrototype && <section className="admin-accounts-workspace">
