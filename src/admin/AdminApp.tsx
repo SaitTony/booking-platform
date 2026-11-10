@@ -110,7 +110,6 @@ export default function AdminApp() {
   const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'companySettings'|'masterPro'|'settings'|'accountSettings'|null>(null)
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'|'settings'>('overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
-  const adminPath = window.location.pathname.replace(/\/+$/, '')
   // The rebuilt Owner directory views are now the default admin experience.
   // Keep the old URL aliases working, but do not require a special route to reach the new views.
   const isAccountsPrototype = true
