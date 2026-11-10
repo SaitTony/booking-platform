@@ -69,7 +69,8 @@ export default function MasterProBuilder() {
   const confirmedBookings = bookings.filter(item=>item.status==='confirmed').length
   const completedBookings = bookings.filter(item=>item.status==='completed').length
   const todayKey = new Intl.DateTimeFormat('sv-SE',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())
-  const todayBookings = bookings.filter(item=>item.starts_at.slice(0,10)===todayKey).length
+  // Compare booking dates in the specialist's timezone, not the UTC date embedded in the ISO string.
+  const todayBookings = bookings.filter(item=>new Intl.DateTimeFormat('sv-SE',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(item.starts_at))===todayKey).length
   const moneyTotal = bookings.filter(item=>item.status==='completed').reduce((sum,item)=>sum+Number(item.price_snapshot||0),0)
   const activeServices = services.filter(item=>item.active)
   const currentService = activeServices.find(item=>item.id===selectedService) ?? activeServices[0]
