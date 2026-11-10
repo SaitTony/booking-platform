@@ -1,0 +1,72 @@
+name: Deploy isolated admin design preview
+
+on:
+  push:
+    branches: [demo/admin-ux-redesign]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout production main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+
+      - name: Checkout design branch
+        uses: actions/checkout@v4
+        with:
+          ref: demo/admin-ux-redesign
+          path: preview
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build current production site
+        working-directory: production
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build isolated admin preview
+        working-directory: preview
+        env:
+          VITE_BASE_PATH: /workflows/admin-preview/
+          VITE_SUPABASE_URL: https://cetcxttaqtberrntsntr.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_GMJlnRBrbKZnEcqSBkr3Dg_UVmLKUG
+        run: |
+          npm ci
+          npm run build
+          mkdir -p ../production/dist/admin-preview
+          cp -R dist/. ../production/dist/admin-preview/
+
+      - name: Preserve SPA fallback
+        working-directory: production
+        run: cp dist/index.html dist/404.html
+
+      - name: Upload combined Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: production/dist
+
+      - name: Deploy preview alongside production
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}admin-preview/
