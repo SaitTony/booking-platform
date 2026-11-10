@@ -209,7 +209,7 @@ export default function MasterProBuilder() {
          p_buffer_minutes:Number(bufferMinutes),
       })
       if(error)throw error
-      setPhoto(photoUrl);setCoverImage(coverUrl);setPhotoFile(null);setCoverFile(null)
+      setPhoto(photoUrl);setCoverImage(coverUrl);setPhotoFile(null);setCoverFile(null);setMasterUpdatedAt(new Date().toISOString())
       setSaveMessage('Изменения и изображения успешно сохранены в базе данных')
     }catch(error){setSaveMessage(error instanceof Error?error.message:'Не удалось сохранить изменения')}
     finally{setSaving(false)}
@@ -257,7 +257,7 @@ export default function MasterProBuilder() {
   if(!masterId)return <main className="mpb-shell"><div className="mpb-page-head"><div><h1>Нет доступа к конструктору</h1><p>{saveMessage||'Не удалось определить вашу страницу Master_pro.'}</p></div><Link to="/admin" className="mpb-secondary">Вернуться в Админ-панель</Link></div></main>
   return <main className="mpb-shell">
     <header className="mpb-topbar">
-      <div className="mpb-brand"><span className="mpb-brand-mark">W</span><span>Workflows <small>· Конструктор Master_pro</small></span></div>
+      <div className="mpb-brand"><span className="mpb-brand-mark">W</span><span>Workflows <small>· Личный кабинет Master_pro</small></span></div>
       <div className="mpb-top-actions"><span className={`mpb-draft-status ${pageActive?'is-published':''}`}><i/> {publishing?'Обновление статуса…':saving?'Сохранение…':pageActive?'Опубликована':'Черновик'}</span><button type="button" className="mpb-publication-toggle" onClick={()=>void togglePagePublication()} disabled={publishing||saving}>{publishing?(pageActive?'Отключаем…':'Публикуем…'):pageActive?'Отключить страницу':'Опубликовать страницу'}</button></div>
     </header>
     <div className="mpb-page-head">
