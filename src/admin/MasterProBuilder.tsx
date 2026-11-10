@@ -105,20 +105,19 @@ export default function MasterProBuilder() {
     if(hours.some(item=>item.enabled&&item.closes<=item.opens)){setSaveMessage('Время окончания рабочего дня должно быть позже начала');setSection('schedule');return}
     setSaving(true);setSaveMessage('')
     try{
-      const {error:masterError}=await supabase.from('masters').update({display_name:name.trim(),public_description:description.trim(),timezone,theme:{id:theme,specialty:specialty.trim(),cover_title:coverTitle.trim(),tags:pageTags}}).eq('id',masterId)
-      if(masterError)throw masterError
-      const {data:existingServices,error:existingError}=await supabase.from('services').select('id').eq('master_id',masterId)
-      if(existingError)throw existingError
-      const retained=new Set(services.map(item=>item.id))
-      for(const existing of existingServices||[]){if(!retained.has(existing.id)){const {error}=await supabase.from('services').delete().eq('id',existing.id).eq('master_id',masterId);if(error)throw error}}
-      if(services.length){const {error}=await supabase.from('services').upsert(services.map((item,index)=>({id:item.id,master_id:masterId,name:item.name.trim(),description:item.description.trim(),duration:item.duration,price:item.price,is_active:item.active,sort_order:index})),{onConflict:'id'});if(error)throw error}
-      const {error:hoursDeleteError}=await supabase.from('working_hours').delete().eq('master_id',masterId)
-      if(hoursDeleteError)throw hoursDeleteError
-      const workingRows=hours.flatMap((item,index)=>item.enabled?[{master_id:masterId,weekday:(index+1)%7,opens_at:item.opens,closes_at:item.closes,is_day_off:false}]:[])
-      if(workingRows.length){const {error}=await supabase.from('working_hours').insert(workingRows);if(error)throw error}
-      const {error:settingsError}=await supabase.from('booking_settings').upsert({master_id:masterId,booking_horizon_days:Number(horizon)},{onConflict:'master_id'})
-      if(settingsError)throw settingsError
-      setSaveMessage(photo.startsWith('blob:')?'Изменения сохранены. Фотографии пока доступны только в предпросмотре: хранилище файлов ещё не настроено.':'Изменения успешно сохранены в базе данных')
+      const workingRows=hours.flatMap((item,index)=>item.enabled?[{weekday:(index+1)%7,opens_at:item.opens,closes_at:item.closes}]:[])
+      const {error}=await supabase.rpc('save_master_pro_builder',{
+        p_master_id:masterId,
+        p_display_name:name.trim(),
+        p_description:description.trim(),
+        p_timezone:timezone,
+        p_theme:{id:theme,specialty:specialty.trim(),cover_title:coverTitle.trim(),tags:pageTags},
+        p_services:services.map((item,index)=>({id:item.id,name:item.name.trim(),description:item.description.trim(),duration:item.duration,price:item.price,active:item.active,sort_order:index})),
+        p_working_hours:workingRows,
+        p_booking_horizon_days:Number(horizon),
+      })
+      if(error)throw error
+      setSaveMessage(photo.startsWith('blob:')||coverImage.startsWith('blob:')?'Изменения сохранены. Загруженные изображения пока доступны только в предпросмотре: хранилище файлов ещё не настроено.':'Изменения успешно сохранены в базе данных')
     }catch(error){setSaveMessage(error instanceof Error?error.message:'Не удалось сохранить изменения')}
     finally{setSaving(false)}
   }
