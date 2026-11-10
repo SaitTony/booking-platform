@@ -1843,3 +1843,9 @@
 @media(max-width:1050px){.admin-shell[data-redesign="true"] .rd-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-shell[data-redesign="true"] .rd-company-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.admin-shell[data-redesign="true"] .rd-overview-grid,.admin-shell[data-redesign="true"] .rd-settings-grid{grid-template-columns:1fr}.admin-shell[data-redesign="true"] .rd-company-grid{grid-template-columns:1fr}.admin-shell[data-redesign="true"] .rd-page-title{align-items:flex-start;flex-direction:column}.admin-shell[data-redesign="true"] .rd-toolbar{flex-direction:column}.admin-shell[data-redesign="true"] .rd-toolbar select{height:42px}.admin-shell[data-redesign="true"] .rd-mini-stats{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.admin-shell[data-redesign="true"] .rd-kpis{grid-template-columns:1fr 1fr}.admin-shell[data-redesign="true"] .rd-kpis article{padding:13px;min-height:110px}.admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:24px}.admin-shell[data-redesign="true"] .rd-page-title h2{font-size:24px}.admin-shell[data-redesign="true"] .rd-palettes{grid-template-columns:1fr}.admin-shell[data-redesign="true"] .rd-demo-chip{display:none}}
+
+.admin-shell[data-redesign="true"] .rd-actions{display:flex;align-items:center;gap:5px}
+.admin-shell[data-redesign="true"] .rd-actions button{padding:6px 7px;border:1px solid var(--rd-line);border-radius:6px;background:var(--rd-panel);color:var(--rd-text);font-size:8px}
+.admin-shell[data-redesign="true"] .rd-actions button.danger,.admin-shell[data-redesign="true"] .rd-company-actions button.danger{color:#b54848}
+.admin-shell[data-redesign="true"] .rd-company-actions button{flex:1}
+@media(max-width:760px){.admin-shell[data-redesign="true"] .rd-actions{flex-wrap:wrap}}
