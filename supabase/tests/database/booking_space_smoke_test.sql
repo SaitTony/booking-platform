@@ -2,7 +2,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
-select extensions.plan(47);
+select extensions.plan(52);
 
 -- Test identities are created through the same Auth trigger used in production.
 insert into auth.users (
@@ -92,9 +92,11 @@ select m.id, extract(dow from ((now() at time zone 'UTC')::date + 2))::smallint,
 from public.masters m
 where m.id in ('30000000-0000-4000-8000-000000000001', '30000000-0000-4000-8000-000000000002');
 
-insert into public.booking_settings (master_id)
-values ('30000000-0000-4000-8000-000000000001'),
-       ('30000000-0000-4000-8000-000000000002');
+insert into public.booking_settings (master_id,buffer_minutes)
+values ('30000000-0000-4000-8000-000000000001',15),
+       ('30000000-0000-4000-8000-000000000002',0);
+
+select extensions.has_column('public','booking_settings','buffer_minutes','Booking settings expose a configurable inter-booking buffer');
 
 -- Schema and role helper checks.
 select extensions.has_table('public', 'profiles', 'profiles table exists');
@@ -192,8 +194,30 @@ select extensions.is(
   'Client One', 'A public booking cannot overwrite an existing client name'
 );
 
+select extensions.ok(
+  not exists (
+    select 1 from public.get_available_slots(
+      '30000000-0000-4000-8000-000000000001',
+      '40000000-0000-4000-8000-000000000001',
+      (now() at time zone 'UTC')::date + 2
+    ) s
+    where s.slot_start = (((now() at time zone 'UTC')::date + 2)::timestamp + time '09:40') at time zone 'UTC'
+  ),
+  'A slot immediately after an appointment is hidden until the configured buffer elapses'
+);
 select extensions.throws_ok(
-  $$insert into public.bookings (
+  $select public.create_booking(
+    '30000000-0000-4000-8000-000000000001',
+    '40000000-0000-4000-8000-000000000001',
+    ((((now() at time zone 'UTC')::date + 2)::timestamp + time '09:40') at time zone 'UTC'),
+    'Too Close', '+79531234593', true
+  )$,
+  'P0001', 'Между записями должна быть пауза не менее 15 минут',
+  'Booking creation rejects appointments that violate the configured buffer'
+);
+
+select extensions.throws_ok(
+  $insert into public.bookings (
       master_id, service_id, client_id, starts_at, ends_at, status,
       service_name_snapshot, service_duration_snapshot, price_snapshot,
       client_name_snapshot, client_phone_snapshot
@@ -235,9 +259,9 @@ select extensions.ok(
       '40000000-0000-4000-8000-000000000001',
       (now() at time zone 'UTC')::date + 2
     ) s
-    where s.slot_start = (((now() at time zone 'UTC')::date + 2)::timestamp + time '09:40') at time zone 'UTC'
+    where s.slot_start = (((now() at time zone 'UTC')::date + 2)::timestamp + time '09:55') at time zone 'UTC'
   ),
-  'The next non-overlapping slot remains available'
+  'The next slot is available only after the configured 15-minute buffer'
 );
 
 -- Server-side booking validation rejects invalid lead time, horizon, consent and phone.
@@ -322,6 +346,20 @@ select extensions.is(
   (select count(*)::integer from public.bookings), 2,
   'Owner sees all bookings'
 );
+
+-- Completing a booking updates status and audit history atomically.
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
+select extensions.lives_ok(
+  $select public.complete_booking((select id from public.bookings where master_id='30000000-0000-4000-8000-000000000002' limit 1))$,
+  'Owner can mark a confirmed booking as completed'
+);
+select extensions.is(
+  (select status::text from public.bookings where master_id='30000000-0000-4000-8000-000000000002' limit 1),
+  'completed',
+  'Completing a booking changes its status'
+);
+reset role;
 
 -- Ordinary authenticated staff cannot detach profile ownership.
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
