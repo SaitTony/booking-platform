@@ -18,6 +18,8 @@ export default function MasterProBuilder() {
   const [description,setDescription] = useState('')
   const [photo,setPhoto] = useState('')
   const [coverImage,setCoverImage] = useState('')
+  const [photoFile,setPhotoFile] = useState<File|null>(null)
+  const [coverFile,setCoverFile] = useState<File|null>(null)
   const [coverTitle,setCoverTitle] = useState('')
   const [theme,setTheme] = useState<Theme>('natural')
   const [services,setServices] = useState<Service[]>([])
@@ -34,6 +36,8 @@ export default function MasterProBuilder() {
   const [,setSaved] = useState(false)
   const [showPublish,setShowPublish] = useState(false)
   const [masterId,setMasterId] = useState<string | null>(null)
+  const [masterSlug,setMasterSlug] = useState('')
+  const [pageActive,setPageActive] = useState(false)
   const [loading,setLoading] = useState(true)
   const [saving,setSaving] = useState(false)
   const [saveMessage,setSaveMessage] = useState('')
@@ -62,7 +66,7 @@ export default function MasterProBuilder() {
         const {data:{user},error:userError}=await supabase.auth.getUser()
         if(userError) throw userError
         if(!user) throw new Error('Войдите в систему через административную панель')
-        const {data:master,error:masterError}=await supabase.from('masters').select('id,display_name,public_description,photo_url,timezone,theme').eq('profile_id',user.id).eq('kind','individual').maybeSingle()
+        const {data:master,error:masterError}=await supabase.from('masters').select('id,slug,is_active,display_name,public_description,photo_url,cover_url,timezone,theme').eq('profile_id',user.id).eq('kind','individual').maybeSingle()
         if(masterError) throw masterError
         if(!master) throw new Error('Для этой учётной записи не найдена индивидуальная страница Master_pro')
         const [serviceResult,hourResult,settingsResult]=await Promise.all([
@@ -75,9 +79,12 @@ export default function MasterProBuilder() {
         if(settingsResult.error) throw settingsResult.error
         if(cancelled) return
         setMasterId(master.id)
+        setMasterSlug(master.slug)
+        setPageActive(master.is_active)
         setName(master.display_name||'')
         setDescription(master.public_description||'')
         setPhoto(master.photo_url||'')
+        setCoverImage(master.cover_url||'')
         setTimezone(master.timezone||'Europe/Moscow')
         const metadata=(master.theme&&typeof master.theme==='object'?master.theme:{}) as Record<string,unknown>
         setTheme((metadata.id as Theme)||'natural')
@@ -105,6 +112,15 @@ export default function MasterProBuilder() {
     if(hours.some(item=>item.enabled&&item.closes<=item.opens)){setSaveMessage('Время окончания рабочего дня должно быть позже начала');setSection('schedule');return}
     setSaving(true);setSaveMessage('')
     try{
+      const uploadAsset=async(file:File,kind:'profile'|'cover')=>{
+        const extension=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg'
+        const path=`${masterId}/${kind}-${crypto.randomUUID()}.${extension}`
+        const {error:uploadError}=await supabase!.storage.from('master-assets').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type})
+        if(uploadError)throw uploadError
+        return supabase!.storage.from('master-assets').getPublicUrl(path).data.publicUrl
+      }
+      const photoUrl=photoFile?await uploadAsset(photoFile,'profile'):photo
+      const coverUrl=coverFile?await uploadAsset(coverFile,'cover'):coverImage
       const workingRows=hours.flatMap((item,index)=>item.enabled?[{weekday:(index+1)%7,opens_at:item.opens,closes_at:item.closes}]:[])
       const {error}=await supabase.rpc('save_master_pro_builder',{
         p_master_id:masterId,
@@ -112,19 +128,25 @@ export default function MasterProBuilder() {
         p_description:description.trim(),
         p_timezone:timezone,
         p_theme:{id:theme,specialty:specialty.trim(),cover_title:coverTitle.trim(),tags:pageTags},
+        p_photo_url:photoUrl||null,
+        p_cover_url:coverUrl||null,
         p_services:services.map((item,index)=>({id:item.id,name:item.name.trim(),description:item.description.trim(),duration:item.duration,price:item.price,active:item.active,sort_order:index})),
         p_working_hours:workingRows,
         p_booking_horizon_days:Number(horizon),
       })
       if(error)throw error
-      setSaveMessage(photo.startsWith('blob:')||coverImage.startsWith('blob:')?'Изменения сохранены. Загруженные изображения пока доступны только в предпросмотре: хранилище файлов ещё не настроено.':'Изменения успешно сохранены в базе данных')
+      setPhoto(photoUrl);setCoverImage(coverUrl);setPhotoFile(null);setCoverFile(null)
+      setSaveMessage('Изменения и изображения успешно сохранены в базе данных')
     }catch(error){setSaveMessage(error instanceof Error?error.message:'Не удалось сохранить изменения')}
     finally{setSaving(false)}
   }
 
-  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>, setter: (value:string)=>void){
+  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>, setter: (value:string)=>void, fileSetter:(value:File|null)=>void){
     const file=event.target.files?.[0]
-    if(file){setter(URL.createObjectURL(file));setSaved(false)}
+    if(!file)return
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){setSaveMessage('Поддерживаются только JPG, PNG и WebP');event.target.value='';return}
+    if(file.size>5*1024*1024){setSaveMessage('Размер изображения не должен превышать 5 МБ');event.target.value='';return}
+    setter(URL.createObjectURL(file));fileSetter(file);setSaved(false);setSaveMessage('')
   }
 
 
@@ -158,8 +180,8 @@ export default function MasterProBuilder() {
           <div className="mpb-tip"><strong>Совет</strong><span>Используйте портрет, на котором хорошо видно ваше лицо. Он будет показан рядом с именем на публичной странице.</span></div>
         </div>}
         {section==='design'&&<div className="mpb-form-stack">
-          <div className="mpb-field"><label>Фотография профиля</label><input type="file" accept="image/*" onChange={e=>handleImageUpload(e,setPhoto)}/><small>Загрузите портрет для предпросмотра. Сохранение файлов подключим после настройки хранилища.</small>{photo&&<div className="mpb-upload-controls"><img className="mpb-upload-preview" src={photo} alt="Предпросмотр фотографии профиля"/><button type="button" className="mpb-text-button mpb-delete-button" onClick={()=>{setPhoto('');setSaved(false)}}>Удалить фотографию</button></div>}</div>
-          <div className="mpb-field"><label>Изображение обложки</label><input type="file" accept="image/*" onChange={e=>handleImageUpload(e,setCoverImage)}/><small>Это широкое изображение в шапке публичной страницы.</small>{coverImage&&<div className="mpb-upload-controls"><img className="mpb-upload-preview mpb-cover-upload-preview" src={coverImage} alt="Предпросмотр изображения обложки"/><button type="button" className="mpb-text-button mpb-delete-button" onClick={()=>{setCoverImage('');setSaved(false)}}>Удалить изображение</button></div>}</div>
+          <div className="mpb-field"><label>Фотография профиля</label><input type="file" accept="image/*" onChange={e=>handleImageUpload(e,setPhoto,setPhotoFile)}/><small>JPG, PNG или WebP, до 5 МБ. Изображение будет сохранено вместе с изменениями страницы.</small>{photo&&<div className="mpb-upload-controls"><img className="mpb-upload-preview" src={photo} alt="Предпросмотр фотографии профиля"/><button type="button" className="mpb-text-button mpb-delete-button" onClick={()=>{setPhoto('');setPhotoFile(null);setSaved(false)}}>Удалить фотографию</button></div>}</div>
+          <div className="mpb-field"><label>Изображение обложки</label><input type="file" accept="image/*" onChange={e=>handleImageUpload(e,setCoverImage,setCoverFile)}/><small>JPG, PNG или WebP, до 5 МБ. Изображение будет сохранено вместе с изменениями страницы.</small>{coverImage&&<div className="mpb-upload-controls"><img className="mpb-upload-preview mpb-cover-upload-preview" src={coverImage} alt="Предпросмотр изображения обложки"/><button type="button" className="mpb-text-button mpb-delete-button" onClick={()=>{setCoverImage('');setCoverFile(null);setSaved(false)}}>Удалить изображение</button></div>}</div>
           <div className="mpb-field"><label>Цветовая тема</label><small>Выберите оформление. Клиенты увидят готовую тему — переключателя на публичной странице не будет.</small></div>
           <div className="mpb-theme-grid">{(Object.keys(themeNames) as Theme[]).map(id=><button key={id} className={theme===id?'selected':''} onClick={()=>{setTheme(id);setSaved(false)}}><span className={'mpb-theme-swatch theme-'+id}><i/><i/><i/><i/></span><strong>{themeNames[id]}</strong>{theme===id&&<b>Выбрана</b>}</button>)}</div>
           <div className="mpb-tip"><strong>Предпросмотр</strong><span>Цветовая схема применяется ко всей публичной странице, включая карточки услуг, календарь и кнопки записи.</span></div>
@@ -177,8 +199,8 @@ export default function MasterProBuilder() {
         {section==='settings'&&<div className="mpb-form-stack">
           <div className="mpb-field"><label>Часовой пояс</label><select value={timezone} onChange={e=>{setTimezone(e.target.value);setSaved(false)}}><option value="Europe/Kaliningrad">Калининград (−1 Мск)</option><option value="Europe/Moscow">Москва (Мск)</option><option value="Europe/Samara">Самара (+1 Мск)</option><option value="Asia/Yekaterinburg">Екатеринбург (+2 Мск)</option><option value="Asia/Omsk">Омск (+3 Мск)</option><option value="Asia/Novosibirsk">Новосибирск (+4 Мск)</option><option value="Asia/Tomsk">Томск (+4 Мск)</option><option value="Asia/Novokuznetsk">Кемерово (+4 Мск)</option><option value="Asia/Krasnoyarsk">Красноярск (+4 Мск)</option><option value="Asia/Irkutsk">Иркутск (+5 Мск)</option><option value="Asia/Yakutsk">Якутск (+6 Мск)</option><option value="Asia/Vladivostok">Владивосток (+7 Мск)</option><option value="Asia/Magadan">Магадан (+8 Мск)</option><option value="Asia/Kamchatka">Петропавловск-Камчатский (+9 Мск)</option></select><small>Время в календаре будет рассчитываться по часовому поясу мастера.</small></div>
           <div className="mpb-field"><label>Горизонт онлайн-записи</label><select value={horizon} onChange={e=>{setHorizon(e.target.value);setSaved(false)}}><option value="14">14 дней</option><option value="30">30 дней</option><option value="45">45 дней</option><option value="60">60 дней</option></select><small>На сколько дней вперёд клиент сможет выбрать дату.</small></div>
-          <div className="mpb-info-row"><span>Полная ссылка на сайт</span><strong className="mpb-public-url">https://workflows.app/pro/anna</strong><small>Полный адрес и окончательный URL страницы задаёт администратор системы. У мастера нет возможности изменить его самостоятельно.</small></div>
-          <div className="mpb-info-row"><span>Статус страницы</span><strong className="mpb-status-draft">Черновик</strong><small>До публикации страница не будет доступна клиентам.</small></div>
+          <div className="mpb-info-row"><span>Публичная ссылка</span><strong className="mpb-public-url">{window.location.origin}{import.meta.env.BASE_URL}pro/{masterSlug}</strong><small>Ссылка формируется автоматически и не редактируется вручную.</small></div>
+          <div className="mpb-info-row"><span>Статус страницы</span><strong className={pageActive?'mpb-status-active':'mpb-status-draft'}>{pageActive?'Активна и доступна клиентам':'Черновик · не опубликована'}</strong><small>{pageActive?'Клиенты могут открыть страницу по публичной ссылке.':'Публикацию и включение страницы выполняет Owner или Admin в административной панели.'}</small></div>
         </div>}
 
       </section>
@@ -191,7 +213,7 @@ export default function MasterProBuilder() {
           {previewTab==='page'?<div className="mpb-public-content"><div className="mpb-public-title"><small>ВЫБЕРИТЕ УСЛУГУ</small><h3>Услуги и стоимость</h3></div>{activeServices.map(item=><button key={item.id} className={'mpb-public-service '+(selectedService===item.id?'chosen':'')} onClick={()=>setSelectedService(item.id)}><span><b>{item.name}</b><small>{item.description}</small><em>{item.duration} минут</em></span><strong>{money(item.price)}</strong></button>)}{!activeServices.length&&<p className="mpb-empty-preview">Добавьте хотя бы одну активную услугу.</p>}<div className="mpb-public-title mpb-calendar-title"><small>СЛЕДУЮЩИЙ ШАГ</small><h3>Выберите удобное время</h3></div><div className="mpb-public-dates">{['ПН 10','ВТ 11','СР 12','ЧТ 13','ПТ 14'].map((d,i)=><span className={i===1?'selected':''} key={d}>{d}</span>)}</div><div className="mpb-public-times">{['10:00','11:30','13:00','15:30'].map((t,i)=><span className={i===1?'selected':''} key={t}>{t}</span>)}</div><button className="mpb-public-cta">Выбрать дату и время</button></div>:<div className="mpb-public-content"><div className="mpb-public-title"><small>ВАША ЗАПИСЬ</small><h3>Подтверждение</h3></div><div className="mpb-booking-receipt"><span>Мастер<strong>{name||'Ваше имя'}</strong></span><span>Услуга<strong>{currentService?.name??'Не выбрана'}</strong></span><span>Длительность<strong>{currentService?.duration??0} минут</strong></span><span>Стоимость<strong>{money(currentService?.price??0)}</strong></span></div><label className="mpb-preview-input">Ваше имя<input placeholder="Как к вам обращаться?"/></label><label className="mpb-preview-input">Номер телефона<input placeholder="+7 (___) ___-__-__"/></label><button className="mpb-public-cta">Подтвердить запись</button><small className="mpb-preview-demo-note">Предпросмотр · данные не отправляются</small></div>}
           <div className="mpb-public-footer">ИНДИВИДУАЛЬНАЯ ПРАКТИКА <span>Онлайн-запись без ожидания</span></div>
         </div></div>
-        <div className="mpb-preview-note">Предпросмотр демонстрационный. Изменения сохраняются кнопкой «Сохранить изменения». Публикация пока не подключена.</div>
+        <div className="mpb-preview-note">Предпросмотр обновляется по мере редактирования. Сохраните изменения, чтобы обновить публичную страницу.</div>
       </aside>
     </div>
     {showPublish&&<div className="mpb-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setShowPublish(false)}}><section className="mpb-publish-modal"><button className="mpb-modal-close" onClick={()=>setShowPublish(false)}>Закрыть</button><span className="mpb-eyebrow">ПУБЛИКАЦИЯ</span><h2>Страница ещё не готова к публикации</h2><p>Сейчас это интерактивный прототип конструктора. Сохранение в Supabase и настоящая публикация будут подключены после согласования интерфейса.</p><button className="mpb-primary" onClick={()=>setShowPublish(false)}>Понятно</button></section></div>}
