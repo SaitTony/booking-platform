@@ -142,8 +142,9 @@ Do not point destructive local commands at the hosted project. Use the exact pro
 
 ## Current product gaps
 
-- Master_pro Builder loads the authenticated user's individual master page and persists profile fields, theme metadata, services, weekly working hours, and booking horizon via the `SECURITY INVOKER` RPC `public.save_master_pro_builder`. The RPC checks `private.can_manage_master` and runs all writes in one transaction. Image uploads and public publishing remain unconfigured; image previews are local only.
-- Photo and cover URL fields exist, but image upload to Supabase Storage is not implemented.
+- Master_pro Builder loads the authenticated user's individual master page and persists profile fields, theme metadata, services, weekly working hours, booking horizon, and image URLs via the `SECURITY INVOKER` RPC `public.save_master_pro_builder`. The RPC checks `private.can_manage_master` and runs database writes in one transaction. Profile and cover images upload to the public `master-assets` bucket (JPG/PNG/WebP, max 5 MiB); Storage INSERT is restricted to the manager's master-id folder.
+- The builder does not change `masters.is_active`. Publishing/enabling and disabling an individual page remain Owner/Admin responsibilities. The builder displays the real publication status and `/pro/{slug}` public URL.
+- `masters.photo_url` and `masters.cover_url` store public URLs from the `master-assets` Storage bucket.
 - The `booking_settings.rules_text` field exists; an editable settings interface is not yet available.
 - PostHog project exists, but frontend SDK and event instrumentation are not connected.
 - Leaked Password Protection must still be enabled in the Supabase Dashboard.
