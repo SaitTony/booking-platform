@@ -1861,7 +1861,10 @@
   padding:34px 0 64px;box-sizing:border-box;
 }
 .admin-shell[data-redesign="true"] .admin-workspace-layout{
-  grid-template-columns:260px minmax(0,1fr);gap:30px;
+  display:grid;
+  grid-template-columns:260px minmax(0,1fr);
+  align-items:start;
+  gap:30px;
 }
 .admin-shell[data-redesign="true"] .ap-primary-nav{padding:14px;border-radius:16px}
 .admin-shell[data-redesign="true"] .ap-primary-nav button{min-height:50px;padding:0 14px;font-size:14px;gap:13px}
@@ -1928,3 +1931,16 @@
  .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:27px}
  .admin-shell[data-redesign="true"] .rd-table td{padding:12px}
 }
+
+
+/* Keep authentication and account-state screens on the active redesigned theme. */
+.admin-shell[data-redesign="true"] .admin-card{
+  max-width:520px;padding:34px;border:1px solid var(--rd-line);border-radius:12px;
+  background:var(--rd-panel);box-shadow:0 8px 28px rgba(23,33,47,.06);
+}
+.admin-shell[data-redesign="true"] .admin-card h1{color:var(--rd-text);font-size:26px;letter-spacing:-.025em}
+.admin-shell[data-redesign="true"] .admin-card p{color:var(--rd-muted)}
+.admin-shell[data-redesign="true"] .admin-card .eyebrow{color:var(--rd-muted);font-size:10px;letter-spacing:.1em}
+.admin-shell[data-redesign="true"] .admin-card .admin-field{color:var(--rd-muted)}
+.admin-shell[data-redesign="true"] .admin-card .admin-field input{min-height:44px;border:1px solid var(--rd-line);border-radius:8px;background:var(--rd-bg);color:var(--rd-text)}
+.admin-shell[data-redesign="true"] .admin-card .full-button{min-height:42px}

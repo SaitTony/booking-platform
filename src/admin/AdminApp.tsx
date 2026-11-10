@@ -191,15 +191,26 @@ export default function AdminApp() {
   }
 
 
-  async function loadProfile() {
+  async function loadProfile(userId?: string) {
     if (!supabase) { setSessionReady(true); return }
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      if (userError) throw userError
-      if (!user) { setProfile(null); return }
+      let resolvedUserId = userId
+      if (!resolvedUserId) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError) {
+          if (userError.name === 'AuthSessionMissingError' || userError.message === 'Auth session missing!') {
+            setProfile(null)
+            setError('')
+            return
+          }
+          throw userError
+        }
+        resolvedUserId = user?.id
+      }
+      if (!resolvedUserId) { setProfile(null); setError(''); return }
       const { data, error: profileError } = await supabase.from('profiles')
         .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
-        .eq('id', user.id).maybeSingle()
+        .eq('id', resolvedUserId).maybeSingle()
       if (profileError) throw profileError
       const normalizedProfile = data ? { ...data, company_members: normalizeMembers((data as Profile).company_members) } as Profile : null
       setProfile(normalizedProfile)
@@ -246,9 +257,26 @@ export default function AdminApp() {
 
   useEffect(() => {
     if (!supabase) { setSessionReady(true); return }
-    void loadProfile()
-    const { data: listener } = supabase.auth.onAuthStateChange(() => { void loadProfile() })
-    return () => listener.subscription.unsubscribe()
+    let mounted = true
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Do not start Supabase requests inside the auth callback: the SDK may
+      // still hold its auth lock while notifying subscribers.
+      window.setTimeout(() => {
+        if (!mounted) return
+        if (!session?.user) {
+          setProfile(null)
+          setError('')
+          setSessionReady(true)
+          return
+        }
+        setSessionReady(false)
+        void loadProfile(session.user.id)
+      }, 0)
+    })
+    return () => {
+      mounted = false
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
@@ -536,8 +564,8 @@ export default function AdminApp() {
   const [emailForCreate, setEmailForCreate] = useState('')
   const [phoneForCreate, setPhoneForCreate] = useState('')
 
-  if (!sessionReady && supabase) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card">Загрузка…</section></main>
-  if (!profile) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><form className="admin-card" onSubmit={signIn}>
+  if (!sessionReady && supabase) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><section className="admin-card">Загрузка…</section></main>
+  if (!profile) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><form className="admin-card" onSubmit={signIn}>
     <span className="eyebrow">Workflows project</span><h1>Административная панель</h1>
     <label className="admin-field">Email<input type="email" autoComplete="username" placeholder="name@example.com" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
     <label className="admin-field">Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
@@ -546,15 +574,15 @@ export default function AdminApp() {
     <button className="primary-button full-button" disabled={busy || !supabase}>{busy?'Входим…':'Войти'}</button>
   </form></main>
 
-  if (profile.force_password_change) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><form className="admin-card" onSubmit={changePassword}>
+  if (profile.force_password_change) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><form className="admin-card" onSubmit={changePassword}>
     <span className="eyebrow">ПЕРВЫЙ ВХОД</span><h1>Создайте свой пароль</h1><p>Временный пароль больше не будет использоваться. Придумайте новый пароль длиной не менее 6 символов.</p>
     <label className="admin-field">Новый пароль<input type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required minLength={6} /></label>
     {error && <p className="admin-error">{error}</p>}
     <button className="primary-button full-button" disabled={busy}>{busy?'Сохраняем…':'Сменить пароль'}</button>
   </form></main>
 
-  if (profile.disabled_at) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
-  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
+  if (profile.disabled_at) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
+  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
     <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions">{!isAccountsPrototype && <button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button>}<button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
@@ -585,13 +613,25 @@ export default function AdminApp() {
             <label className="admin-field">Конкретная учётная запись<select value={previewAccountId} onChange={event=>setPreviewAccountId(event.target.value)}><option value="">Не выбрана — режим Owner</option>{previewAccounts.map(account=><option key={account.id} value={account.id}>{account.full_name} · {account.email}</option>)}</select></label>
             {previewAccount&&<button type="button" className="secondary-button" onClick={()=>{setPreviewAccountId('');setActiveModal(null)}}>Вернуться к панели Owner</button>}
           </section>}</div></section>}
-          {activeSection==='overview' && <section className="admin-overview">
-            <h2>Обзор системы</h2>
-            <section className="admin-stats" aria-label="Сводная статистика">
-              <article className="admin-stat-card"><span>Учётные записи</span><strong>{accounts.filter(account=>account.platform_role!=='owner').length}</strong><small>{accounts.filter(account=>account.platform_role!=='owner'&&!account.disabled_at).length} активных</small></article>
-              <article className="admin-stat-card"><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных</small></article>
-              <article className="admin-stat-card"><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных</small></article>
-            </section>
+          {activeSection==='overview' && <section className="rd-page">
+            <div className="rd-page-title"><div><span className="rd-kicker">СИСТЕМА / СВОДКА</span><h2>Добро пожаловать</h2><p>Ключевые показатели платформы и быстрый доступ к управлению.</p></div><span className="rd-live"><i/> Данные панели загружены</span></div>
+            <div className="rd-kpis">
+              <article><span>Учётные записи</span><strong>{accounts.filter(account=>account.platform_role!=='owner').length}</strong><small>{accounts.filter(account=>account.platform_role!=='owner'&&!account.disabled_at).length} активных аккаунтов</small><b>↗</b></article>
+              <article><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных компаний</small><b>▦</b></article>
+              <article><span>Master_pro</span><strong>{accounts.filter(account=>account.platform_role==='master_pro').length}</strong><small>Индивидуальные специалисты</small><b>✦</b></article>
+              <article><span>Страницы мастеров</span><strong>{masterPages.length}</strong><small>{masterPages.filter(page=>page.is_active).length} активных страниц</small><b>⌘</b></article>
+            </div>
+            <div className="rd-overview-grid">
+              <section className="rd-card"><div className="rd-card-head"><div><h3>Быстрые действия</h3><p>Часто используемые операции</p></div></div><div className="rd-quick-actions">
+                <button type="button" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setMasterProPageName('');setActiveModal('account')}}><i>＋</i><span><b>Создать учётную запись</b><small>Добавить нового пользователя</small></span><em>→</em></button>
+                <button type="button" onClick={()=>setActiveModal('company')}><i>▦</i><span><b>Создать компанию</b><small>Новое пространство компании</small></span><em>→</em></button>
+                <button type="button" onClick={()=>setActiveSection('masterPro')}><i>✦</i><span><b>Управление Master_pro</b><small>Индивидуальные страницы специалистов</small></span><em>→</em></button>
+              </div></section>
+              <section className="rd-card"><div className="rd-card-head"><div><h3>Последние учётные записи</h3><p>Недавно добавленные пользователи</p></div><button type="button" className="rd-link" onClick={()=>setActiveSection('accounts')}>Все записи →</button></div>
+                {accounts.filter(account=>account.platform_role!=='owner').slice(0,4).map(account=><div className="rd-recent" key={account.id}><span className="rd-person-avatar">{account.full_name.split(/\s+/).map(part=>part[0]).slice(0,2).join('').toUpperCase()}</span><div><b>{account.full_name}</b><small>{account.email}</small></div><i className={account.disabled_at?'is-off':'is-active'}>{account.disabled_at?'Отключён':roleLabel(account)}</i></div>)}
+                {!accounts.some(account=>account.platform_role!=='owner')&&<p className="rd-empty">Пока нет созданных учётных записей.</p>}
+              </section>
+            </div>
           </section>}
       {activeSection==='accounts' && isAccountsPrototype && <AccountsPrototype accounts={accounts} companies={companies} pages={masterPages} loading={accountsLoading} busy={busy} onCreate={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setMasterProPageName('');setActiveModal('account')}} onSettings={openAccountSettings} onToggle={toggleAccountStatus} />}
       {activeSection==='accounts' && !isAccountsPrototype && <section className="admin-accounts-workspace">
