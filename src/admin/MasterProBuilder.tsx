@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import { Link } from 'react-router-dom'
 import './MasterProBuilder.css'
 
 type Section = 'profile' | 'design' | 'services' | 'schedule' | 'settings'
 type Theme = 'natural' | 'graphite' | 'sand' | 'green' | 'blue' | 'dark'
-type Service = { id: number; name: string; description: string; duration: number; price: number; active: boolean }
+type Service = { id: string; name: string; description: string; duration: number; price: number; active: boolean }
 
 const themeNames: Record<Theme,string> = { natural:'Natural', graphite:'Graphite', sand:'Sand', green:'Deep Green', blue:'Midnight Blue', dark:'Dark' }
 const week = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье']
@@ -12,29 +13,30 @@ const money = (value:number) => new Intl.NumberFormat('ru-RU').format(value) + '
 
 export default function MasterProBuilder() {
   const [section,setSection] = useState<Section>('profile')
-  const [name,setName] = useState('Анна Смирнова')
-  const [specialty,setSpecialty] = useState('Персональный мастер')
-  const [description,setDescription] = useState('Помогаю найти время для себя. Индивидуальный подход, внимание к деталям и комфорт на каждом этапе.')
+  const [name,setName] = useState('')
+  const [specialty,setSpecialty] = useState('')
+  const [description,setDescription] = useState('')
   const [photo,setPhoto] = useState('')
   const [coverImage,setCoverImage] = useState('')
-  const [coverTitle,setCoverTitle] = useState('PERSONAL SPACE')
+  const [coverTitle,setCoverTitle] = useState('')
   const [theme,setTheme] = useState<Theme>('natural')
-  const [services,setServices] = useState<Service[]>([
-    {id:1,name:'Тестовая запись · Консультация',description:'Демонстрационная услуга — её можно изменить или удалить.',duration:60,price:1500,active:true},
-    {id:2,name:'Тестовая запись · Основная услуга',description:'Временный пример для настройки каталога.',duration:90,price:2500,active:true},
-  ])
-  const [pageTags,setPageTags] = useState<string[]>(['Частная практика','По записи'])
+  const [services,setServices] = useState<Service[]>([])
+  const [pageTags,setPageTags] = useState<string[]>([])
   const [customTag,setCustomTag] = useState('')
   const availableTags = ['Частная практика','По записи','Онлайн-консультация','Выезд к клиенту','Принимаю новых клиентов','Оплата картой']
-  const [selectedService,setSelectedService] = useState<number | null>(null)
+  const [selectedService,setSelectedService] = useState<string | null>(null)
   const [newService,setNewService] = useState({name:'',description:'',duration:'60',price:'0'})
-  const [hours,setHours] = useState(week.map((_,i)=>({enabled:i<6,opens:i===5?'10:00':'09:00',closes:i===5?'16:00':'18:00'})))
+  const [hours,setHours] = useState(week.map(()=>({enabled:false,opens:'09:00',closes:'18:00'})))
   const [timezone,setTimezone] = useState('Europe/Moscow')
   const [horizon,setHorizon] = useState('30')
   const [device,setDevice] = useState<'desktop'|'mobile'>('desktop')
   const [previewTab,setPreviewTab] = useState<'page'|'booking'>('page')
   const [,setSaved] = useState(false)
   const [showPublish,setShowPublish] = useState(false)
+  const [masterId,setMasterId] = useState<string | null>(null)
+  const [loading,setLoading] = useState(true)
+  const [saving,setSaving] = useState(false)
+  const [saveMessage,setSaveMessage] = useState('')
   const activeServices = services.filter(item=>item.active)
   const currentService = activeServices.find(item=>item.id===selectedService) ?? activeServices[0]
   const activeDays = useMemo(()=>hours.filter(item=>item.enabled).length,[hours])
@@ -48,8 +50,77 @@ export default function MasterProBuilder() {
 
   function addService(){
     if(!newService.name.trim())return
-    const item={id:Date.now(),name:newService.name.trim(),description:newService.description,duration:Math.max(1,Number(newService.duration)||60),price:Math.max(0,Number(newService.price)||0),active:true}
+    const item={id:crypto.randomUUID(),name:newService.name.trim(),description:newService.description,duration:Math.max(1,Number(newService.duration)||60),price:Math.max(0,Number(newService.price)||0),active:true}
     setServices(current=>[...current,item]);setSelectedService(item.id);setNewService({name:'',description:'',duration:'60',price:'0'});setSaved(false)
+  }
+
+  useEffect(()=>{
+    let cancelled=false
+    async function loadPage(){
+      try{
+        if(!supabase) throw new Error('Supabase не настроен')
+        const {data:{user},error:userError}=await supabase.auth.getUser()
+        if(userError) throw userError
+        if(!user) throw new Error('Войдите в систему через административную панель')
+        const {data:master,error:masterError}=await supabase.from('masters').select('id,display_name,public_description,photo_url,timezone,theme').eq('profile_id',user.id).eq('kind','individual').maybeSingle()
+        if(masterError) throw masterError
+        if(!master) throw new Error('Для этой учётной записи не найдена индивидуальная страница Master_pro')
+        const [serviceResult,hourResult,settingsResult]=await Promise.all([
+          supabase.from('services').select('id,name,description,duration,price,is_active').eq('master_id',master.id).order('sort_order'),
+          supabase.from('working_hours').select('weekday,opens_at,closes_at,is_day_off').eq('master_id',master.id),
+          supabase.from('booking_settings').select('booking_horizon_days').eq('master_id',master.id).maybeSingle(),
+        ])
+        if(serviceResult.error) throw serviceResult.error
+        if(hourResult.error) throw hourResult.error
+        if(settingsResult.error) throw settingsResult.error
+        if(cancelled) return
+        setMasterId(master.id)
+        setName(master.display_name||'')
+        setDescription(master.public_description||'')
+        setPhoto(master.photo_url||'')
+        setTimezone(master.timezone||'Europe/Moscow')
+        const metadata=(master.theme&&typeof master.theme==='object'?master.theme:{}) as Record<string,unknown>
+        setTheme((metadata.id as Theme)||'natural')
+        setSpecialty(typeof metadata.specialty==='string'?metadata.specialty:'')
+        setCoverTitle(typeof metadata.cover_title==='string'?metadata.cover_title:'')
+        setPageTags(Array.isArray(metadata.tags)?metadata.tags.filter((tag):tag is string=>typeof tag==='string'):[])
+        setServices((serviceResult.data||[]).map(item=>({id:item.id,name:item.name,description:item.description,duration:item.duration,price:Number(item.price),active:item.is_active})))
+        setHours(week.map((_,index)=>{
+          const weekday=(index+1)%7
+          const row=(hourResult.data||[]).find(item=>item.weekday===weekday)
+          return row?{enabled:!row.is_day_off,opens:row.opens_at.slice(0,5),closes:row.closes_at.slice(0,5)}:{enabled:false,opens:'09:00',closes:'18:00'}
+        }))
+        if(settingsResult.data) setHorizon(String(settingsResult.data.booking_horizon_days))
+      }catch(error){if(!cancelled)setSaveMessage(error instanceof Error?error.message:'Не удалось загрузить страницу')}
+      finally{if(!cancelled)setLoading(false)}
+    }
+    void loadPage()
+    return ()=>{cancelled=true}
+  },[])
+
+  async function savePage(){
+    if(!supabase||!masterId)return
+    if(!name.trim()){setSaveMessage('Укажите имя и фамилию перед сохранением');setSection('profile');return}
+    if(services.some(item=>!item.name.trim()||item.duration<1||item.duration>720||item.price<0)){setSaveMessage('Проверьте названия, длительность и стоимость услуг');setSection('services');return}
+    if(hours.some(item=>item.enabled&&item.closes<=item.opens)){setSaveMessage('Время окончания рабочего дня должно быть позже начала');setSection('schedule');return}
+    setSaving(true);setSaveMessage('')
+    try{
+      const {error:masterError}=await supabase.from('masters').update({display_name:name.trim(),public_description:description.trim(),timezone,theme:{id:theme,specialty:specialty.trim(),cover_title:coverTitle.trim(),tags:pageTags}}).eq('id',masterId)
+      if(masterError)throw masterError
+      const {data:existingServices,error:existingError}=await supabase.from('services').select('id').eq('master_id',masterId)
+      if(existingError)throw existingError
+      const retained=new Set(services.map(item=>item.id))
+      for(const existing of existingServices||[]){if(!retained.has(existing.id)){const {error}=await supabase.from('services').delete().eq('id',existing.id).eq('master_id',masterId);if(error)throw error}}
+      if(services.length){const {error}=await supabase.from('services').upsert(services.map((item,index)=>({id:item.id,master_id:masterId,name:item.name.trim(),description:item.description.trim(),duration:item.duration,price:item.price,is_active:item.active,sort_order:index})),{onConflict:'id'});if(error)throw error}
+      const {error:hoursDeleteError}=await supabase.from('working_hours').delete().eq('master_id',masterId)
+      if(hoursDeleteError)throw hoursDeleteError
+      const workingRows=hours.flatMap((item,index)=>item.enabled?[{master_id:masterId,weekday:(index+1)%7,opens_at:item.opens,closes_at:item.closes,is_day_off:false}]:[])
+      if(workingRows.length){const {error}=await supabase.from('working_hours').insert(workingRows);if(error)throw error}
+      const {error:settingsError}=await supabase.from('booking_settings').upsert({master_id:masterId,booking_horizon_days:Number(horizon)},{onConflict:'master_id'})
+      if(settingsError)throw settingsError
+      setSaveMessage(photo.startsWith('blob:')?'Изменения сохранены. Фотографии пока доступны только в предпросмотре: хранилище файлов ещё не настроено.':'Изменения успешно сохранены в базе данных')
+    }catch(error){setSaveMessage(error instanceof Error?error.message:'Не удалось сохранить изменения')}
+    finally{setSaving(false)}
   }
 
   function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>, setter: (value:string)=>void){
@@ -58,14 +129,16 @@ export default function MasterProBuilder() {
   }
 
 
+  if(loading)return <main className="mpb-shell"><div className="mpb-page-head"><h1>Загрузка страницы…</h1></div></main>
+  if(!masterId)return <main className="mpb-shell"><div className="mpb-page-head"><div><h1>Нет доступа к конструктору</h1><p>{saveMessage||'Не удалось определить вашу страницу Master_pro.'}</p></div><Link to="/admin" className="mpb-secondary">Вернуться в Админ-панель</Link></div></main>
   return <main className="mpb-shell">
     <header className="mpb-topbar">
       <div className="mpb-brand"><span className="mpb-brand-mark">W</span><span>Workflows <small>· Конструктор Master_pro</small></span></div>
-      <div className="mpb-top-actions"><span className="mpb-draft-status"><i/> Черновик · демо-режим</span></div>
+      <div className="mpb-top-actions"><span className="mpb-draft-status"><i/> {saving?'Сохранение…':'Черновик'}</span></div>
     </header>
     <div className="mpb-page-head">
       <div><h1>Создание страницы</h1><p>Настройте свою страницу и сразу посмотрите, как её увидят клиенты.</p></div>
-      <div className="mpb-page-actions"><Link to="/admin" className="mpb-secondary">Вернуться в Админ-панель</Link><button className="mpb-primary" onClick={()=>setShowPublish(true)}>Опубликовать страницу</button></div>
+      <div className="mpb-page-actions"><Link to="/admin" className="mpb-secondary">Вернуться в Админ-панель</Link><button className="mpb-primary" onClick={()=>void savePage()} disabled={loading||saving||!masterId}>{saving?'Сохраняем…':'Сохранить изменения'}</button></div>
     </div>
     <div className="mpb-workspace">
       <aside className="mpb-sidebar">
@@ -74,6 +147,7 @@ export default function MasterProBuilder() {
         <div className="mpb-sidebar-bottom"><div className="mpb-completion"><div><strong>Готовность страницы</strong><b>60%</b></div><span><i/></span><small>Заполните разделы и проверьте предпросмотр</small></div><div className="mpb-help"><strong>Нужна помощь?</strong><span>Подсказки по настройке страницы</span></div></div>
       </aside>
       <section className="mpb-editor">
+        {saveMessage&&<div className="mpb-tip" role="status"><span>{saveMessage}</span></div>}
         <div className="mpb-editor-heading"><div><span className="mpb-eyebrow">РАЗДЕЛ {sections.findIndex(x=>x.id===section)+1} ИЗ 5</span><h2>{sections.find(x=>x.id===section)?.title}</h2><p>{sections.find(x=>x.id===section)?.sub}</p></div><span className="mpb-live-indicator"><i/> Изменения видны сразу</span></div>
         {section==='profile'&&<div className="mpb-form-stack">
           <div className="mpb-field"><label>Специализация</label><input value={specialty} onChange={e=>{setSpecialty(e.target.value);setSaved(false)}} placeholder="Например, стилист"/><small>Коротко обозначьте направление вашей работы. На публичной странице она будет указана над именем.</small></div>
@@ -85,7 +159,7 @@ export default function MasterProBuilder() {
           <div className="mpb-tip"><strong>Совет</strong><span>Используйте портрет, на котором хорошо видно ваше лицо. Он будет показан рядом с именем на публичной странице.</span></div>
         </div>}
         {section==='design'&&<div className="mpb-form-stack">
-          <div className="mpb-field"><label>Фотография профиля</label><input type="file" accept="image/*" onChange={e=>handleImageUpload(e,setPhoto)}/><small>Загрузите портрет. Сейчас он сразу появится в предпросмотре; сохранение файла в профиль подключим вместе с хранилищем.</small>{photo&&<div className="mpb-upload-controls"><img className="mpb-upload-preview" src={photo} alt="Предпросмотр фотографии профиля"/><button type="button" className="mpb-text-button mpb-delete-button" onClick={()=>{setPhoto('');setSaved(false)}}>Удалить фотографию</button></div>}</div>
+          <div className="mpb-field"><label>Фотография профиля</label><input type="file" accept="image/*" onChange={e=>handleImageUpload(e,setPhoto)}/><small>Загрузите портрет для предпросмотра. Сохранение файлов подключим после настройки хранилища.</small>{photo&&<div className="mpb-upload-controls"><img className="mpb-upload-preview" src={photo} alt="Предпросмотр фотографии профиля"/><button type="button" className="mpb-text-button mpb-delete-button" onClick={()=>{setPhoto('');setSaved(false)}}>Удалить фотографию</button></div>}</div>
           <div className="mpb-field"><label>Изображение обложки</label><input type="file" accept="image/*" onChange={e=>handleImageUpload(e,setCoverImage)}/><small>Это широкое изображение в шапке публичной страницы.</small>{coverImage&&<div className="mpb-upload-controls"><img className="mpb-upload-preview mpb-cover-upload-preview" src={coverImage} alt="Предпросмотр изображения обложки"/><button type="button" className="mpb-text-button mpb-delete-button" onClick={()=>{setCoverImage('');setSaved(false)}}>Удалить изображение</button></div>}</div>
           <div className="mpb-field"><label>Цветовая тема</label><small>Выберите оформление. Клиенты увидят готовую тему — переключателя на публичной странице не будет.</small></div>
           <div className="mpb-theme-grid">{(Object.keys(themeNames) as Theme[]).map(id=><button key={id} className={theme===id?'selected':''} onClick={()=>{setTheme(id);setSaved(false)}}><span className={'mpb-theme-swatch theme-'+id}><i/><i/><i/><i/></span><strong>{themeNames[id]}</strong>{theme===id&&<b>Выбрана</b>}</button>)}</div>
@@ -118,7 +192,7 @@ export default function MasterProBuilder() {
           {previewTab==='page'?<div className="mpb-public-content"><div className="mpb-public-title"><small>ВЫБЕРИТЕ УСЛУГУ</small><h3>Услуги и стоимость</h3></div>{activeServices.map(item=><button key={item.id} className={'mpb-public-service '+(selectedService===item.id?'chosen':'')} onClick={()=>setSelectedService(item.id)}><span><b>{item.name}</b><small>{item.description}</small><em>{item.duration} минут</em></span><strong>{money(item.price)}</strong></button>)}{!activeServices.length&&<p className="mpb-empty-preview">Добавьте хотя бы одну активную услугу.</p>}<div className="mpb-public-title mpb-calendar-title"><small>СЛЕДУЮЩИЙ ШАГ</small><h3>Выберите удобное время</h3></div><div className="mpb-public-dates">{['ПН 10','ВТ 11','СР 12','ЧТ 13','ПТ 14'].map((d,i)=><span className={i===1?'selected':''} key={d}>{d}</span>)}</div><div className="mpb-public-times">{['10:00','11:30','13:00','15:30'].map((t,i)=><span className={i===1?'selected':''} key={t}>{t}</span>)}</div><button className="mpb-public-cta">Выбрать дату и время</button></div>:<div className="mpb-public-content"><div className="mpb-public-title"><small>ВАША ЗАПИСЬ</small><h3>Подтверждение</h3></div><div className="mpb-booking-receipt"><span>Мастер<strong>{name||'Ваше имя'}</strong></span><span>Услуга<strong>{currentService?.name??'Не выбрана'}</strong></span><span>Длительность<strong>{currentService?.duration??0} минут</strong></span><span>Стоимость<strong>{money(currentService?.price??0)}</strong></span></div><label className="mpb-preview-input">Ваше имя<input placeholder="Как к вам обращаться?"/></label><label className="mpb-preview-input">Номер телефона<input placeholder="+7 (___) ___-__-__"/></label><button className="mpb-public-cta">Подтвердить запись</button><small className="mpb-preview-demo-note">Предпросмотр · данные не отправляются</small></div>}
           <div className="mpb-public-footer">ИНДИВИДУАЛЬНАЯ ПРАКТИКА <span>Онлайн-запись без ожидания</span></div>
         </div></div>
-        <div className="mpb-preview-note">Предпросмотр демонстрационный. Изменения не публикуются и не сохраняются в базе.</div>
+        <div className="mpb-preview-note">Предпросмотр демонстрационный. Изменения сохраняются кнопкой «Сохранить изменения». Публикация пока не подключена.</div>
       </aside>
     </div>
     {showPublish&&<div className="mpb-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setShowPublish(false)}}><section className="mpb-publish-modal"><button className="mpb-modal-close" onClick={()=>setShowPublish(false)}>Закрыть</button><span className="mpb-eyebrow">ПУБЛИКАЦИЯ</span><h2>Страница ещё не готова к публикации</h2><p>Сейчас это интерактивный прототип конструктора. Сохранение в Supabase и настоящая публикация будут подключены после согласования интерфейса.</p><button className="mpb-primary" onClick={()=>setShowPublish(false)}>Понятно</button></section></div>}
