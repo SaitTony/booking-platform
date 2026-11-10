@@ -24,7 +24,7 @@ type Props = {
   loading: boolean
   busy: boolean
   onTogglePage: (page: MasterPage) => void
-  onArchivePage: (page: MasterPage) => void
+  onArchivePage: (page: MasterPage, accountId?: string) => void
 }
 
 type Filter = 'all' | 'published' | 'draft' | 'missing' | 'disabled' | 'archived'
@@ -35,9 +35,9 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
   const masterPros = accounts
   const individualPages = pages.filter(page => page.kind === 'individual')
   const archivedPages = individualPages.filter(page => !!page.archived_at)
-  const pageFor = (account: MasterProAccount) => individualPages.find(page => page.profile_id === account.id)
-  const publishedCount = masterPros.filter(account => pageFor(account)?.is_active).length
-  const draftCount = masterPros.filter(account => pageFor(account) && !pageFor(account)?.is_active).length
+  const pageFor = (account: MasterProAccount) => individualPages.find(page => page.profile_id === account.id) ?? individualPages.find(page => !!page.archived_at && !page.profile_id && page.display_name.trim().toLocaleLowerCase('ru') === account.full_name.trim().toLocaleLowerCase('ru'))
+  const publishedCount = masterPros.filter(account => { const page=pageFor(account); return !!page?.is_active && !page.archived_at }).length
+  const draftCount = masterPros.filter(account => { const page=pageFor(account); return !!page && !page.is_active && !page.archived_at }).length
   const missingCount = masterPros.filter(account => !pageFor(account)).length
   const disabledCount = masterPros.filter(account => account.disabled_at).length
   const archivedCount = archivedPages.length
@@ -103,7 +103,7 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
               <div className="mp-management-page">{page ? <><strong>{page.display_name}</strong><a href={`https://saittony.github.io/workflows/pro/${page.slug}`} target="_blank" rel="noreferrer">/pro/{page.slug}</a>{page.archived_at && <small className="mp-archived-label">В архиве</small>}</> : <span>Нет связанной страницы</span>}</div>
               <span>{page ? <button type="button" className={'ap-switch ' + (page.is_active && !page.archived_at ? 'is-on' : '')} role="switch" aria-checked={page.is_active && !page.archived_at} aria-label={page.is_active && !page.archived_at ? 'Отключить страницу' : 'Включить страницу'} disabled={busy || !!page.archived_at} onClick={() => onTogglePage(page)}><span/></button> : <i className="ap-role ap-company-inactive">Нет страницы</i>}</span>
               <span><i className={'ap-role ' + (!account.disabled_at ? 'ap-company-active' : 'ap-company-inactive')}>{account.disabled_at ? 'Отключён' : 'Активен'}</i></span>
-              <span className="mp-management-actions">{page ? <button type="button" className="ap-secondary mp-archive-action" disabled={busy} onClick={() => onArchivePage(page)}>{page.archived_at ? 'Вернуть из архива' : 'В архив'}</button> : '—'}</span>
+              <span className="mp-management-actions">{page ? <button type="button" className="ap-secondary mp-archive-action" disabled={busy} onClick={() => onArchivePage(page, account.id)}>{page.archived_at ? 'Вернуть из архива' : 'В архив'}</button> : '—'}</span>
             </div>
           })}
       </div>
