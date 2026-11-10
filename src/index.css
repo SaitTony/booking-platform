@@ -1993,3 +1993,16 @@
 .admin-shell[data-redesign="true"] .admin-sidebar button.active{background:var(--rd-accent-soft)!important;border-color:color-mix(in srgb,var(--rd-accent) 30%,var(--rd-line))!important;color:var(--rd-accent)!important;box-shadow:inset 0 -3px 0 var(--rd-accent)!important}
 .admin-shell[data-redesign="true"] .admin-main-content{width:100%!important;min-width:0}
 @media(max-width:700px){.admin-shell[data-redesign="true"] .admin-sidebar{scrollbar-width:thin}.admin-shell[data-redesign="true"] .admin-sidebar button{min-height:43px!important;padding:0 13px!important;font-size:13px!important}}
+
+
+/* Overview KPI cards: reduce vertical footprint while keeping labels readable. */
+.admin-shell[data-redesign="true"] .rd-kpis{gap:12px;margin-bottom:15px}
+.admin-shell[data-redesign="true"] .rd-kpis article{min-height:112px;padding:14px 17px}
+.admin-shell[data-redesign="true"] .rd-kpis article>span{font-size:12px}
+.admin-shell[data-redesign="true"] .rd-kpis article>strong{margin:6px 0 2px;font-size:30px;line-height:1.05}
+.admin-shell[data-redesign="true"] .rd-kpis article>small{font-size:10px;line-height:1.25}
+.admin-shell[data-redesign="true"] .rd-kpis article>b{top:12px;right:14px}
+@media(max-width:520px){
+ .admin-shell[data-redesign="true"] .rd-kpis article{min-height:98px;padding:11px 13px}
+ .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:26px}
+}
