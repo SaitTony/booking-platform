@@ -206,18 +206,18 @@ select extensions.ok(
   'A slot immediately after an appointment is hidden until the configured buffer elapses'
 );
 select extensions.throws_ok(
-  $select public.create_booking(
+  $buffer_test$select public.create_booking(
     '30000000-0000-4000-8000-000000000001',
     '40000000-0000-4000-8000-000000000001',
     ((((now() at time zone 'UTC')::date + 2)::timestamp + time '09:40') at time zone 'UTC'),
     'Too Close', '+79531234593', true
-  )$,
+  )$buffer_test$,
   'P0001', 'Между записями должна быть пауза не менее 15 минут',
   'Booking creation rejects appointments that violate the configured buffer'
 );
 
 select extensions.throws_ok(
-  $insert into public.bookings (
+  $invalid_service$insert into public.bookings (
       master_id, service_id, client_id, starts_at, ends_at, status,
       service_name_snapshot, service_duration_snapshot, price_snapshot,
       client_name_snapshot, client_phone_snapshot
@@ -228,7 +228,7 @@ select extensions.throws_ok(
       (select id from public.clients where phone_e164 = '+79531234599'),
       now() + interval '7 days', now() + interval '7 days 30 minutes', 'cancelled',
       'Consultation', 30, 50, 'Client One', '+79531234599'
-    )$$,
+    )$invalid_service$,
   '23503', null,
   'A booking cannot reference a service belonging to another master'
 );
@@ -351,7 +351,7 @@ select extensions.is(
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
 select extensions.lives_ok(
-  $select public.complete_booking((select id from public.bookings where master_id='30000000-0000-4000-8000-000000000002' limit 1))$,
+  $complete_test$select public.complete_booking((select id from public.bookings where master_id='30000000-0000-4000-8000-000000000002' limit 1))$complete_test$,
   'Owner can mark a confirmed booking as completed'
 );
 select extensions.is(
