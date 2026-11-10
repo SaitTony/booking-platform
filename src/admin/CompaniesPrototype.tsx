@@ -21,10 +21,7 @@ type Props = {
   onDelete: (company: Company) => void
 }
 
-type Tab = 'all' | 'active' | 'inactive'
-
 export default function CompaniesPrototype({ companies, pages, accounts, busy, onCreate, onEdit, onToggle, onDelete }: Props) {
-  const [tab, setTab] = useState<Tab>('all')
   const [search, setSearch] = useState('')
 
   const activeCount = companies.filter(company => company.is_active).length
@@ -32,11 +29,10 @@ export default function CompaniesPrototype({ companies, pages, accounts, busy, o
   const visibleCompanies = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('ru')
     return companies
-      .filter(company => tab === 'all' || (tab === 'active' ? company.is_active : !company.is_active))
       .filter(company => !query || [company.name, company.slug, company.description]
         .some(value => String(value ?? '').toLocaleLowerCase('ru').includes(query)))
       .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
-  }, [companies, tab, search])
+  }, [companies, search])
 
   function staffCount(companyId: string) {
     return accounts.filter(account => account.company_members?.some(member => member.company_id === companyId)).length
@@ -60,14 +56,8 @@ export default function CompaniesPrototype({ companies, pages, accounts, busy, o
       </button>
     </div>
 
-    <nav className="ap-tabs" aria-label="Статус компаний">
-      <button type="button" className={tab === 'all' ? 'active' : ''} onClick={() => setTab('all')}>Все <span>{companies.length}</span></button>
-      <button type="button" className={tab === 'active' ? 'active' : ''} onClick={() => setTab('active')}>Активные <span>{activeCount}</span></button>
-      <button type="button" className={tab === 'inactive' ? 'active' : ''} onClick={() => setTab('inactive')}>Неактивные <span>{inactiveCount}</span></button>
-    </nav>
-
     <section className="ap-table">
-      <div className="ap-table-heading"><strong>{tab === 'all' ? 'Все компании' : tab === 'active' ? 'Активные компании' : 'Неактивные компании'}</strong><span>{visibleCompanies.length} из {companies.length}</span></div>
+      <div className="ap-table-heading"><strong>Все компании</strong><span>{visibleCompanies.length} из {companies.length}</span></div>
       <div className="ap-table-scroll">
         <div className="ap-grid ap-company-grid ap-grid-head"><span>№</span><span>Компания</span><span>Адрес страницы</span><span>Сотрудники</span><span>Страницы мастеров</span><span>Статус</span><span>Доступ</span><span></span><span></span></div>
         {visibleCompanies.length === 0
