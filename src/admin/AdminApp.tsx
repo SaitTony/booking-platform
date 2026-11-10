@@ -111,7 +111,9 @@ export default function AdminApp() {
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'|'settings'>('overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
   const adminPath = window.location.pathname.replace(/\/+$/, '')
-  const isAccountsPrototype = adminPath.endsWith('/admin/accounts-prototype') || adminPath.endsWith('/admin/redesign')
+  // The rebuilt Owner directory views are now the default admin experience.
+  // Keep the old URL aliases working, but do not require a special route to reach the new views.
+  const isAccountsPrototype = true
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [email, setEmail] = useState('')
@@ -586,7 +588,7 @@ export default function AdminApp() {
   if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
-    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions">{!isAccountsPrototype && <button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button>}<button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
+    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions"><button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
     {notice && <p className="admin-notice">{notice}</p>}{error && !activeModal && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' && !previewAccount ? <>
       <div className="admin-workspace-layout">
@@ -741,7 +743,7 @@ export default function AdminApp() {
       <section className={activeModal === 'accountSettings' ? 'admin-modal admin-modal-compact' : 'admin-modal'} role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
         {error && <p className="admin-error admin-modal-error" role="alert">{error}</p>}
-        {!isAccountsPrototype && activeModal==='settings'&&<div className="admin-settings-modal">
+        {activeModal==='settings'&&<div className="admin-settings-modal">
           <h2 id="admin-modal-title">Настройки панели</h2>
           <section className="admin-theme-picker"><div className="admin-theme-heading"><div><span className="eyebrow">ОФОРМЛЕНИЕ ПАНЕЛИ</span><h3>Цветовая тема</h3><p>Выберите палитру административной панели.</p></div><span className="admin-theme-current">{adminPalettes.find(item=>item.id===adminTheme)?.name}</span></div>
             <div className="theme-options admin-theme-options">{adminPalettes.map(item=><button type="button" key={item.id} className={`theme-option ${adminTheme===item.id?'active':''}`} onClick={()=>{setAdminTheme(item.id);localStorage.setItem('workflows-admin-theme',item.id)}}><span className={`palette palette-${item.id}`}><i/><i/><i/><i/></span><span><b>{item.name}</b><small>{item.desc}</small></span>{adminTheme===item.id&&<em>✓</em>}</button>)}</div>
