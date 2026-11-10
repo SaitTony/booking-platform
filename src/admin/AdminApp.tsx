@@ -676,6 +676,7 @@ export default function AdminApp() {
           pages={masterPages.filter(page=>page.kind==='individual')}
           loading={accountsLoading}
           busy={busy}
+          onCreateAccount={()=>{setTemporaryPassword('000000');setCreateRole('master_pro');setCreateCompanyId('');setActiveModal('account')}}
           onCreatePage={account=>{setPageKind('individual');setPageProfileId(account.id);setPageName(account.full_name??'');setPageSlug(makeSlug(account.full_name||'master'));setPageDescription('');setActiveModal('masterPro')}}
           onTogglePage={page=>void toggleMasterPage(page)}
           onArchivePage={page=>void archiveMasterPage(page)}
