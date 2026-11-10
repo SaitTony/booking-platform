@@ -38,7 +38,9 @@ export default function StaffWorkspace({profile,kindFilter,companyIdFilter,readO
     const timeout=window.setTimeout(()=>setNotice(''),3000)
     return ()=>window.clearTimeout(timeout)
   },[notice])
-  const canEdit=!readOnly&&(profile.platform_role==='owner'||profile.platform_role==='master_pro'||profile.company_members?.some(m=>m.role==='admin')===true)
+  // Company Masters manage only their own workspace; the query above scopes them to their assigned master_id.
+  // Admins manage the company workspace, while Owner previews remain explicitly read-only.
+  const canEdit=!readOnly&&(profile.platform_role==='owner'||profile.platform_role==='master_pro'||profile.company_members?.some(m=>m.role==='admin'||m.role==='master')===true)
   const canCancel=!readOnly&&canEdit
 
   async function loadMasters(){
