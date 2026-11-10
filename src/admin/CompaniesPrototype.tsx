@@ -26,7 +26,6 @@ type Tab = 'all' | 'active' | 'inactive'
 export default function CompaniesPrototype({ companies, pages, accounts, busy, onCreate, onEdit, onToggle, onDelete }: Props) {
   const [tab, setTab] = useState<Tab>('all')
   const [search, setSearch] = useState('')
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
 
   const activeCount = companies.filter(company => company.is_active).length
   const inactiveCount = companies.length - activeCount
@@ -79,7 +78,7 @@ export default function CompaniesPrototype({ companies, pages, accounts, busy, o
           ? <div className="ap-empty">{companies.length === 0 ? 'Компаний пока нет. Создайте первую компанию.' : 'По заданным условиям компании не найдены.'}</div>
           : visibleCompanies.map((company, index) => <div className={'ap-grid ap-company-grid ap-row ' + (!company.is_active ? 'is-disabled' : '')} key={company.id}>
             <span className="ap-number">{index + 1}</span>
-            <div className="ap-person"><strong>{company.name}</strong><small>{company.description || 'Без описания'}</small><button type="button" className="ap-detail-trigger" onClick={() => setSelectedCompanyId(current => current === company.id ? null : company.id)} aria-expanded={selectedCompanyId === company.id}>Подробнее</button></div>
+            <div className="ap-person"><strong>{company.name}</strong><small>{company.description || 'Без описания'}</small></div>
             <span className="ap-muted" title={company.slug}>/{company.slug}</span>
             <span className="ap-place">{staffCount(company.id)}</span>
             <span className="ap-place">{pageCount(company.id)}</span>
@@ -91,30 +90,6 @@ export default function CompaniesPrototype({ companies, pages, accounts, busy, o
       </div>
       <footer className="ap-footer">Изменения применяются к данным Workflows · Supabase</footer>
     </section>
-    {visibleCompanies.find(company => company.id === selectedCompanyId) && (() => {
-      const company = visibleCompanies.find(item => item.id === selectedCompanyId)!
-      const staff = accounts.filter(account => account.company_members?.some(member => member.company_id === company.id))
-      const companyPages = pages.filter(page => page.kind === 'company' && page.company_id === company.id)
-      return <aside className="ap-account-detail ap-company-detail" aria-label="Карточка компании">
-        <div className="ap-account-detail-heading">
-          <div><span className="rd-kicker">КАРТОЧКА КОМПАНИИ</span><h3>{company.name}</h3><p>/{company.slug} · {company.is_active ? 'Компания активна' : 'Компания отключена'}</p></div>
-          <button type="button" className="ap-detail-close" onClick={() => setSelectedCompanyId(null)} aria-label="Закрыть карточку">×</button>
-        </div>
-        <div className="ap-account-detail-grid">
-          <div><small>Сотрудники</small><strong>{staff.length}</strong></div>
-          <div><small>Страницы мастеров</small><strong>{companyPages.length}</strong></div>
-          <div><small>Статус</small><strong>{company.is_active ? 'Активна' : 'Отключена'}</strong></div>
-        </div>
-        <div className="ap-company-detail-lists">
-          <section><h4>Сотрудники компании</h4>{staff.length ? staff.map(account => <div className="ap-company-detail-row" key={account.id}><span><strong>{account.full_name || 'Без имени'}</strong><small>{account.email}</small></span><i>{account.company_members?.find(member => member.company_id === company.id)?.role === 'admin' ? 'Admin' : 'Master'}</i></div>) : <p>Сотрудники пока не назначены.</p>}</section>
-          <section><h4>Страницы мастеров</h4>{companyPages.length ? companyPages.map(page => <div className="ap-company-detail-row" key={page.id}><span><strong>{page.display_name}</strong><small>/{company.slug}/{page.slug}</small></span><i>{page.archived_at ? 'В архиве' : page.is_active ? 'Активна' : 'Черновик'}</i></div>) : <p>Страницы мастеров пока не созданы.</p>}</section>
-        </div>
-        <div className="ap-account-detail-actions">
-          <button type="button" className="ap-secondary" disabled={busy} onClick={() => onEdit(company)}>Настройки компании</button>
-          <button type="button" className="ap-secondary" disabled={busy} onClick={() => onToggle(company)}>{company.is_active ? 'Отключить компанию' : 'Включить компанию'}</button>
-          <button type="button" className="ap-secondary ap-detail-danger" disabled={busy} onClick={() => onDelete(company)}>Удалить компанию</button>
-        </div>
-      </aside>
-    })()}
+
   </section>
 }
