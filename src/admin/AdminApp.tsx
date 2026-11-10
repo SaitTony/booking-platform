@@ -536,8 +536,8 @@ export default function AdminApp() {
   const [emailForCreate, setEmailForCreate] = useState('')
   const [phoneForCreate, setPhoneForCreate] = useState('')
 
-  if (!sessionReady && supabase) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card">Загрузка…</section></main>
-  if (!profile) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><form className="admin-card" onSubmit={signIn}>
+  if (!sessionReady && supabase) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><section className="admin-card">Загрузка…</section></main>
+  if (!profile) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><form className="admin-card" onSubmit={signIn}>
     <span className="eyebrow">Workflows project</span><h1>Административная панель</h1>
     <label className="admin-field">Email<input type="email" autoComplete="username" placeholder="name@example.com" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
     <label className="admin-field">Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
@@ -546,15 +546,15 @@ export default function AdminApp() {
     <button className="primary-button full-button" disabled={busy || !supabase}>{busy?'Входим…':'Войти'}</button>
   </form></main>
 
-  if (profile.force_password_change) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><form className="admin-card" onSubmit={changePassword}>
+  if (profile.force_password_change) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><form className="admin-card" onSubmit={changePassword}>
     <span className="eyebrow">ПЕРВЫЙ ВХОД</span><h1>Создайте свой пароль</h1><p>Временный пароль больше не будет использоваться. Придумайте новый пароль длиной не менее 6 символов.</p>
     <label className="admin-field">Новый пароль<input type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required minLength={6} /></label>
     {error && <p className="admin-error">{error}</p>}
     <button className="primary-button full-button" disabled={busy}>{busy?'Сохраняем…':'Сменить пароль'}</button>
   </form></main>
 
-  if (profile.disabled_at) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
-  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
+  if (profile.disabled_at) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
+  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
   return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
     <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions">{!isAccountsPrototype && <button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button>}<button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
