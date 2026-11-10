@@ -46,14 +46,6 @@ export default function CompaniesPrototype({ companies, pages, accounts, busy, o
   }
 
   return <section className="accounts-prototype companies-prototype">
-    <header className="ap-heading">
-      <div><h2>Компании</h2><p>Управление компаниями, публичными страницами и доступом сотрудников</p></div>
-      <button type="button" className="ap-primary" onClick={onCreate}>
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>
-        Создать компанию
-      </button>
-    </header>
-
     <div className="ap-stats ap-company-stats">
       <article><span>Всего компаний</span><strong>{companies.length}</strong><small>Все созданные компании</small></article>
       <article><span>Активные</span><strong>{activeCount}</strong><small>Доступны клиентам и сотрудникам</small></article>
@@ -62,6 +54,10 @@ export default function CompaniesPrototype({ companies, pages, accounts, busy, o
 
     <div className="ap-toolbar">
       <label className="ap-search"><span aria-hidden="true">⌕</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Поиск по названию или адресу…" aria-label="Поиск компаний"/></label>
+      <button type="button" className="ap-primary ap-toolbar-create" onClick={onCreate}>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>
+        Создать компанию
+      </button>
     </div>
 
     <nav className="ap-tabs" aria-label="Статус компаний">
