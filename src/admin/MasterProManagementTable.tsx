@@ -27,10 +27,7 @@ type Props = {
   onArchivePage: (page: MasterPage, accountId?: string) => void
 }
 
-type Filter = 'all' | 'published' | 'draft' | 'missing' | 'disabled' | 'archived'
-
 export default function MasterProManagementTable({ accounts, pages, loading, busy, onTogglePage, onArchivePage }: Props) {
-  const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
   const masterPros = accounts
@@ -47,26 +44,11 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
     const query = search.trim().toLocaleLowerCase('ru')
     return masterPros.filter(account => {
       const page = pageFor(account)
-      const matchesFilter = filter === 'all'
-        || (filter === 'published' && !!page?.is_active && !page.archived_at)
-        || (filter === 'draft' && !!page && !page.is_active && !page.archived_at)
-        || (filter === 'missing' && !page)
-        || (filter === 'disabled' && !!account.disabled_at)
-        || (filter === 'archived' && !!page?.archived_at)
       const matchesSearch = !query || [account.full_name, account.email, page?.display_name, page?.slug]
         .some(value => String(value ?? '').toLocaleLowerCase('ru').includes(query))
-      return matchesFilter && matchesSearch
+      return matchesSearch
     }).sort((a, b) => a.full_name.localeCompare(b.full_name, 'ru'))
-  }, [masterPros, filter, search, individualPages])
-
-  const tabs: {id:Filter;label:string;count:number}[] = [
-    {id:'all',label:'Все',count:masterPros.length},
-    {id:'published',label:'Опубликованы',count:publishedCount},
-    {id:'draft',label:'Черновики',count:draftCount},
-    {id:'missing',label:'Без страницы',count:missingCount},
-    {id:'disabled',label:'Отключённые УЗ',count:disabledCount},
-    {id:'archived',label:'Архив',count:archivedCount},
-  ]
+  }, [masterPros, search, individualPages])
 
   return <section className="accounts-prototype master-pro-management">
     <div className="ap-stats ap-company-stats mp-management-stats">
@@ -77,20 +59,12 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
       <article><span>В архиве</span><strong>{archivedCount}</strong><small>Страницы можно восстановить</small></article>
     </div>
 
-    <header className="ap-heading">
-      <div><h2>Master_pro</h2><p>Индивидуальные специалисты и их публичные страницы вне компаний</p></div>
-    </header>
-
     <div className="ap-toolbar">
       <label className="ap-search"><span aria-hidden="true">⌕</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Поиск по имени, email или адресу страницы…" aria-label="Поиск Master_pro"/></label>
     </div>
 
-    <nav className="ap-tabs" aria-label="Фильтр индивидуальных специалистов">
-      {tabs.map(tab => <button type="button" key={tab.id} className={filter === tab.id ? 'active' : ''} onClick={() => setFilter(tab.id)}>{tab.label} <span>{tab.count}</span></button>)}
-    </nav>
-
     <section className="ap-table">
-      <div className="ap-table-heading"><strong>{tabs.find(tab => tab.id === filter)?.label ?? 'Все специалисты'}</strong><span>{visible.length} из {masterPros.length}</span></div>
+      <div className="ap-table-heading"><strong>Все специалисты</strong><span>{visible.length} из {masterPros.length}</span></div>
       <div className="ap-table-scroll">
         <div className="ap-grid mp-management-grid ap-grid-head"><span>№</span><span>Специалист</span><span>Email</span><span>Индивидуальная страница</span><span>Публикация</span><span>Доступ</span><span>Архивация</span></div>
         {loading && masterPros.length === 0 ? <div className="ap-empty">Загружаем учётные записи…</div>
