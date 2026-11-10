@@ -430,3 +430,37 @@
   .admin-shell[data-redesign="true"] .admin-theme-options{grid-template-columns:1fr}
   .admin-shell[data-redesign="true"] .admin-modal{padding:19px}
 }
+
+/* Owner account detail drawer */
+.admin-shell[data-redesign="true"] .ap-detail-trigger{
+  align-self:flex-start;margin-top:1px;padding:0;border:0;background:transparent;
+  color:#2864d8;font-size:9px;font-weight:700;text-align:left;
+}
+.admin-shell[data-redesign="true"] .ap-detail-trigger:hover{text-decoration:underline}
+.admin-shell[data-redesign="true"] .ap-account-detail{
+  margin-top:14px;padding:20px;border:1px solid #dce4ef;border-radius:11px;
+  background:#fff;box-shadow:0 8px 24px rgba(25,42,65,.055);
+}
+.admin-shell[data-redesign="true"] .ap-account-detail-heading{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  padding-bottom:15px;border-bottom:1px solid #edf0f4;
+}
+.admin-shell[data-redesign="true"] .ap-account-detail-heading h3{
+  margin:0;color:#1b2a3e;font-size:18px;font-weight:760;letter-spacing:-.035em;
+}
+.admin-shell[data-redesign="true"] .ap-account-detail-heading p{margin:5px 0 0;color:#78879a;font-size:10px}
+.admin-shell[data-redesign="true"] .ap-detail-close{
+  display:grid;place-items:center;width:30px;height:30px;border:1px solid #e0e5ec;
+  border-radius:7px;background:#fff;color:#69798d;font-size:20px;line-height:1;
+}
+.admin-shell[data-redesign="true"] .ap-account-detail-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 22px;padding:17px 0;
+}
+.admin-shell[data-redesign="true"] .ap-account-detail-grid>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.admin-shell[data-redesign="true"] .ap-account-detail-grid small{color:#8a96a5;font-size:9px}
+.admin-shell[data-redesign="true"] .ap-account-detail-grid strong{overflow-wrap:anywhere;color:#34445a;font-size:11px;font-weight:650}
+.admin-shell[data-redesign="true"] .ap-account-detail-actions{display:flex;flex-wrap:wrap;gap:8px}
+@media(max-width:600px){
+ .admin-shell[data-redesign="true"] .ap-account-detail{padding:15px}
+ .admin-shell[data-redesign="true"] .ap-account-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+}
