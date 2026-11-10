@@ -5,7 +5,7 @@ import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 
 type MasterRecord = {
   id: string; display_name: string; slug: string; public_description: string; timezone: string
-  kind: 'individual' | 'company'; company_id: string | null; photo_url: string | null; theme: { id?: string } | null
+  kind: 'individual' | 'company'; company_id: string | null; photo_url: string | null; cover_url: string | null; theme: { id?: string; specialty?: string; cover_title?: string; tags?: string[] } | null
 }
 type ServiceRecord = { id: string; name: string; description: string; duration: number; price: number }
 type CompanyRecord = { id: string; name: string; slug: string; is_active: boolean; theme: { id?: string } | null }
@@ -47,7 +47,7 @@ export default function BookingPage({ individual = false }: { individual?: boole
       let companyRecord: CompanyRecord | null = null
       if (individual) {
         const { data, error: queryError } = await supabase!.from('masters')
-          .select('id,display_name,slug,public_description,timezone,kind,company_id,photo_url,theme')
+          .select('id,display_name,slug,public_description,timezone,kind,company_id,photo_url,cover_url,theme')
           .eq('slug', params.slug ?? '').eq('kind','individual').eq('is_active',true).is('archived_at',null).maybeSingle()
         if (queryError) throw queryError
         if (!data) throw new Error('Страница мастера не найдена или временно недоступна')
@@ -133,7 +133,8 @@ export default function BookingPage({ individual = false }: { individual?: boole
   return <main className="booking-shell" data-theme={pageTheme}>
     <header className="topbar"><span className="brand" aria-hidden="true"><span className="brand-mark" aria-hidden="true">✦</span></span><span className="demo-label"><i/> ОНЛАЙН-ЗАПИСЬ</span></header>
     {company && <div className="breadcrumb"><Link to={'/'+company.slug}>{company.name}</Link><span>/</span>{master.display_name}</div>}
-    <section className="master-hero"><div className="master-avatar">{master.photo_url?<img src={master.photo_url} alt={master.display_name}/>:master.display_name.slice(0,1).toUpperCase()}</div><div className="master-copy"><span className="eyebrow">{company?.name ?? 'ИНДИВИДУАЛЬНЫЙ МАСТЕР'}</span><h1>{master.display_name}</h1><p>{master.public_description}</p></div></section>
+    {(master.cover_url||master.theme?.cover_title)&&<div className="master-cover-photo" style={master.cover_url?{backgroundImage:`linear-gradient(115deg,rgba(0,0,0,.12),rgba(0,0,0,.32)),url("${master.cover_url}")`,backgroundSize:'cover',backgroundPosition:'center'}:undefined}>{master.theme?.cover_title&&<span>{master.theme.cover_title}</span>}<b>YOUR TIME · YOUR STYLE</b></div>}
+    <section className="master-hero"><div className="master-avatar">{master.photo_url?<img src={master.photo_url} alt={master.display_name}/>:master.display_name.slice(0,1).toUpperCase()}</div><div className="master-copy"><span className="eyebrow">{master.theme?.specialty || company?.name || 'ИНДИВИДУАЛЬНЫЙ МАСТЕР'}</span><h1>{master.display_name}</h1><p>{master.public_description}</p>{Array.isArray(master.theme?.tags)&&master.theme.tags.length>0&&<div className="master-meta">{master.theme.tags.map(tag=><span key={tag}>{tag}</span>)}</div>}</div></section>
     <div className="booking-layout"><section className="booking-main">
       <div className="section-heading"><div><span className="eyebrow">ШАГ 1</span><h2>Выберите услугу</h2></div></div>
       <div className="service-list">{services.map(service=><button key={service.id} className={'service-card '+(serviceId===service.id?'selected':'')} onClick={()=>{setServiceId(service.id);setSelectedSlot('')}}><span className="service-radio">{serviceId===service.id?'✓':''}</span><span className="service-info"><strong>{service.name}</strong><small>{service.description}</small><em>{service.duration} минут</em></span><b>{money(service.price)}</b></button>)}</div>
