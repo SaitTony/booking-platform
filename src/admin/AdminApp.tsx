@@ -600,7 +600,7 @@ export default function AdminApp() {
                 <button type="button" onClick={()=>setActiveSection('masterPro')}><i>✦</i><span><b>Управление Master_pro</b><small>Индивидуальные страницы специалистов</small></span><em>→</em></button>
               </div></section>
               <section className="rd-card"><div className="rd-card-head"><div><h3>Последние учётные записи</h3><p>Недавно добавленные пользователи</p></div><button type="button" className="rd-link" onClick={()=>setActiveSection('accounts')}>Все записи →</button></div>
-                {accounts.filter(account=>account.platform_role!=='owner').slice(0,4).map(account=><div className="rd-recent" key={account.id}><span className="rd-person-avatar">{account.full_name.split(/\\s+/).map(part=>part[0]).slice(0,2).join('').toUpperCase()}</span><div><b>{account.full_name}</b><small>{account.email}</small></div><i className={account.disabled_at?'is-off':'is-active'}>{account.disabled_at?'Отключён':roleLabel(account)}</i></div>)}
+                {accounts.filter(account=>account.platform_role!=='owner').slice(0,4).map(account=><div className="rd-recent" key={account.id}><span className="rd-person-avatar">{account.full_name.split(/\s+/).map(part=>part[0]).slice(0,2).join('').toUpperCase()}</span><div><b>{account.full_name}</b><small>{account.email}</small></div><i className={account.disabled_at?'is-off':'is-active'}>{account.disabled_at?'Отключён':roleLabel(account)}</i></div>)}
                 {!accounts.some(account=>account.platform_role!=='owner')&&<p className="rd-empty">Пока нет созданных учётных записей.</p>}
               </section>
             </div>
