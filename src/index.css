@@ -2006,3 +2006,28 @@
  .admin-shell[data-redesign="true"] .rd-kpis article{min-height:98px;padding:11px 13px}
  .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:26px}
 }
+
+
+/* Final Owner header/navigation spacing and alignment. */
+.admin-shell[data-redesign="true"] .admin-top{
+  padding-bottom:12px !important;
+  margin-bottom:10px !important;
+}
+.admin-shell[data-redesign="true"] .admin-workspace-layout{gap:12px !important}
+.admin-shell[data-redesign="true"] .admin-sidebar{
+  justify-content:center !important;
+  padding:6px 9px !important;
+  min-height:58px;
+}
+.admin-shell[data-redesign="true"] .admin-sidebar button{
+  justify-content:center !important;
+  text-align:center !important;
+  font-size:16px !important;
+  min-height:46px !important;
+  padding-left:22px !important;
+  padding-right:22px !important;
+}
+@media(max-width:700px){
+ .admin-shell[data-redesign="true"] .admin-sidebar{justify-content:flex-start !important}
+ .admin-shell[data-redesign="true"] .admin-sidebar button{font-size:14px !important;padding-left:14px !important;padding-right:14px !important}
+}
