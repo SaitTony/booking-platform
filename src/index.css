@@ -1944,3 +1944,40 @@
 .admin-shell[data-redesign="true"] .admin-card .admin-field{color:var(--rd-muted)}
 .admin-shell[data-redesign="true"] .admin-card .admin-field input{min-height:44px;border:1px solid var(--rd-line);border-radius:8px;background:var(--rd-bg);color:var(--rd-text)}
 .admin-shell[data-redesign="true"] .admin-card .full-button{min-height:42px}
+
+
+/* Table header contrast: distinct in every administrative color palette. */
+.admin-shell[data-redesign="true"] .ap-table-heading,
+.admin-shell[data-redesign="true"] .ap-grid-head{
+  background:color-mix(in srgb,var(--rd-accent) 13%,var(--rd-panel)) !important;
+  color:var(--rd-text) !important;
+  border-color:color-mix(in srgb,var(--rd-accent) 28%,var(--rd-line)) !important;
+}
+.admin-shell[data-redesign="true"] .ap-table-heading{
+  min-height:54px;
+  border-bottom:1px solid color-mix(in srgb,var(--rd-accent) 32%,var(--rd-line)) !important;
+}
+.admin-shell[data-redesign="true"] .ap-table-heading strong{
+  color:var(--rd-text) !important;
+  font-size:13px !important;
+  font-weight:800 !important;
+}
+.admin-shell[data-redesign="true"] .ap-table-heading>span{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:0 9px;
+  border:1px solid color-mix(in srgb,var(--rd-accent) 30%,var(--rd-line));
+  border-radius:20px;
+  background:color-mix(in srgb,var(--rd-accent) 17%,var(--rd-panel));
+  color:var(--rd-text) !important;
+  font-size:11px !important;
+  font-weight:750;
+}
+.admin-shell[data-redesign="true"] .ap-grid-head{
+  min-height:43px;
+  color:var(--rd-text) !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  border-bottom:1px solid color-mix(in srgb,var(--rd-accent) 28%,var(--rd-line)) !important;
+}
