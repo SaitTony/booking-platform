@@ -745,3 +745,24 @@
     grid-template-columns:repeat(5,minmax(138px,1fr));
   }
 }
+
+
+/* Header: reduce the empty top area and keep brand, role and name on two lines. */
+.admin-shell[data-redesign="true"] .admin-wide{padding-top:10px}
+.admin-shell[data-redesign="true"] .admin-top{margin-bottom:18px;padding-bottom:16px}
+.admin-shell[data-redesign="true"] .admin-brand-line{
+  display:flex;align-items:center;flex-wrap:wrap;gap:9px;min-width:0;
+}
+.admin-shell[data-redesign="true"] .admin-branding .admin-brand-line .eyebrow{
+  margin:0;
+}
+.admin-shell[data-redesign="true"] .admin-header-identity{
+  color:var(--rd-muted);font-size:11px;font-weight:650;letter-spacing:0;
+  line-height:1.4;overflow-wrap:anywhere;
+}
+.admin-shell[data-redesign="true"] .admin-branding .admin-brand-line+.admin-top h1{margin-top:0}
+@media(max-width:600px){
+  .admin-shell[data-redesign="true"] .admin-wide{padding:8px 16px 36px}
+  .admin-shell[data-redesign="true"] .admin-top{align-items:flex-start;gap:12px;margin-bottom:14px;padding-bottom:13px}
+  .admin-shell[data-redesign="true"] .admin-header-identity{font-size:10px}
+}
