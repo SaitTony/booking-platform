@@ -69,10 +69,6 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
   ]
 
   return <section className="accounts-prototype master-pro-management">
-    <header className="ap-heading">
-      <div><h2>Master_pro</h2><p>Индивидуальные специалисты и их публичные страницы вне компаний</p></div>
-    </header>
-
     <div className="ap-stats ap-company-stats mp-management-stats">
       <article><span>Всего Master_pro</span><strong>{masterPros.length}</strong><small>Самостоятельные специалисты</small></article>
       <article><span>Опубликовано страниц</span><strong>{publishedCount}</strong><small>Доступны клиентам</small></article>
@@ -80,6 +76,10 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
       <article><span>Отключённые УЗ</span><strong>{disabledCount}</strong><small>Доступ к кабинету закрыт</small></article>
       <article><span>В архиве</span><strong>{archivedCount}</strong><small>Страницы можно восстановить</small></article>
     </div>
+
+    <header className="ap-heading">
+      <div><h2>Master_pro</h2><p>Индивидуальные специалисты и их публичные страницы вне компаний</p></div>
+    </header>
 
     <div className="ap-toolbar">
       <label className="ap-search"><span aria-hidden="true">⌕</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Поиск по имени, email или адресу страницы…" aria-label="Поиск Master_pro"/></label>
