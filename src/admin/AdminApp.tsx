@@ -117,6 +117,7 @@ export default function AdminApp() {
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [masterProPageName, setMasterProPageName] = useState('')
   const [accounts, setAccounts] = useState<Account[]>([])
   const [companies, setCompanies] = useState<CompanyOption[]>([])
   const [masterPages, setMasterPages] = useState<MasterOption[]>([])
@@ -502,11 +503,13 @@ export default function AdminApp() {
     if (!createRole) { setError('Выберите роль сотрудника.'); return }
     if (createRole === 'admin' && !companyName.trim()) { setError('Укажите название компании для Admin.'); return }
     if (createRole === 'master' && !createCompanyId) { setError('Для Master необходимо выбрать компанию.'); return }
-    const pageSlug = makeSlug(fullName)
+    const pageDisplayName = createRole === 'master_pro' ? masterProPageName.trim() : fullName.trim()
+    const pageSlug = makeSlug(createRole === 'master_pro' ? pageDisplayName : fullName)
     const companyBaseSlug = makeSlug(companyName)
     const companySlugForCreate = companyBaseSlug ? companyBaseSlug + '-' + Math.random().toString(36).slice(2, 8) : ''
     if ((createRole === 'master' || createRole === 'master_pro') && !pageSlug) { setError('Добавьте имя, из которого можно сформировать адрес страницы.'); return }
-    if (createRole === 'master_pro' && hasDuplicateIndividualPageName(masterPages, fullName)) { setError('Страница с таким названием уже существует. Измените название страницы и попробуйте снова.'); return }
+    if (createRole === 'master_pro' && !pageDisplayName) { setError('Укажите название публичной страницы Master_pro.'); return }
+    if (createRole === 'master_pro' && hasDuplicateIndividualPageName(masterPages, pageDisplayName)) { setError('Страница с таким названием уже существует. Измените название страницы и попробуйте снова.'); return }
     if (createRole === 'admin' && !companySlugForCreate) { setError('Название компании должно содержать буквы или цифры.'); return }
     setBusy(true); setError(''); setNotice('')
     const { error: createError } = await supabase.functions.invoke('create-user', {
@@ -516,14 +519,14 @@ export default function AdminApp() {
         companyId: createRole === 'master' ? createCompanyId : null,
         companyName: createRole === 'admin' ? companyName.trim() : null,
         companySlug: createRole === 'admin' ? companySlugForCreate : null,
-        pageName: fullName.trim(),
+        pageName: createRole === 'master_pro' ? pageDisplayName : fullName.trim(),
         pageSlug: createRole === 'master' || createRole === 'master_pro' ? pageSlug : null,
       },
     })
     if (createError) setError(await getFunctionErrorMessage(createError, 'Не удалось создать учётную запись.'))
     else {
       setNotice('Учётная запись и связанные страницы созданы.')
-      setFullName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('000000')
+      setFullName(''); setMasterProPageName(''); setEmailForCreate(''); setPhoneForCreate(''); setTemporaryPassword('000000')
       setCreateRole(''); setCreateCompanyId(''); setCompanyName(''); setCompanySlug(''); setActiveModal(null)
       await Promise.all([loadAccounts(), loadDirectories()])
     }
@@ -553,7 +556,7 @@ export default function AdminApp() {
   if (profile.disabled_at) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
   if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
-  return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={adminPath.endsWith('/admin/redesign') ? "true" : undefined} data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
+  return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign={isAccountsPrototype ? "true" : undefined} data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
     <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions">{!isAccountsPrototype && <button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button>}<button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
     {notice && <p className="admin-notice">{notice}</p>}{error && !activeModal && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' && !previewAccount ? <>
@@ -729,17 +732,21 @@ export default function AdminApp() {
         </form>}
         {activeModal==='account'&&<form onSubmit={createAccount}>
           <h2 id="admin-modal-title">Новая учётная запись</h2><p className="admin-modal-intro">Заполните данные сотрудника и назначьте ему роль сразу при создании.</p>
-          <label className="admin-field">Имя<input value={fullName} onChange={e=>setFullName(e.target.value)} required autoFocus/>{createRole==='master_pro'&&hasDuplicateIndividualPageName(masterPages,fullName)&&<small>Страница с таким названием уже существует. Измените имя страницы.</small>}</label>
+          <label className="admin-field">Имя пользователя<input value={fullName} onChange={e=>{setFullName(e.target.value);if(createRole==='master_pro'&&(!masterProPageName||masterProPageName===fullName))setMasterProPageName(e.target.value)}} required autoFocus/></label>
           <label className="admin-field">Email<input type="email" placeholder="name@example.com" value={emailForCreate} onChange={e=>setEmailForCreate(e.target.value)} required/></label>
           <label className="admin-field">Контактный номер телефона<PhoneInput value={phoneForCreate} onChange={setPhoneForCreate} required/></label>
           <label className="admin-field">Роль<select value={createRole} onChange={e=>{setCreateRole(e.target.value as 'admin'|'master'|'master_pro'|'');setCreateCompanyId('');setCompanyName('');setCompanySlug('')}} required><option value="">Выберите роль</option><option value="admin">Admin</option><option value="master">Master</option><option value="master_pro">Master_pro</option></select></label>
           {createRole==='admin'&&<label className="admin-field">Название компании<input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="Название новой компании" required/></label>}
           {createRole==='master'&&<label className="admin-field">Компания<select value={createCompanyId} onChange={e=>setCreateCompanyId(e.target.value)} required><option value="">Выберите компанию</option>{companies.filter(company=>company.is_active).map(company=><option key={company.id} value={company.id}>{company.name}</option>)}</select><small>Страница мастера будет создана автоматически в выбранной компании.</small></label>}
-          {createRole==='master_pro'&&<p className="admin-modal-intro">Индивидуальная страница будет создана автоматически и связана с учётной записью.</p>}
+          {createRole==='master_pro'&&<>
+            <label className="admin-field">Название публичной страницы<input value={masterProPageName} onChange={e=>setMasterProPageName(e.target.value)} placeholder="Например, Petrov" required/>{masterProPageName.trim()&&hasDuplicateIndividualPageName(masterPages,masterProPageName)&&<small className="admin-field-error">Страница с таким названием уже существует. Выберите другое название.</small>}</label>
+            <label className="admin-field">Адрес страницы (slug)<input value={makeSlug(masterProPageName)} readOnly/><small>Сформируется автоматически: /pro/{makeSlug(masterProPageName)||'имя-страницы'}</small></label>
+            <p className="admin-modal-intro">Индивидуальная страница будет создана автоматически и связана с учётной записью. Имя страницы может отличаться от имени пользователя.</p>
+          </>}
           {createRole==='admin'&&<p className="admin-modal-intro">Страница компании будет создана автоматически и связана с учётной записью Admin.</p>}
           <label className="admin-field">Временный пароль<input type="text" autoComplete="new-password" minLength={6} value={temporaryPassword} onChange={e=>setTemporaryPassword(e.target.value)} required/></label>
           <p className="admin-modal-intro">После первого входа сотрудник должен будет задать собственный пароль.</p>
-          <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)||!createRole||(createRole==='admin'&&!companyName.trim())||(createRole==='master'&&!createCompanyId)}>{busy?'Создаём…':'Создать учётную запись'}</button>
+          <button className="primary-button" disabled={busy||!isValidRussianPhone(phoneForCreate)||!createRole||(createRole==='admin'&&!companyName.trim())||(createRole==='master'&&!createCompanyId)||(createRole==='master_pro'&&(!masterProPageName.trim()||!makeSlug(masterProPageName)||hasDuplicateIndividualPageName(masterPages,masterProPageName)))}>{busy?'Создаём…':'Создать учётную запись'}</button>
         </form>}
         {activeModal==='delete'&&<div>
           <h2 id="admin-modal-title">Удалить учётную запись?</h2>
