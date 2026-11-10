@@ -95,3 +95,5 @@
 .mpb-status-active{color:#1a7f37}
 .mpb-info-row a.mpb-public-url{font-size:13px;font-weight:650;color:#0969da;text-decoration:none;overflow-wrap:anywhere}
 .mpb-info-row a.mpb-public-url:hover{text-decoration:underline}
+
+.mpb-draft-status.is-published{color:#1a7f37}.mpb-draft-status.is-published i{background:#1a7f37}
