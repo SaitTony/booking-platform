@@ -670,8 +670,7 @@ export default function AdminApp() {
         </div>
       </section>}
 
-      {activeSection==='masterPro' && <section className="admin-accordion admin-panel-section">
-        <header className="admin-panel-heading"><h2>Master_pro</h2><span className="accordion-count">{masterPages.filter(page=>page.kind==='individual').length}</span></header>
+      {activeSection==='masterPro' && <section className="admin-panel-section">
         <MasterProManagementTable
           accounts={accounts.filter(account=>account.platform_role==='master_pro')}
           pages={masterPages.filter(page=>page.kind==='individual')}
@@ -681,37 +680,6 @@ export default function AdminApp() {
           onTogglePage={page=>void toggleMasterPage(page)}
           onArchivePage={page=>void archiveMasterPage(page)}
         />
-        <div className="accordion-content">
-          <details className="admin-subaccordion">
-            <summary>Управлять</summary>
-            <div className="accordion-content">
-              {masterPages.filter(page=>page.kind==='individual').map(page=>{
-                const linkedAccount=accounts.find(account=>account.id===page.profile_id)
-                return <details className="admin-company-item" key={page.id}>
-                  <summary><span>{page.display_name}</span><span className="accordion-meta">{page.is_active?'Активна':'Отключена'}</span></summary>
-                  <div className="accordion-content">
-                    <section className="admin-card">
-                      <div className="admin-account"><div><strong>{linkedAccount?.full_name??'Учётная запись не привязана'}</strong><span>{linkedAccount?.email??'Назначьте Master_pro для этой страницы'}</span></div><span className="admin-role">{page.is_active?'Активна':'Отключена'}</span></div>
-                      <div className="admin-inline-actions"><button className="secondary-button account-action" onClick={()=>void toggleMasterPage(page)}>{page.is_active?'Отключить страницу':'Включить страницу'}</button><button className="secondary-button account-action" onClick={()=>void archiveMasterPage(page)}>В архив</button></div>
-                      {!linkedAccount&&<form className="nested-form" onSubmit={event=>void assignRole(event,undefined,page.id,'master_pro')}>
-                        <h3>Связать учётную запись</h3>
-                        <label className="admin-field">Пользователь<select value={selectedUserId} onChange={e=>setSelectedUserId(e.target.value)} required><option value="">Выберите учётную запись</option>{accounts.filter(a=>a.platform_role!=='owner'&&a.platform_role!=='master_pro').map(a=><option key={a.id} value={a.id}>{a.full_name} · {a.email}</option>)}</select></label>
-                        <button className="primary-button" disabled={busy||!selectedUserId}>Назначить Master_pro</button>
-                      </form>}
-                    </section>
-                  </div>
-                </details>
-              })}
-              <StaffWorkspace profile={profile} kindFilter="individual"/>
-            </div>
-          </details>
-          <details className="admin-subaccordion">
-            <summary>Создать</summary>
-            <div className="accordion-content">
-              <button className="admin-action-card admin-action-card-wide" onClick={()=>{setPageKind('individual');setPageProfileId('');setActiveModal('masterPro')}}><span className="admin-action-icon">＋</span><strong>Создать страницу Master_pro</strong><small>Новая индивидуальная страница специалиста</small></button>
-            </div>
-          </details>
-        </div>
       </section>}
         </div>
       </div>
