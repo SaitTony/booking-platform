@@ -600,3 +600,18 @@
  .admin-shell[data-redesign="true"] .workspace .workspace-exception{align-items:stretch;flex-direction:column}
  .admin-shell[data-redesign="true"] .workspace .workspace-exception .admin-field{width:100%}
 }
+
+/* Clear booking states and empty lists in company workspaces */
+.admin-shell[data-redesign="true"] .workspace-empty-state{
+  margin:12px 0 0;padding:18px;border:1px dashed #dce3eb;border-radius:8px;
+  background:#fafbfd;color:#8290a2;font-size:11px;text-align:center;
+}
+.admin-shell[data-redesign="true"] .workspace .booking-status-confirmed{
+  background:#edf5ef;color:#39734b;
+}
+.admin-shell[data-redesign="true"] .workspace .booking-status-completed{
+  background:#edf3ff;color:#315fbd;
+}
+.admin-shell[data-redesign="true"] .workspace .booking-status-cancelled{
+  background:#f7eeee;color:#9a5555;
+}
