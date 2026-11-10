@@ -49,6 +49,15 @@ The migration set includes:
 - Owner/Master_pro-only publication control for individual Master_pro pages (database trigger enforcement);
 - reserved company slugs, FK/index improvements, timestamp triggers, consolidated RLS policies, relocation of btree_gist to the non-exposed extensions schema, and isolation of SECURITY DEFINER access helpers in the non-exposed private schema, composite foreign keys for company memberships and bookings, their child-side indexes, and safer default EXECUTE privileges for future public functions.
 
+## Product access model — two independent specialist branches
+
+Workflows has two separate operating models; do not merge them into a single staff hierarchy.
+
+1. **Individual Master_pro:** independent specialist, not a company employee and not a `company_members` member. The Master_pro user manages their own individual page, content, services, schedule, booking settings and publication. Admin and Master have no visibility or access to individual Master_pro pages. Owner retains platform-level publication authority as separately agreed, but this does not make Master_pro a subordinate or transfer day-to-day content management to Owner.
+2. **Company Admin + Master:** Admin is the manager of one company and manages its company page/content and its employee Masters and their corporate pages. Master is an employee within that company, not an independent Master_pro. Master cannot manage the company, other employees or individual Master_pro pages. Fine-grained self-edit permissions for Master must follow the separately approved role matrix and must not grant company/employee administration.
+
+Enforce this split in the database, RLS, RPCs, Edge Functions and UI—not only by hiding navigation. Individual and corporate pages must remain isolated. Admin must only access their own company and its Masters.
+
 ## Edge Functions
 
 All eight functions are deployed with JWT verification enabled:
