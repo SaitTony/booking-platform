@@ -59,7 +59,7 @@ export default function BookingPage({ individual = false }: { individual?: boole
         if (!companyData) throw new Error('Компания не найдена или временно недоступна')
         companyRecord = companyData as CompanyRecord
         const { data, error: masterError } = await supabase!.from('masters')
-          .select('id,display_name,slug,public_description,timezone,kind,company_id,photo_url,theme')
+          .select('id,display_name,slug,public_description,timezone,kind,company_id,photo_url,cover_url,theme')
           .eq('company_id',companyRecord.id).eq('slug',params.masterSlug ?? '').eq('kind','company')
           .eq('is_active',true).is('archived_at',null).maybeSingle()
         if (masterError) throw masterError
