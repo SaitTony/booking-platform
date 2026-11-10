@@ -10,6 +10,7 @@ type Hours = { id:string; weekday:number; opens_at:string; closes_at:string; is_
 type Booking = { id:string; starts_at:string; ends_at:string; status:string; service_name_snapshot:string; price_snapshot:number; client_name_snapshot:string; client_phone_snapshot:string }
 
 const weekdays=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота']
+const bookingStatusLabel=(status:string)=>status==='confirmed'?'Активна':status==='completed'?'Выполнена':status==='cancelled'?'Отменена':status==='pending'?'Ожидает подтверждения':status
 
 export default function StaffWorkspace({profile,kindFilter,companyIdFilter,readOnly=false}:{profile:StaffProfile;kindFilter?:'individual'|'company';companyIdFilter?:string;readOnly?:boolean}) {
   const [masters,setMasters]=useState<Master[]>([])
@@ -38,7 +39,9 @@ export default function StaffWorkspace({profile,kindFilter,companyIdFilter,readO
     const timeout=window.setTimeout(()=>setNotice(''),3000)
     return ()=>window.clearTimeout(timeout)
   },[notice])
-  const canEdit=!readOnly&&(profile.platform_role==='owner'||profile.platform_role==='master_pro'||profile.company_members?.some(m=>m.role==='admin')===true)
+  // Company Masters manage only their own workspace; the query above scopes them to their assigned master_id.
+  // Admins manage the company workspace, while Owner previews remain explicitly read-only.
+  const canEdit=!readOnly&&(profile.platform_role==='owner'||profile.platform_role==='master_pro'||profile.company_members?.some(m=>m.role==='admin'||m.role==='master')===true)
   const canCancel=!readOnly&&canEdit
 
   async function loadMasters(){
@@ -175,7 +178,7 @@ export default function StaffWorkspace({profile,kindFilter,companyIdFilter,readO
       <form className="workspace-exception" onSubmit={addDayOff}><label className="admin-field">Дата исключения<input type="date" value={exceptionDate} onChange={e=>setExceptionDate(e.target.value)} required/></label><label className="admin-field">Тип<select value={exceptionDayOff?'off':'hours'} onChange={e=>setExceptionDayOff(e.target.value==='off')}><option value="off">Выходной</option><option value="hours">Изменить часы</option></select></label>{!exceptionDayOff&&<><label className="admin-field">Начало<input type="time" value={exceptionOpens} onChange={e=>setExceptionOpens(e.target.value)}/></label><label className="admin-field">Окончание<input type="time" value={exceptionCloses} onChange={e=>setExceptionCloses(e.target.value)}/></label></>}<button className="secondary-button" disabled={busy||(!exceptionDayOff&&exceptionCloses<=exceptionOpens)}>Сохранить исключение</button></form>
     </section>}
     <section className="admin-card workspace-section"><h3>Записи</h3>
-      <div className="admin-account-list">{bookings.map(booking=><article className="admin-account" key={booking.id}><div><strong>{booking.client_name_snapshot} · {booking.service_name_snapshot}</strong><span>{new Date(booking.starts_at).toLocaleString('ru-RU')} · {booking.client_phone_snapshot}</span></div><span className="admin-role">{booking.status}</span>{canCancel&&booking.status==='confirmed'&&<button className="secondary-button" onClick={()=>void cancelBooking(booking.id)}>Отменить</button>}</article>)}</div>
+      <div className="admin-account-list">{bookings.map(booking=><article className="admin-account" key={booking.id}><div><strong>{booking.client_name_snapshot} · {booking.service_name_snapshot}</strong><span>{new Date(booking.starts_at).toLocaleString('ru-RU')} · {booking.client_phone_snapshot}</span></div><span className={`admin-role booking-status-${booking.status}`}>{bookingStatusLabel(booking.status)}</span>{canCancel&&booking.status==='confirmed'&&<button className="secondary-button" onClick={()=>void cancelBooking(booking.id)}>Отменить</button>}</article>)}{!bookings.length&&<p className="workspace-empty-state">Записей пока нет.</p>}</div>
     </section>
     <section className="admin-card workspace-section"><h3>Клиентская база</h3><div className="admin-account-list">{clients.map(client=><article className="admin-account" key={client.id}><div><strong>{client.full_name}</strong><span>{client.phone_e164}</span></div></article>)}</div></section>
   </section>

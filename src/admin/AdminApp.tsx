@@ -110,8 +110,9 @@ export default function AdminApp() {
   const [activeModal, setActiveModal] = useState<'account'|'reset'|'delete'|'company'|'companySettings'|'masterPro'|'settings'|'accountSettings'|null>(null)
   const [activeSection, setActiveSection] = useState<'overview'|'accounts'|'companies'|'masterPro'|'settings'>('overview')
   const [accountsLoading, setAccountsLoading] = useState(false)
-  const adminPath = window.location.pathname.replace(/\/+$/, '')
-  const isAccountsPrototype = adminPath.endsWith('/admin/accounts-prototype') || adminPath.endsWith('/admin/redesign')
+  // The rebuilt Owner directory views are now the default admin experience.
+  // Keep the old URL aliases working, but do not require a special route to reach the new views.
+  const useOwnerDirectoryViews = true
   const [sessionReady, setSessionReady] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [email, setEmail] = useState('')
@@ -565,8 +566,8 @@ export default function AdminApp() {
   const [emailForCreate, setEmailForCreate] = useState('')
   const [phoneForCreate, setPhoneForCreate] = useState('')
 
-  if (!sessionReady && supabase) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme}><section className="admin-card">Загрузка…</section></main>
-  if (!profile) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme}><form className="admin-card" onSubmit={signIn}>
+  if (!sessionReady && supabase) return <main className="admin-shell" data-redesign="true" data-admin-theme={adminTheme}><section className="admin-card">Загрузка…</section></main>
+  if (!profile) return <main className="admin-shell" data-redesign="true" data-admin-theme={adminTheme}><form className="admin-card" onSubmit={signIn}>
     <span className="eyebrow">Workflows project</span><h1>Административная панель</h1>
     <label className="admin-field">Email<input type="email" autoComplete="username" placeholder="name@example.com" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
     <label className="admin-field">Пароль<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
@@ -575,18 +576,18 @@ export default function AdminApp() {
     <button className="primary-button full-button" disabled={busy || !supabase}>{busy?'Входим…':'Войти'}</button>
   </form></main>
 
-  if (profile.force_password_change) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme}><form className="admin-card" onSubmit={changePassword}>
+  if (profile.force_password_change) return <main className="admin-shell" data-redesign="true" data-admin-theme={adminTheme}><form className="admin-card" onSubmit={changePassword}>
     <span className="eyebrow">ПЕРВЫЙ ВХОД</span><h1>Создайте свой пароль</h1><p>Временный пароль больше не будет использоваться. Придумайте новый пароль длиной не менее 6 символов.</p>
     <label className="admin-field">Новый пароль<input type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required minLength={6} /></label>
     {error && <p className="admin-error">{error}</p>}
     <button className="primary-button full-button" disabled={busy}>{busy?'Сохраняем…':'Сменить пароль'}</button>
   </form></main>
 
-  if (profile.disabled_at) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme}><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
-  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
+  if (profile.disabled_at) return <main className="admin-shell" data-redesign="true" data-admin-theme={adminTheme}><section className="admin-card"><h1>Доступ отключён</h1><p>Обратитесь к владельцу платформы.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
+  if (profile.platform_role === 'pending' && !profile.company_members?.length) return <main className="admin-shell" data-redesign="true" data-admin-theme={adminTheme}><section className="admin-card"><h1>Ожидается назначение роли</h1><p>Учётная запись создана. Owner должен назначить роль и связать аккаунт с компанией или страницей мастера.</p><button className="secondary-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></section></main>
 
-  return <main className="admin-shell" data-prototype-mode={isAccountsPrototype ? "true" : undefined} data-redesign="true" data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
-    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions">{!isAccountsPrototype && <button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button>}<button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
+  return <main className="admin-shell" data-redesign="true" data-admin-theme={adminTheme} data-preview-mode={previewAccount?'true':undefined}><section className="admin-wide">
+    <header className="admin-top"><div className="admin-branding"><span className="eyebrow">WORKFLOWS</span><h1>Административная панель</h1><p>{displayedProfile?.full_name??profile.full_name} · {previewAccount?roleLabel(previewAccount):profile.platform_role === 'owner' ? 'Owner' : roleLabel({ ...profile })}{previewAccount?' · Режим просмотра':''}</p></div><div className="admin-top-actions"><button type="button" className="secondary-button admin-settings-trigger" aria-label="Настройки панели" title="Настройки панели" onClick={()=>setActiveModal('settings')}>⚙</button><button className="secondary-button logout-button" onClick={()=>void supabase?.auth.signOut()}>Выйти</button></div></header>
     {notice && <p className="admin-notice">{notice}</p>}{error && !activeModal && <p className="admin-error">{error}</p>}
     {profile.platform_role === 'owner' && !previewAccount ? <>
       <div className="admin-workspace-layout">
@@ -629,8 +630,8 @@ export default function AdminApp() {
               </section>
             </div>
           </section>}
-      {activeSection==='accounts' && isAccountsPrototype && <AccountsPrototype accounts={accounts} companies={companies} pages={masterPages} loading={accountsLoading} busy={busy} onCreate={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setMasterProPageName('');setActiveModal('account')}} onSettings={openAccountSettings} onToggle={toggleAccountStatus} />}
-      {activeSection==='accounts' && !isAccountsPrototype && <section className="admin-accounts-workspace">
+      {activeSection==='accounts' && useOwnerDirectoryViews && <AccountsPrototype accounts={accounts} companies={companies} pages={masterPages} loading={accountsLoading} busy={busy} onCreate={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setMasterProPageName('');setActiveModal('account')}} onSettings={openAccountSettings} onToggle={toggleAccountStatus} />}
+      {activeSection==='accounts' && !useOwnerDirectoryViews && <section className="admin-accounts-workspace">
         <header className="admin-accounts-toolbar">
           <button className="primary-button admin-create-account-button" onClick={()=>{setTemporaryPassword('000000');setCreateRole('');setCreateCompanyId('');setCompanyName('');setCompanySlug('');setActiveModal('account')}}><span>＋</span> Создать УЗ</button>
           <div className="admin-account-stats">
@@ -656,7 +657,7 @@ export default function AdminApp() {
         </div>
       </section>}
 
-      {activeSection==='companies' && isAccountsPrototype && <CompaniesPrototype
+      {activeSection==='companies' && useOwnerDirectoryViews && <CompaniesPrototype
         companies={companies}
         pages={masterPages}
         accounts={accounts.filter(account=>account.platform_role!=='owner')}
@@ -666,7 +667,7 @@ export default function AdminApp() {
         onToggle={company=>void toggleCompanyStatus(company)}
         onDelete={company=>void deleteCompany(company)}
       />}
-      {activeSection==='companies' && !isAccountsPrototype && <section className="admin-accordion admin-panel-section">
+      {activeSection==='companies' && !useOwnerDirectoryViews && <section className="admin-accordion admin-panel-section">
         <header className="admin-panel-heading"><h2>Компании</h2><span className="accordion-count">{companies.length}</span></header>
         <div className="accordion-content">
           <details className="admin-subaccordion">
@@ -741,7 +742,7 @@ export default function AdminApp() {
       <section className={activeModal === 'accountSettings' ? 'admin-modal admin-modal-compact' : 'admin-modal'} role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
         <button className="admin-modal-close" aria-label="Закрыть" onClick={()=>setActiveModal(null)}>×</button>
         {error && <p className="admin-error admin-modal-error" role="alert">{error}</p>}
-        {!isAccountsPrototype && activeModal==='settings'&&<div className="admin-settings-modal">
+        {activeModal==='settings'&&<div className="admin-settings-modal">
           <h2 id="admin-modal-title">Настройки панели</h2>
           <section className="admin-theme-picker"><div className="admin-theme-heading"><div><span className="eyebrow">ОФОРМЛЕНИЕ ПАНЕЛИ</span><h3>Цветовая тема</h3><p>Выберите палитру административной панели.</p></div><span className="admin-theme-current">{adminPalettes.find(item=>item.id===adminTheme)?.name}</span></div>
             <div className="theme-options admin-theme-options">{adminPalettes.map(item=><button type="button" key={item.id} className={`theme-option ${adminTheme===item.id?'active':''}`} onClick={()=>{setAdminTheme(item.id);localStorage.setItem('workflows-admin-theme',item.id)}}><span className={`palette palette-${item.id}`}><i/><i/><i/><i/></span><span><b>{item.name}</b><small>{item.desc}</small></span>{adminTheme===item.id&&<em>✓</em>}</button>)}</div>
