@@ -944,3 +944,41 @@
     padding:11px 12px!important;
   }
 }
+
+
+/* Keep directory actions on the same toolbar row as search and filters. */
+.admin-shell[data-redesign="true"] .ap-toolbar{
+  display:flex!important;
+  align-items:center!important;
+  flex-wrap:nowrap!important;
+  gap:9px!important;
+  min-width:0;
+}
+.admin-shell[data-redesign="true"] .ap-toolbar .ap-search{
+  flex:1 1 230px!important;
+  min-width:170px!important;
+}
+.admin-shell[data-redesign="true"] .ap-toolbar>select{
+  flex:0 1 155px!important;
+  min-width:118px!important;
+}
+.admin-shell[data-redesign="true"] .ap-toolbar .ap-toolbar-create{
+  display:inline-flex!important;
+  flex:0 0 auto!important;
+  min-height:39px!important;
+  white-space:nowrap!important;
+}
+@media(max-width:900px){
+  .admin-shell[data-redesign="true"] .ap-toolbar{
+    flex-wrap:wrap!important;
+  }
+  .admin-shell[data-redesign="true"] .ap-toolbar .ap-search{
+    flex:1 1 100%!important;
+  }
+  .admin-shell[data-redesign="true"] .ap-toolbar>select{
+    flex:1 1 145px!important;
+  }
+  .admin-shell[data-redesign="true"] .ap-toolbar .ap-toolbar-create{
+    flex:0 0 auto!important;
+  }
+}
