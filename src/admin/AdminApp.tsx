@@ -1,3 +1,4 @@
+import './admin-ux-redesign.css'
 import CompanySettings from './CompanySettings'
 import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import StaffWorkspace from './StaffWorkspace'
