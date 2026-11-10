@@ -487,3 +487,7 @@
 @media(max-width:600px){
  .admin-shell[data-redesign="true"] .ap-company-detail-lists{grid-template-columns:1fr;gap:12px}
 }
+
+/* Master_pro detail view */
+.admin-shell[data-redesign="true"] .mp-open-page{display:inline-flex;align-items:center;text-decoration:none}
+.admin-shell[data-redesign="true"] .mp-account-detail .ap-account-detail-actions{align-items:center}
