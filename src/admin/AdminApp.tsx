@@ -611,7 +611,7 @@ export default function AdminApp() {
             {previewAccount&&<button type="button" className="secondary-button" onClick={()=>{setPreviewAccountId('');setActiveModal(null)}}>Вернуться к панели Owner</button>}
           </section>}</div></section>}
           {activeSection==='overview' && <section className="rd-page">
-            <div className="rd-page-title"><div><span className="rd-kicker">СИСТЕМА / СВОДКА</span><h2>Добро пожаловать</h2><p>Ключевые показатели платформы и быстрый доступ к управлению.</p></div><span className="rd-live"><i/> Данные панели загружены</span></div>
+            <div className="rd-page-title"><div><span className="rd-kicker">СИСТЕМА / СВОДКА</span><p>Ключевые показатели платформы и быстрый доступ к управлению.</p></div><span className="rd-live"><i/> Данные панели загружены</span></div>
             <div className="rd-kpis">
               <article><span>Учётные записи</span><strong>{accounts.filter(account=>account.platform_role!=='owner').length}</strong><small>{accounts.filter(account=>account.platform_role!=='owner'&&!account.disabled_at).length} активных аккаунтов</small><b>↗</b></article>
               <article><span>Компании</span><strong>{companies.length}</strong><small>{companies.filter(company=>company.is_active).length} активных компаний</small><b>▦</b></article>
