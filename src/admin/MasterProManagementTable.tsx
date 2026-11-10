@@ -23,13 +23,14 @@ type Props = {
   loading: boolean
   busy: boolean
   onCreatePage: (account: MasterProAccount) => void
+  onCreateAccount: () => void
   onTogglePage: (page: MasterPage) => void
   onArchivePage: (page: MasterPage) => void
 }
 
 type Filter = 'all' | 'published' | 'draft' | 'missing' | 'disabled'
 
-export default function MasterProManagementTable({ accounts, pages, loading, busy, onCreatePage, onTogglePage, onArchivePage }: Props) {
+export default function MasterProManagementTable({ accounts, pages, loading, busy, onCreatePage, onCreateAccount, onTogglePage, onArchivePage }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
   const masterPros = accounts
@@ -65,7 +66,7 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
 
   return <section className="accounts-prototype master-pro-management">
     <header className="ap-heading">
-      <div><h2>Master_pro</h2><p>Индивидуальные специалисты и их публичные страницы вне компаний</p></div>
+      <div><h2>Master_pro</h2><p>Индивидуальные специалисты и их публичные страницы вне компаний</p></div><button type="button" className="ap-primary" onClick={onCreateAccount}>＋ Создать Master_pro</button>
     </header>
 
     <div className="ap-stats ap-company-stats mp-management-stats">
