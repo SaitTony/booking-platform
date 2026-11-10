@@ -1474,7 +1474,9 @@
 .master-pro-management .mp-management-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.master-pro-management .mp-management-grid{grid-template-columns:42px minmax(150px,1.1fr) minmax(160px,1.2fr) minmax(170px,1.3fr) minmax(110px,.8fr) minmax(100px,.7fr) 86px;gap:12px}.mp-management-page{display:grid;gap:4px;min-width:0}.mp-management-page strong{font-size:13px}.mp-management-page a{font-size:11px;color:#0969da;overflow-wrap:anywhere}.mp-management-page>span{font-size:12px;color:#656d76}.mp-management-actions{display:flex;gap:5px;align-items:center}.mp-management-actions .ap-gear,.mp-management-actions .ap-delete{width:30px;height:30px}.mp-management-create{padding:7px 9px;font-size:11px;white-space:nowrap}@media(max-width:1100px){.master-pro-management .mp-management-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.master-pro-management .mp-management-grid{min-width:950px}}@media(max-width:600px){.master-pro-management .mp-management-stats{grid-template-columns:1fr 1fr}}
 /* Master_pro owner tab: keep the shared admin canvas visible instead of white card fills. */
 .admin-shell .master-pro-management .ap-stats article,.admin-shell .master-pro-management .ap-table,.admin-shell .master-pro-management .ap-search{background:transparent!important}
-.admin-shell .master-pro-management .ap-table-heading,.admin-shell .master-pro-management .ap-grid-head{background:transparent!important}
+.admin-shell .master-pro-management .ap-table-heading{background:transparent!important}
+/* Owner table column headers: a subtle theme-aware contrast against the admin canvas. */
+.admin-shell .accounts-prototype .ap-grid-head{background:color-mix(in srgb,var(--admin-page,#f7f6f2) 90%,#000 10%)!important}
 .admin-shell .master-pro-management .mp-management-grid{grid-template-columns:38px minmax(140px,1.1fr) minmax(150px,1.1fr) minmax(170px,1.25fr) minmax(90px,.65fr) minmax(100px,.7fr) minmax(135px,.85fr);min-width:1120px}
 .admin-shell .master-pro-management .mp-archive-action{font-size:11px;padding:6px 8px;white-space:nowrap}
 .admin-shell .master-pro-management .mp-archived-label{font-size:10px;color:var(--ap-muted)}
