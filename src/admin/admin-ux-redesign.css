@@ -636,3 +636,42 @@
  .admin-shell[data-redesign="true"] .admin-sidebar{flex-wrap:nowrap;overflow-x:auto}
  .admin-shell[data-redesign="true"] .admin-sidebar button{min-height:44px;padding:0 14px}
 }
+
+
+/* Unified switch geometry: the thumb stays fully inside the track in both states. */
+.admin-shell[data-redesign="true"] .ap-switch{
+  position:relative!important;display:inline-block!important;flex:0 0 42px!important;
+  width:42px!important;min-width:42px!important;height:24px!important;min-height:24px!important;
+  padding:0!important;overflow:hidden!important;box-sizing:border-box!important;
+  border:0!important;border-radius:999px!important;vertical-align:middle!important;
+}
+.admin-shell[data-redesign="true"] .ap-switch>span{
+  position:absolute!important;left:3px!important;top:3px!important;
+  display:block!important;width:18px!important;height:18px!important;
+  margin:0!important;transform:translateX(0)!important;
+  border-radius:50%!important;box-sizing:border-box!important;
+  transition:transform .16s ease!important;
+}
+.admin-shell[data-redesign="true"] .ap-switch.is-on>span{transform:translateX(18px)!important}
+.admin-shell .admin-switch{
+  position:relative!important;display:inline-flex!important;align-items:center!important;flex:0 0 52px!important;
+  width:52px!important;min-width:52px!important;height:31px!important;min-height:31px!important;
+  padding:3px!important;overflow:hidden!important;box-sizing:border-box!important;border-radius:999px!important;
+}
+.admin-shell .admin-switch>span{
+  display:block!important;flex:0 0 25px!important;width:25px!important;height:25px!important;
+  margin:0!important;transform:translateX(0)!important;border-radius:50%!important;
+  box-sizing:border-box!important;transition:transform .18s ease!important;
+}
+.admin-shell .admin-switch.is-on>span{transform:translateX(21px)!important}
+.admin-shell[data-redesign="true"] .rd-toggle{
+  position:relative!important;display:inline-block!important;width:42px!important;min-width:42px!important;
+  height:24px!important;padding:0!important;overflow:hidden!important;box-sizing:border-box!important;
+  border-radius:999px!important;
+}
+.admin-shell[data-redesign="true"] .rd-toggle i{
+  position:absolute!important;left:3px!important;top:3px!important;width:18px!important;height:18px!important;
+  margin:0!important;transform:translateX(0)!important;box-sizing:border-box!important;
+  transition:transform .16s ease!important;
+}
+.admin-shell[data-redesign="true"] .rd-toggle.on i{transform:translateX(18px)!important}
