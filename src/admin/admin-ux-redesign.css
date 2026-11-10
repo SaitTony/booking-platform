@@ -491,3 +491,112 @@
 /* Master_pro detail view */
 .admin-shell[data-redesign="true"] .mp-open-page{display:inline-flex;align-items:center;text-decoration:none}
 .admin-shell[data-redesign="true"] .mp-account-detail .ap-account-detail-actions{align-items:center}
+
+/* Shared staff workspace: align company Admin, Master and Master_pro screens */
+.admin-shell[data-redesign="true"] .workspace{
+  display:flex;flex-direction:column;gap:16px;min-width:0;
+}
+.admin-shell[data-redesign="true"] .admin-section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 16px;
+}
+.admin-shell[data-redesign="true"] .admin-section-head h2{
+  margin:0;color:#1b2a3e;font-size:27px;font-weight:760;letter-spacing:-.05em;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-section-head{margin:0}
+.admin-shell[data-redesign="true"] .workspace .admin-section-head h2{font-size:27px}
+.admin-shell[data-redesign="true"] .workspace .admin-section-head select,
+.admin-shell[data-redesign="true"] .admin-section-head select{
+  min-height:38px;max-width:100%;padding:0 34px 0 11px;border:1px solid #dce3eb;border-radius:8px;
+  background:#fff;color:#43536a;font-size:11px;
+}
+.admin-shell[data-redesign="true"] .workspace-section{
+  min-width:0;padding:20px;border:1px solid #e1e6ed;border-radius:11px;background:#fff;
+  box-shadow:0 2px 7px rgba(25,42,65,.025);
+}
+.admin-shell[data-redesign="true"] .workspace-section>h3,
+.admin-shell[data-redesign="true"] .workspace-section>h2{
+  margin:0 0 16px;color:#26384e;font-size:14px;font-weight:760;letter-spacing:-.02em;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-card{
+  padding:20px;border:1px solid #e1e6ed;border-radius:11px;background:#fff;
+  box-shadow:0 2px 7px rgba(25,42,65,.025);
+}
+.admin-shell[data-redesign="true"] .workspace .admin-field{
+  display:flex;flex-direction:column;gap:6px;min-width:0;color:#657386;font-size:10px;font-weight:650;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-field input,
+.admin-shell[data-redesign="true"] .workspace .admin-field textarea,
+.admin-shell[data-redesign="true"] .workspace .admin-field select{
+  width:100%;min-height:38px;padding:9px 11px;border:1px solid #dce3eb;border-radius:7px;
+  background:#fff;color:#26384e;font-size:11px;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-field textarea{min-height:82px;resize:vertical}
+.admin-shell[data-redesign="true"] .workspace .admin-create-form,
+.admin-shell[data-redesign="true"] .workspace .workspace-service-form{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;
+}
+.admin-shell[data-redesign="true"] .workspace .workspace-service-form .primary-button,
+.admin-shell[data-redesign="true"] .workspace .workspace-service-form .secondary-button{
+  align-self:end;min-height:38px;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-account-list{
+  display:flex;flex-direction:column;gap:0;margin-top:12px;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-account-list>.admin-account{
+  display:flex;align-items:center;gap:12px;min-width:0;padding:12px 0;
+  border:0;border-top:1px solid #edf0f4;border-radius:0;background:transparent;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-account-list>.admin-account:first-child{border-top:1px solid #edf0f4}
+.admin-shell[data-redesign="true"] .workspace .admin-account-list>.admin-account>div:first-child{
+  display:flex;flex:1;flex-direction:column;gap:4px;min-width:0;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-account-list>.admin-account strong{
+  overflow:hidden;color:#34445a;font-size:11px;font-weight:700;text-overflow:ellipsis;
+}
+.admin-shell[data-redesign="true"] .workspace .admin-account-list>.admin-account span{
+  color:#8995a4;font-size:10px;
+}
+.admin-shell[data-redesign="true"] .workspace .workspace-hours{
+  display:flex;flex-direction:column;border-top:1px solid #edf0f4;
+}
+.admin-shell[data-redesign="true"] .workspace .workspace-hour-row{
+  display:grid;grid-template-columns:minmax(120px,1fr) 1.1fr 105px 12px 105px auto;
+  align-items:center;gap:11px;min-width:0;padding:10px 0;border-bottom:1px solid #edf0f4;
+}
+.admin-shell[data-redesign="true"] .workspace .workspace-hour-row>strong{color:#34445a;font-size:10px}
+.admin-shell[data-redesign="true"] .workspace .workspace-hour-row>label{
+  display:flex;align-items:center;gap:7px;color:#718096;font-size:10px;
+}
+.admin-shell[data-redesign="true"] .workspace .workspace-hour-row input[type="time"]{
+  width:100%;min-width:0;min-height:34px;padding:5px 7px;border:1px solid #dce3eb;border-radius:6px;
+  background:#fff;color:#34445a;font-size:10px;
+}
+.admin-shell[data-redesign="true"] .workspace .workspace-hour-row input[type="checkbox"]{accent-color:#2864d8}
+.admin-shell[data-redesign="true"] .workspace .workspace-exception{
+  display:flex;align-items:flex-end;flex-wrap:wrap;gap:11px;margin-top:16px;padding-top:16px;border-top:1px solid #edf0f4;
+}
+.admin-shell[data-redesign="true"] .workspace .workspace-exception .admin-field{min-width:150px;flex:1}
+.admin-shell[data-redesign="true"] .workspace .workspace-exception button{min-height:38px}
+.admin-shell[data-redesign="true"] .workspace .primary-button,
+.admin-shell[data-redesign="true"] .workspace .secondary-button{
+  min-height:34px;padding:0 11px;border-radius:7px;font-size:10px;font-weight:680;
+}
+@media(max-width:850px){
+ .admin-shell[data-redesign="true"] .workspace .workspace-hour-row{
+  grid-template-columns:minmax(100px,1fr) 1.2fr 95px 10px 95px auto;gap:7px;
+ }
+}
+@media(max-width:600px){
+ .admin-shell[data-redesign="true"] .workspace .admin-create-form,
+ .admin-shell[data-redesign="true"] .workspace .workspace-service-form{grid-template-columns:1fr}
+ .admin-shell[data-redesign="true"] .workspace-section,
+ .admin-shell[data-redesign="true"] .workspace .admin-card{padding:15px}
+ .admin-shell[data-redesign="true"] .workspace .workspace-hour-row{
+  grid-template-columns:1fr 1fr;gap:8px;padding:12px 0;
+ }
+ .admin-shell[data-redesign="true"] .workspace .workspace-hour-row>strong{grid-column:1/-1}
+ .admin-shell[data-redesign="true"] .workspace .workspace-hour-row>span{display:none}
+ .admin-shell[data-redesign="true"] .workspace .workspace-hour-row button{grid-column:1/-1}
+ .admin-shell[data-redesign="true"] .workspace .workspace-exception{align-items:stretch;flex-direction:column}
+ .admin-shell[data-redesign="true"] .workspace .workspace-exception .admin-field{width:100%}
+}
