@@ -8,7 +8,7 @@ type Company = {
   is_active: boolean
 }
 type MasterPage = { id: string; company_id: string | null; kind: 'individual' | 'company'; display_name: string; slug: string; is_active: boolean; archived_at?: string | null }
-type Account = { id: string; full_name: string; email: string; company_members?: { company_id: string }[] }
+type Account = { id: string; full_name: string; email: string; company_members?: { company_id: string; role: 'admin' | 'master' }[] }
 
 type Props = {
   companies: Company[]
