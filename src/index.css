@@ -1928,3 +1928,17 @@
  .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:27px}
  .admin-shell[data-redesign="true"] .rd-table td{padding:12px}
 }
+
+/* Keep the redesigned admin visual language on pre-authentication and account-state screens. */
+.admin-shell[data-redesign="true"] .admin-card{
+  max-width:520px;padding:34px;border:1px solid var(--rd-line);border-radius:12px;
+  background:var(--rd-panel);box-shadow:0 8px 28px rgba(23,33,47,.06);
+}
+.admin-shell[data-redesign="true"] .admin-card h1{
+  color:var(--rd-text);font-size:26px;letter-spacing:-.025em;
+}
+.admin-shell[data-redesign="true"] .admin-card p{color:var(--rd-muted)}
+.admin-shell[data-redesign="true"] .admin-card .eyebrow{color:var(--rd-muted);font-size:10px;letter-spacing:.1em}
+.admin-shell[data-redesign="true"] .admin-card .admin-field{color:var(--rd-muted)}
+.admin-shell[data-redesign="true"] .admin-card .admin-field input{min-height:44px;border:1px solid var(--rd-line);border-radius:8px;background:var(--rd-bg);color:var(--rd-text)}
+.admin-shell[data-redesign="true"] .admin-card .full-button{min-height:42px}
