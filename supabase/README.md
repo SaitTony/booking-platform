@@ -142,7 +142,7 @@ Do not point destructive local commands at the hosted project. Use the exact pro
 
 ## Current product gaps
 
-- Master_pro Builder is still a local interactive prototype; it does not persist data.
+- Master_pro Builder loads the authenticated user's individual master page and persists profile fields, theme metadata, services, weekly working hours, and booking horizon via the `SECURITY INVOKER` RPC `public.save_master_pro_builder`. The RPC checks `private.can_manage_master` and runs all writes in one transaction. Image uploads and public publishing remain unconfigured; image previews are local only.
 - Photo and cover URL fields exist, but image upload to Supabase Storage is not implemented.
 - The `booking_settings.rules_text` field exists; an editable settings interface is not yet available.
 - PostHog project exists, but frontend SDK and event instrumentation are not connected.
