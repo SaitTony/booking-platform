@@ -51,6 +51,8 @@ export default function MasterProBuilder() {
   const [,setSaved] = useState(false)
   const [masterId,setMasterId] = useState<string | null>(null)
   const [masterSlug,setMasterSlug] = useState('')
+  const [masterCreatedAt,setMasterCreatedAt] = useState<string|null>(null)
+  const [masterUpdatedAt,setMasterUpdatedAt] = useState<string|null>(null)
   const [pageActive,setPageActive] = useState(false)
   const [publishing,setPublishing] = useState(false)
   const [loading,setLoading] = useState(true)
@@ -76,13 +78,18 @@ export default function MasterProBuilder() {
   const currentService = activeServices.find(item=>item.id===selectedService) ?? activeServices[0]
   const activeDays = useMemo(()=>hours.filter(item=>item.enabled).length,[hours])
   const sections: {id:Section;number:string;symbol:string;title:string;sub:string}[] = [
-    {id:'home',number:'01',symbol:'⌂',title:'Обзор',sub:'Сводка по странице и записям'},
-    {id:'profile',number:'02',symbol:'●',title:'Моя страница',sub:'Профиль и оформление'},
-    {id:'services',number:'03',symbol:'▤',title:'Услуги',sub:'Каталог, цены и длительность'},
-    {id:'schedule',number:'04',symbol:'◷',title:'Расписание',sub:'Рабочие дни, паузы и исключения'},
-    {id:'bookings',number:'05',symbol:'▦',title:'Записи',sub:'Клиенты, статусы и даты'},
-    {id:'settings',number:'06',symbol:'⚙',title:'Настройки',sub:'Часовой пояс и параметры записи'},
+    {id:'home',number:'01',symbol:'●',title:'Моя страница',sub:'Статус, показатели и управление страницей'},
+    {id:'schedule',number:'02',symbol:'◷',title:'Расписание',sub:'Рабочие дни, паузы и исключения'},
+    {id:'bookings',number:'03',symbol:'▦',title:'Записи',sub:'Клиенты, статусы и даты'},
   ]
+  const builderSections = [
+    {id:'profile' as Section,title:'Профиль и оформление'},
+    {id:'services' as Section,title:'Услуги'},
+    {id:'settings' as Section,title:'Настройки записи'},
+  ]
+  const sectionTitle = sections.find(item=>item.id===section)?.title ?? builderSections.find(item=>item.id===section)?.title ?? 'Конструктор страницы'
+  const sectionSubtitle = sections.find(item=>item.id===section)?.sub ?? 'Настройте содержимое и внешний вид публичной страницы'
+  const formatDate = (value:string|null) => value ? new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(value)) : 'Нет данных'
 
   function addService(){
     if(!newService.name.trim())return
@@ -114,7 +121,7 @@ export default function MasterProBuilder() {
         if(!user) throw new Error('Войдите в систему через административную панель')
         setProfileId(user.id)
         setWelcomeVisible(localStorage.getItem('workflows-master-pro-welcome-'+user.id)!=='seen')
-        const {data:master,error:masterError}=await supabase.from('masters').select('id,slug,is_active,display_name,public_description,photo_url,cover_url,timezone,theme').eq('profile_id',user.id).eq('kind','individual').maybeSingle()
+        const {data:master,error:masterError}=await supabase.from('masters').select('id,slug,is_active,display_name,public_description,photo_url,cover_url,timezone,theme,created_at,updated_at').eq('profile_id',user.id).eq('kind','individual').maybeSingle()
         if(masterError) throw masterError
         if(!master) throw new Error('Для этой учётной записи не найдена индивидуальная страница Master_pro')
         const [serviceResult,hourResult,settingsResult,bookingResult,exceptionResult]=await Promise.all([
@@ -128,6 +135,8 @@ export default function MasterProBuilder() {
         if(cancelled) return
         setMasterId(master.id)
         setMasterSlug(master.slug)
+        setMasterCreatedAt(master.created_at??null)
+        setMasterUpdatedAt(master.updated_at??master.created_at??null)
         setPageActive(master.is_active)
         setName(master.display_name||'')
         setDescription(master.public_description||'')
@@ -252,20 +261,28 @@ export default function MasterProBuilder() {
       <div className="mpb-top-actions"><span className={`mpb-draft-status ${pageActive?'is-published':''}`}><i/> {publishing?'Обновление статуса…':saving?'Сохранение…':pageActive?'Опубликована':'Черновик'}</span><button type="button" className="mpb-publication-toggle" onClick={()=>void togglePagePublication()} disabled={publishing||saving}>{publishing?(pageActive?'Отключаем…':'Публикуем…'):pageActive?'Отключить страницу':'Опубликовать страницу'}</button></div>
     </header>
     <div className="mpb-page-head">
-      <div><span className="mpb-eyebrow">ЛИЧНЫЙ КАБИНЕТ MASTER_PRO</span><h1>Рабочее пространство</h1><p>Управляйте страницей, расписанием, услугами и записями клиентов в одном месте.</p></div>
-      <div className="mpb-page-actions"><Link to="/admin" className="mpb-secondary">Вернуться в Админ-панель</Link><button className="mpb-primary" onClick={()=>void savePage()} disabled={loading||saving||!masterId}>{saving?'Сохраняем…':'Сохранить изменения'}</button></div>
+      <div><span className="mpb-eyebrow">ЛИЧНЫЙ КАБИНЕТ MASTER_PRO</span><h1>Личный кабинет</h1><p>Управляйте своей публичной страницей, расписанием и записями клиентов.</p></div>
+      <div className="mpb-page-actions"><button type="button" className="mpb-secondary" onClick={()=>void supabase?.auth.signOut()}>Выйти</button>{section!=='home'&&section!=='bookings'&&<button className="mpb-primary" onClick={()=>void savePage()} disabled={loading||saving||!masterId}>{saving?'Сохраняем…':'Сохранить изменения'}</button>}</div>
     </div>
     {welcomeVisible&&<section className="mpb-welcome"><div><span className="mpb-eyebrow">ДОБРО ПОЖАЛОВАТЬ В WORKFLOWS</span><h2>Здравствуйте, {name||'рады видеть вас'}!</h2><p>Это ваше личное пространство. Здесь вы оформляете индивидуальную страницу, настраиваете рабочее расписание и управляете записями клиентов. Начните с заполнения страницы и добавления услуг.</p></div><button type="button" className="mpb-secondary" onClick={dismissWelcome}>Понятно, начать работу</button></section>}
     <div className={'mpb-workspace '+((section==='profile'||section==='services')?'has-preview':'')}>
-      <aside className="mpb-sidebar">
-        
-        <nav>{sections.map(item=><button key={item.id} className={section===item.id?'is-active':''} onClick={()=>setSection(item.id)}><span className="mpb-step-symbol" aria-hidden="true">{item.symbol}</span><span className="mpb-step">{item.number}</span><span className="mpb-nav-copy"><strong>{item.title}</strong><small>{item.sub}</small></span></button>)}</nav>
-        <div className="mpb-sidebar-bottom"><div className="mpb-completion"><div><strong>Готовность страницы</strong><b>60%</b></div><span><i/></span><small>Заполните разделы и проверьте предпросмотр</small></div><div className="mpb-help"><strong>Нужна помощь?</strong><span>Подсказки по настройке страницы</span></div></div>
-      </aside>
+      <nav className="mpb-main-tabs" aria-label="Разделы личного кабинета">{sections.map(item=><button type="button" key={item.id} className={section===item.id?'is-active':''} onClick={()=>setSection(item.id)}><span aria-hidden="true">{item.symbol}</span>{item.title}</button>)}</nav>
       <section className="mpb-editor">
         {saveMessage&&<div className="mpb-tip" role="status"><span>{saveMessage}</span></div>}
-        <div className="mpb-editor-heading"><div><span className="mpb-eyebrow">РАЗДЕЛ {sections.findIndex(x=>x.id===section)+1} ИЗ {sections.length}</span><h2>{sections.find(x=>x.id===section)?.title}</h2><p>{sections.find(x=>x.id===section)?.sub}</p></div><span className="mpb-live-indicator"><i/> Данные из вашей страницы</span></div>
-        {section==='home'&&<div className="mpb-dashboard"><div className="mpb-dashboard-cards"><article><span>Активные записи</span><strong>{confirmedBookings}</strong><small>Ожидают визита</small></article><article><span>Сегодня</span><strong>{todayBookings}</strong><small>Записей на сегодня</small></article><article><span>Завершено</span><strong>{completedBookings}</strong><small>Вся история</small></article><article><span>Выручка</span><strong>{money(moneyTotal)}</strong><small>По завершённым записям</small></article></div><div className="mpb-dashboard-panels"><section><h3>Ваша страница</h3><p>{name||'Имя пока не указано'} · {pageActive?'Опубликована':'Не опубликована'}</p><a href={window.location.origin+import.meta.env.BASE_URL+'pro/'+masterSlug} target="_blank" rel="noreferrer">Открыть публичную страницу ↗</a><button type="button" className="mpb-secondary" onClick={()=>setSection('profile')}>Редактировать страницу</button></section><section><h3>Ближайшие записи</h3>{bookings.filter(item=>item.status==='confirmed'&&new Date(item.starts_at).getTime()>=Date.now()).sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at)).slice(0,4).map(item=><div className="mpb-upcoming-row" key={item.id}><strong>{new Intl.DateTimeFormat('ru-RU',{timeZone:timezone,day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(item.starts_at))}</strong><span>{item.client_name_snapshot} · {item.service_name_snapshot}</span></div>)}{confirmedBookings===0&&<p>Активных записей пока нет.</p>}<button type="button" className="mpb-secondary" onClick={()=>setSection('bookings')}>Все записи</button></section></div></div>}
+        <div className="mpb-editor-heading"><div><span className="mpb-eyebrow">{sections.some(item=>item.id===section)?'ЛИЧНЫЙ КАБИНЕТ':'КОНСТРУКТОР СТРАНИЦЫ'}</span><h2>{sectionTitle}</h2><p>{sectionSubtitle}</p></div><span className="mpb-live-indicator"><i/> Данные из вашей страницы</span></div>
+        {section==='home'&&<div className="mpb-page-overview">
+          <div className="mpb-page-overview-head"><div><span className="mpb-eyebrow">ВАША ПУБЛИЧНАЯ СТРАНИЦА</span><h2>{name||'Название страницы не задано'}</h2><p>{pageActive?'Страница опубликована и доступна клиентам':'Страница пока не опубликована'}</p></div><span className={'mpb-status-pill '+(pageActive?'is-published':'')}>{pageActive?'Опубликована':'Черновик'}</span></div>
+          <div className="mpb-page-facts">
+            <article><small>Адрес страницы</small><a href={window.location.origin+import.meta.env.BASE_URL+'pro/'+masterSlug} target="_blank" rel="noreferrer">{window.location.origin+import.meta.env.BASE_URL+'pro/'+masterSlug} ↗</a></article>
+            <article><small>Создана</small><strong>{formatDate(masterCreatedAt)}</strong></article>
+            <article><small>Последнее обновление</small><strong>{formatDate(masterUpdatedAt)}</strong></article>
+            <article><small>Активные услуги</small><strong>{activeServices.length}</strong></article>
+          </div>
+          <div className="mpb-dashboard-cards"><article><span>Активные записи</span><strong>{confirmedBookings}</strong><small>Ожидают визита</small></article><article><span>Сегодня</span><strong>{todayBookings}</strong><small>Записей на сегодня</small></article><article><span>Завершено</span><strong>{completedBookings}</strong><small>Вся история</small></article><article><span>Выручка</span><strong>{money(moneyTotal)}</strong><small>По завершённым записям</small></article></div>
+          <div className="mpb-dashboard-panels"><section><h3>Управление страницей</h3><p>Изменяйте описание, фотографии, оформление и перечень услуг в конструкторе.</p><button type="button" className="mpb-primary" onClick={()=>setSection('profile')}>Открыть конструктор страницы</button><div className="mpb-overview-actions"><a href={window.location.origin+import.meta.env.BASE_URL+'pro/'+masterSlug} target="_blank" rel="noreferrer">Посмотреть страницу ↗</a><button type="button" className="mpb-secondary" onClick={()=>void togglePagePublication()} disabled={publishing}>{publishing?'Обновляем…':pageActive?'Снять с публикации':'Опубликовать страницу'}</button></div></section>
+          <section><h3>Ближайшие записи</h3>{bookings.filter(item=>item.status==='confirmed'&&new Date(item.starts_at).getTime()>=Date.now()).sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at)).slice(0,4).map(item=><div className="mpb-upcoming-row" key={item.id}><strong>{new Intl.DateTimeFormat('ru-RU',{timeZone:timezone,day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(item.starts_at))}</strong><span>{item.client_name_snapshot} · {item.service_name_snapshot}</span></div>)}{confirmedBookings===0&&<p>Активных записей пока нет.</p>}<button type="button" className="mpb-secondary" onClick={()=>setSection('bookings')}>Перейти к записям</button></section></div>
+        </div>}
+        {(section==='profile'||section==='services'||section==='settings')&&<nav className="mpb-builder-tabs" aria-label="Разделы конструктора">{builderSections.map(item=><button type="button" key={item.id} className={section===item.id?'is-active':''} onClick={()=>setSection(item.id)}>{item.title}</button>)}</nav>}
         {section==='profile'&&<div className="mpb-form-stack">
           <div className="mpb-field"><label>Специализация</label><input value={specialty} onChange={e=>{setSpecialty(e.target.value);setSaved(false)}} placeholder="Например, стилист"/><small>Коротко обозначьте направление вашей работы. На публичной странице она будет указана над именем.</small></div>
           <div className="mpb-field"><label>Имя и фамилия <em>Обязательно</em></label><input value={name} onChange={e=>{setName(e.target.value);setSaved(false)}} placeholder="Например, Анна Смирнова"/><small>Это имя будет отображаться в верхней части вашей страницы.</small></div>
