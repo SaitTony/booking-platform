@@ -794,12 +794,12 @@
 .admin-shell .palette-dark i:nth-child(4){background:#171b20}
 
 /* Administrative color palettes */
-.admin-shell[data-admin-theme="natural"]{--admin-page:#f7f6f2;--admin-surface:#fff;--admin-soft:#f0efe9;--admin-text:#282820;--admin-muted:#77766c;--admin-line:#e8e5dc;--admin-accent:#626c57;background:var(--admin-page);color:var(--admin-text)}
-.admin-shell[data-admin-theme="graphite"]{--admin-page:#f4f4f3;--admin-surface:#fff;--admin-soft:#e9e9e8;--admin-text:#24272c;--admin-muted:#6d7178;--admin-line:#dedfe1;--admin-accent:#303943;background:var(--admin-page);color:var(--admin-text)}
-.admin-shell[data-admin-theme="sand"]{--admin-page:#f8f2e9;--admin-surface:#fffdfa;--admin-soft:#eee4d7;--admin-text:#44372d;--admin-muted:#887767;--admin-line:#e9ddcf;--admin-accent:#a47c58;background:var(--admin-page);color:var(--admin-text)}
-.admin-shell[data-admin-theme="green"]{--admin-page:#f2f5f1;--admin-surface:#fff;--admin-soft:#e4ece5;--admin-text:#20382f;--admin-muted:#6f8276;--admin-line:#dce6dd;--admin-accent:#315c4b;background:var(--admin-page);color:var(--admin-text)}
-.admin-shell[data-admin-theme="blue"]{--admin-page:#f3f5f9;--admin-surface:#fff;--admin-soft:#e6ebf3;--admin-text:#202e45;--admin-muted:#75839a;--admin-line:#dce3ed;--admin-accent:#425c85;background:var(--admin-page);color:var(--admin-text)}
-.admin-shell[data-admin-theme="dark"]{--admin-page:#171b20;--admin-surface:#252b31;--admin-soft:#303943;--admin-text:#f1f1ee;--admin-muted:#a7afb8;--admin-line:#414a54;--admin-accent:#91a9c6;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="natural"]{--admin-page:#f7f6f2;--admin-surface:#fff;--admin-soft:#f0efe9;--admin-text:#282820;--admin-muted:#77766c;--admin-line:#e8e5dc;--admin-accent:#626c57;--admin-hover:#e9e8e1;--admin-input:#fff;--admin-focus:#626c57;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="graphite"]{--admin-page:#f4f4f3;--admin-surface:#fff;--admin-soft:#e9e9e8;--admin-text:#24272c;--admin-muted:#6d7178;--admin-line:#dedfe1;--admin-accent:#303943;--admin-hover:#e6e7e7;--admin-input:#fff;--admin-focus:#303943;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="sand"]{--admin-page:#f8f2e9;--admin-surface:#fffdfa;--admin-soft:#eee4d7;--admin-text:#44372d;--admin-muted:#887767;--admin-line:#e9ddcf;--admin-accent:#a47c58;--admin-hover:#eee5da;--admin-input:#fffdfa;--admin-focus:#a47c58;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="green"]{--admin-page:#f2f5f1;--admin-surface:#fff;--admin-soft:#e4ece5;--admin-text:#20382f;--admin-muted:#6f8276;--admin-line:#dce6dd;--admin-accent:#315c4b;--admin-hover:#e2ebe3;--admin-input:#fff;--admin-focus:#315c4b;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="blue"]{--admin-page:#f3f5f9;--admin-surface:#fff;--admin-soft:#e6ebf3;--admin-text:#202e45;--admin-muted:#75839a;--admin-line:#dce3ed;--admin-accent:#425c85;--admin-hover:#e4eaf2;--admin-input:#fff;--admin-focus:#425c85;background:var(--admin-page);color:var(--admin-text)}
+.admin-shell[data-admin-theme="dark"]{--admin-page:#171b20;--admin-surface:#252b31;--admin-soft:#303943;--admin-text:#f1f1ee;--admin-muted:#a7afb8;--admin-line:#414a54;--admin-accent:#91a9c6;--admin-hover:#36414d;--admin-input:#252b31;--admin-focus:#91a9c6;background:var(--admin-page);color:var(--admin-text)}
 .admin-shell[data-admin-theme] .admin-top{border-color:var(--admin-line)}
 .admin-shell[data-admin-theme] .admin-top h1,.admin-shell[data-admin-theme] .admin-section-head h2{color:var(--admin-text)}
 .admin-shell[data-admin-theme] .admin-top p,.admin-shell[data-admin-theme] .admin-section-head>span{color:var(--admin-muted)}
@@ -1102,7 +1102,7 @@
 .admin-shell[data-prototype-mode="true"] .workspace-hour-row,.admin-shell[data-prototype-mode="true"] .workspace-exception{border-color:var(--ap-line);background:#fff}
 .admin-shell[data-prototype-mode="true"] .admin-main-content .ap-tabs{border-color:var(--ap-line)}
 .admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table{border-color:var(--ap-line);border-radius:7px}
-.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading,.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-grid-head{background:#f6f8fa}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading,.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-grid-head{background:var(--admin-soft);color:var(--admin-muted)}
 .admin-shell[data-prototype-mode="true"] button:focus-visible{outline:2px solid #0969da;outline-offset:2px}
 @media(max-width:900px){
  .admin-shell[data-prototype-mode="true"]{padding:20px 14px 36px}
@@ -1473,11 +1473,143 @@
 
 .master-pro-management .mp-management-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.master-pro-management .mp-management-grid{grid-template-columns:42px minmax(150px,1.1fr) minmax(160px,1.2fr) minmax(170px,1.3fr) minmax(110px,.8fr) minmax(100px,.7fr) 86px;gap:12px}.mp-management-page{display:grid;gap:4px;min-width:0}.mp-management-page strong{font-size:13px}.mp-management-page a{font-size:11px;color:#0969da;overflow-wrap:anywhere}.mp-management-page>span{font-size:12px;color:#656d76}.mp-management-actions{display:flex;gap:5px;align-items:center}.mp-management-actions .ap-gear,.mp-management-actions .ap-delete{width:30px;height:30px}.mp-management-create{padding:7px 9px;font-size:11px;white-space:nowrap}@media(max-width:1100px){.master-pro-management .mp-management-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.master-pro-management .mp-management-grid{min-width:950px}}@media(max-width:600px){.master-pro-management .mp-management-stats{grid-template-columns:1fr 1fr}}
 /* Master_pro owner tab: keep the shared admin canvas visible instead of white card fills. */
-.admin-shell .master-pro-management .ap-stats article,.admin-shell .master-pro-management .ap-table,.admin-shell .master-pro-management .ap-search{background:transparent!important}
-.admin-shell .master-pro-management .ap-table-heading,.admin-shell .master-pro-management .ap-grid-head{background:transparent!important}
+.admin-shell .master-pro-management .ap-stats article,.admin-shell .master-pro-management .ap-table,.admin-shell .master-pro-management .ap-search{background:var(--admin-surface)}
+.admin-shell .master-pro-management .ap-table-heading,.admin-shell .master-pro-management .ap-grid-head{background:var(--admin-soft);color:var(--admin-muted)}
 .admin-shell .master-pro-management .mp-management-grid{grid-template-columns:38px minmax(140px,1.1fr) minmax(150px,1.1fr) minmax(170px,1.25fr) minmax(90px,.65fr) minmax(100px,.7fr) minmax(135px,.85fr);min-width:1120px}
 .admin-shell .master-pro-management .mp-archive-action{font-size:11px;padding:6px 8px;white-space:nowrap}
 .admin-shell .master-pro-management .mp-archived-label{font-size:10px;color:var(--ap-muted)}
 .admin-shell .master-pro-management .mp-management-actions{justify-content:flex-start}
 
 .admin-shell .master-pro-management .mp-management-stats{grid-template-columns:repeat(5,minmax(0,1fr))}@media(max-width:1100px){.admin-shell .master-pro-management .mp-management-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Owner workspace: one palette contract shared by every section and dialog. */
+.admin-shell[data-prototype-mode="true"] .admin-main-content,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .accounts-prototype {
+  color:var(--admin-text);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-stats article,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-search,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-toolbar select,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .admin-card,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .admin-panel-section {
+  background:var(--admin-surface);
+  border-color:var(--admin-line);
+  color:var(--admin-text);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-grid-head,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-row:hover,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-tabs button span,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-gear:hover,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-secondary:hover {
+  background:var(--admin-soft);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-grid-head {
+  color:var(--admin-muted);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-tabs,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-row,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-grid-head,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-stats article,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-search,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-toolbar select {
+  border-color:var(--admin-line);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-heading h2,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading strong,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-person strong,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-stats article strong,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .mp-management-page strong {
+  color:var(--admin-text);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-heading p,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-stats article>span,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-stats article small,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-muted,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-place,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-number,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-table-heading span,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-empty,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-footer {
+  color:var(--admin-muted);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-search input,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-toolbar select,
+.admin-shell[data-prototype-mode="true"] .admin-modal,
+.admin-shell[data-prototype-mode="true"] .admin-modal-close,
+.admin-shell[data-prototype-mode="true"] .admin-theme-picker,
+.admin-shell[data-prototype-mode="true"] .admin-preview-settings,
+.admin-shell[data-prototype-mode="true"] .account-settings-list,
+.admin-shell[data-prototype-mode="true"] .account-setting-row,
+.admin-shell[data-prototype-mode="true"] .admin-theme-options .theme-option,
+.admin-shell[data-prototype-mode="true"] .workspace-hour-row,
+.admin-shell[data-prototype-mode="true"] .workspace-exception {
+  background:var(--admin-surface);
+  color:var(--admin-text);
+  border-color:var(--admin-line);
+}
+.admin-shell[data-prototype-mode="true"] .admin-theme-options .theme-option.active {
+  border-color:var(--admin-accent);
+  box-shadow:0 0 0 1px var(--admin-accent);
+  background:var(--admin-soft);
+}
+.admin-shell[data-prototype-mode="true"] .admin-theme-options .theme-option.active em,
+.admin-shell[data-prototype-mode="true"] .admin-theme-options .theme-option.active b {
+  color:var(--admin-accent);
+}
+.admin-shell[data-prototype-mode="true"] .admin-theme-options .theme-option small,
+.admin-shell[data-prototype-mode="true"] .admin-preview-settings p,
+.admin-shell[data-prototype-mode="true"] .admin-modal-intro,
+.admin-shell[data-prototype-mode="true"] .account-setting-row span {
+  color:var(--admin-muted);
+}
+.admin-shell[data-prototype-mode="true"] .admin-modal .admin-field input,
+.admin-shell[data-prototype-mode="true"] .admin-modal .admin-field select,
+.admin-shell[data-prototype-mode="true"] .admin-modal .account-page-url input {
+  background:var(--admin-input);
+  color:var(--admin-text);
+  border-color:var(--admin-line);
+}
+.admin-shell[data-prototype-mode="true"] .admin-modal .admin-field input:focus,
+.admin-shell[data-prototype-mode="true"] .admin-modal .admin-field select:focus,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-search:focus-within,
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-toolbar select:focus {
+  border-color:var(--admin-focus);
+  outline-color:var(--admin-focus);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-tabs button.active {
+  border-bottom-color:var(--admin-accent);
+  color:var(--admin-text);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-tabs button span {
+  color:var(--admin-muted);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-switch.is-on {
+  background:var(--admin-accent);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-primary {
+  background:var(--admin-accent);
+  border-color:var(--admin-accent);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-primary:hover {
+  filter:brightness(.92);
+}
+.admin-shell[data-prototype-mode="true"] .admin-main-content .ap-secondary {
+  background:var(--admin-surface);
+  color:var(--admin-text);
+}
+.admin-shell[data-prototype-mode="true"] .admin-modal-backdrop {
+  background:rgba(12,16,20,.62);
+}
+.admin-shell[data-prototype-mode="true"][data-admin-theme="dark"] .admin-modal-backdrop {
+  background:rgba(0,0,0,.76);
+}
+.admin-shell[data-prototype-mode="true"] button:focus-visible {
+  outline:2px solid var(--admin-focus);
+  outline-offset:2px;
+}
