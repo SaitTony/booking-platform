@@ -97,3 +97,9 @@
 .mpb-info-row a.mpb-public-url:hover{text-decoration:underline}
 
 .mpb-draft-status.is-published{color:#1a7f37}.mpb-draft-status.is-published i{background:#1a7f37}
+
+
+.mpb-publication-toggle{border:1px solid #d0d7de;border-radius:6px;background:#fff;color:#24292f;padding:7px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.mpb-publication-toggle:hover:not(:disabled){background:#f6f8fa;border-color:#8c959f}
+.mpb-publication-toggle:disabled{opacity:.6;cursor:wait}
+@media(max-width:760px){.mpb-top-actions{gap:8px}.mpb-publication-toggle{padding:6px 8px;font-size:11px}}
