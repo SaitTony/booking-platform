@@ -116,14 +116,16 @@ select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001
 select extensions.ok(public.is_owner(), 'Owner identity is recognized');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select extensions.ok(
-  exists (
+  has_table_privilege(current_user, 'public.booking_settings', 'SELECT')
+  and not has_table_privilege(current_user, 'public.booking_settings', 'INSERT')
+  and not has_table_privilege(current_user, 'public.booking_settings', 'UPDATE')
+  and not has_table_privilege(current_user, 'public.booking_settings', 'DELETE')
+  and not exists (
     select 1 from pg_policies
     where schemaname='public' and tablename='booking_settings'
-      and cmd='ALL'
-      and coalesce(qual,'') ilike '%can_manage_master%'
-      and coalesce(with_check,'') ilike '%can_manage_master%'
+      and cmd in ('INSERT','UPDATE','DELETE','ALL')
   ),
-  'Booking settings writes are restricted by the manager RLS policy'
+  'Booking settings are readable but read-only for authenticated staff'
 );
 select extensions.ok(public.can_manage_master('30000000-0000-4000-8000-000000000001'), 'Company Admin can manage company masters');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true);
@@ -239,12 +241,19 @@ select extensions.throws_ok(
   'A booking cannot reference a service belonging to another master'
 );
 select extensions.throws_ok(
-  $$select public.create_booking(
-    '30000000-0000-4000-8000-000000000001',
-    '40000000-0000-4000-8000-000000000001',
-    ((((now() at time zone 'UTC')::date + 2)::timestamp + time '09:10') at time zone 'UTC'),
-    'Duplicate Client', '+79531234598', true
-  )$$,
+  $insert into public.bookings (
+      master_id, service_id, client_id, starts_at, ends_at, status,
+      service_name_snapshot, service_duration_snapshot, price_snapshot,
+      client_name_snapshot, client_phone_snapshot
+    )
+    values (
+      '30000000-0000-4000-8000-000000000001',
+      '40000000-0000-4000-8000-000000000001',
+      (select id from public.clients where phone_e164 = '+79531234599'),
+      ((((now() at time zone 'UTC')::date + 2)::timestamp + time '09:10') at time zone 'UTC'),
+      ((((now() at time zone 'UTC')::date + 2)::timestamp + time '09:40') at time zone 'UTC'),
+      'confirmed', 'Consultation', 30, 50, 'Client One', '+79531234599'
+    )$,
   '23P01', null, 'Overlapping confirmed bookings are rejected by the database'
 );
 select extensions.ok(
