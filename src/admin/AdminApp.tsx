@@ -298,10 +298,27 @@ export default function AdminApp() {
     if (!supabase) return
     setBusy(true); setError(''); setNotice('')
     const normalizedEmail = email.trim().toLowerCase()
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
-    if (signInError) setError('Не удалось войти. Проверьте email и пароль.')
-    else await loadProfile()
-    setBusy(false)
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
+      if (signInError) {
+        const message = signInError.message.toLowerCase()
+        if (message.includes('invalid login credentials')) {
+          setError('Supabase отклонил вход: email или пароль не совпадает с учётной записью.')
+        } else if (message.includes('email not confirmed')) {
+          setError('Вход не выполнен: для этой учётной записи не подтверждён email.')
+        } else if (message.includes('too many requests')) {
+          setError('Слишком много попыток входа. Подожди немного и попробуй снова.')
+        } else {
+          setError(`Ошибка авторизации: ${signInError.message}`)
+        }
+      } else {
+        await loadProfile()
+      }
+    } catch (authError) {
+      setError(authError instanceof Error ? `Ошибка подключения к авторизации: ${authError.message}` : 'Не удалось связаться с сервисом авторизации.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function changePassword(event: FormEvent) {
