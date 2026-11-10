@@ -1981,3 +1981,15 @@
   font-weight:800 !important;
   border-bottom:1px solid color-mix(in srgb,var(--rd-accent) 28%,var(--rd-line)) !important;
 }
+
+
+/* Owner primary navigation: horizontal tab bar overriding legacy vertical sidebar. */
+.admin-shell[data-redesign="true"] .admin-workspace-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:18px!important}
+.admin-shell[data-redesign="true"] .admin-sidebar{position:static!important;display:flex!important;flex-direction:row!important;align-items:center!important;flex-wrap:nowrap!important;gap:6px!important;width:100%!important;min-width:0!important;overflow-x:auto!important;padding:9px!important;border:1px solid var(--rd-line)!important;border-radius:13px!important;background:var(--rd-panel)!important;box-shadow:0 3px 12px #18263a08!important}
+.admin-shell[data-redesign="true"] .admin-sidebar:before,.admin-shell[data-redesign="true"] .admin-sidebar-label{display:none!important}
+.admin-shell[data-redesign="true"] .admin-sidebar button{display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;gap:9px!important;width:auto!important;min-height:46px!important;padding:0 18px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;color:var(--rd-text)!important;font-size:14px!important;font-weight:650!important;white-space:nowrap!important}
+.admin-shell[data-redesign="true"] .admin-sidebar button span{display:inline-grid!important;flex:0 0 22px!important;width:22px!important;height:22px!important;font-size:18px!important}
+.admin-shell[data-redesign="true"] .admin-sidebar button:hover{background:var(--rd-soft)!important;border-color:var(--rd-line)!important}
+.admin-shell[data-redesign="true"] .admin-sidebar button.active{background:var(--rd-accent-soft)!important;border-color:color-mix(in srgb,var(--rd-accent) 30%,var(--rd-line))!important;color:var(--rd-accent)!important;box-shadow:inset 0 -3px 0 var(--rd-accent)!important}
+.admin-shell[data-redesign="true"] .admin-main-content{width:100%!important;min-width:0}
+@media(max-width:700px){.admin-shell[data-redesign="true"] .admin-sidebar{scrollbar-width:thin}.admin-shell[data-redesign="true"] .admin-sidebar button{min-height:43px!important;padding:0 13px!important;font-size:13px!important}}
