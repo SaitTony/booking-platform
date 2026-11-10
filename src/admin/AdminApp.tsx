@@ -381,13 +381,13 @@ export default function AdminApp() {
     setBusy(false)
   }
 
-  async function archiveMasterPage(page:MasterOption) {
+  async function archiveMasterPage(page:MasterOption, accountId?:string) {
     const restoring=!!page.archived_at
     const confirmation=restoring?'Вернуть страницу из архива? Она снова станет доступна для управления.':'Переместить страницу в архив? История записей и связь с учётной записью сохранятся.'
     if(!supabase||busy||!window.confirm(confirmation))return
     setBusy(true);setError('');setNotice('')
     try {
-      const {error:updateError}=await supabase.from('masters').update(restoring?{archived_at:null,is_active:false}:{is_active:false,archived_at:new Date().toISOString()}).eq('id',page.id)
+      const {error:updateError}=await supabase.from('masters').update(restoring?{archived_at:null,is_active:false,...(page.kind==='individual'&&accountId?{profile_id:accountId}:{})}:{is_active:false,archived_at:new Date().toISOString()}).eq('id',page.id)
       if(updateError)setError(updateError.message)
       else{setNotice(restoring?'Страница возвращена из архива. Публикацию можно включить отдельно.':'Страница архивирована, история записей и связь с учётной записью сохранены.');await loadDirectories()}
     } finally { setBusy(false) }
