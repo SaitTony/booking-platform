@@ -36,7 +36,7 @@ export default function MasterProManagementTable({ accounts, pages, loading, bus
   const masterPros = accounts
   const individualPages = pages.filter(page => page.kind === 'individual')
   const archivedPages = individualPages.filter(page => !!page.archived_at)
-  const pageFor = (account: MasterProAccount) => individualPages.find(page => page.profile_id === account.id) ?? individualPages.find(page => !!page.archived_at && !page.profile_id && page.display_name.trim().toLocaleLowerCase('ru') === account.full_name.trim().toLocaleLowerCase('ru'))
+  const pageFor = (account: MasterProAccount) => individualPages.find(page => page.profile_id === account.id && !page.archived_at) ?? individualPages.find(page => page.profile_id === account.id && !!page.archived_at) ?? individualPages.find(page => !!page.archived_at && !page.profile_id && page.display_name.trim().toLocaleLowerCase('ru') === account.full_name.trim().toLocaleLowerCase('ru'))
   const publishedCount = masterPros.filter(account => { const page=pageFor(account); return !!page?.is_active && !page.archived_at }).length
   const draftCount = masterPros.filter(account => { const page=pageFor(account); return !!page && !page.is_active && !page.archived_at }).length
   const missingCount = masterPros.filter(account => !pageFor(account)).length
