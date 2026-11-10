@@ -26,7 +26,7 @@ function normalizeMembers(value: Member[] | Member | null | undefined): Member[]
   return value ? [value] : []
 }
 type CompanyOption = { id: string; name: string; slug: string; description?: string; is_active: boolean }
-type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean }
+type MasterOption = { id: string; display_name: string; slug:string; kind: 'individual' | 'company'; company_id: string | null; profile_id: string | null; is_active: boolean; archived_at: string | null }
 type Account = Profile & { company_members?: Member[] }
 
 
@@ -220,7 +220,7 @@ export default function AdminApp() {
     if (!supabase) return
     const [{ data: companyData }, { data: masterData }] = await Promise.all([
       supabase.from('companies').select('id,name,slug,description,is_active').order('name'),
-      supabase.from('masters').select('id,display_name,slug,kind,company_id,profile_id,is_active').is('archived_at', null).order('display_name'),
+      supabase.from('masters').select('id,display_name,slug,kind,company_id,profile_id,is_active,archived_at').order('display_name'),
     ])
     setCompanies((companyData ?? []) as CompanyOption[])
     setMasterPages((masterData ?? []) as MasterOption[])
@@ -382,12 +382,14 @@ export default function AdminApp() {
   }
 
   async function archiveMasterPage(page:MasterOption) {
-    if(!supabase||busy||!window.confirm('Удалить страницу мастера? Она будет перемещена в архив, а история записей сохранится.'))return
+    const restoring=!!page.archived_at
+    const confirmation=restoring?'Вернуть страницу из архива? Она снова станет доступна для управления.':'Переместить страницу в архив? История записей и связь с учётной записью сохранятся.'
+    if(!supabase||busy||!window.confirm(confirmation))return
     setBusy(true);setError('');setNotice('')
     try {
-      const {error:updateError}=await supabase.from('masters').update({is_active:false,archived_at:new Date().toISOString(),...(page.kind==='individual'?{profile_id:null}:{})}).eq('id',page.id)
+      const {error:updateError}=await supabase.from('masters').update(restoring?{archived_at:null,is_active:false}:{is_active:false,archived_at:new Date().toISOString()}).eq('id',page.id)
       if(updateError)setError(updateError.message)
-      else{setNotice('Страница архивирована, история записей сохранена.');await loadDirectories()}
+      else{setNotice(restoring?'Страница возвращена из архива. Публикацию можно включить отдельно.':'Страница архивирована, история записей и связь с учётной записью сохранены.');await loadDirectories()}
     } finally { setBusy(false) }
   }
 
@@ -632,7 +634,7 @@ export default function AdminApp() {
             <summary>Управлять</summary>
             <div className="accordion-content">
               {companies.map(company=>{
-                const companyPages=masterPages.filter(page=>page.kind==='company'&&page.company_id===company.id)
+                const companyPages=masterPages.filter(page=>page.kind==='company'&&page.company_id===company.id&&!page.archived_at)
                 const companyStaff=accounts.filter(account=>account.company_members?.some(member=>member.company_id===company.id))
                 return <details className="admin-company-item" key={company.id}>
                   <summary><span>{company.name}</span><span className="accordion-meta">{companyPages.length} страниц · {companyStaff.length} сотрудников</span></summary>
@@ -676,8 +678,6 @@ export default function AdminApp() {
           pages={masterPages.filter(page=>page.kind==='individual')}
           loading={accountsLoading}
           busy={busy}
-          onCreateAccount={()=>{setTemporaryPassword('000000');setCreateRole('master_pro');setCreateCompanyId('');setActiveModal('account')}}
-          onCreatePage={account=>{setPageKind('individual');setPageProfileId(account.id);setPageName(account.full_name??'');setPageSlug(makeSlug(account.full_name||'master'));setPageDescription('');setActiveModal('masterPro')}}
           onTogglePage={page=>void toggleMasterPage(page)}
           onArchivePage={page=>void archiveMasterPage(page)}
         />
