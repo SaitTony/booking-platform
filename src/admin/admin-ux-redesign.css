@@ -1050,3 +1050,205 @@
   .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:21px!important}
   .admin-shell[data-redesign="true"] .ap-stats article>strong{font-size:20px!important}
 }
+
+
+/* iPhone 16 (390–430px): deliberate overview cards and directory controls */
+@media (max-width:430px){
+  .admin-shell[data-redesign="true"] .admin-wide{
+    width:100%!important;
+    padding:12px 10px 26px!important;
+  }
+  .admin-shell[data-redesign="true"] .admin-workspace-layout{
+    gap:9px!important;
+  }
+  .admin-shell[data-redesign="true"] .admin-sidebar{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:5px!important;
+    padding:6px!important;
+    overflow:visible!important;
+  }
+  .admin-shell[data-redesign="true"] .admin-sidebar button{
+    display:flex!important;
+    justify-content:flex-start!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:42px!important;
+    padding:7px 8px!important;
+    gap:7px!important;
+    font-size:12px!important;
+    white-space:normal!important;
+    line-height:1.15!important;
+  }
+  .admin-shell[data-redesign="true"] .admin-sidebar button span{
+    flex:0 0 18px!important;
+    width:18px!important;
+    height:18px!important;
+  }
+
+  /* Overview: four balanced KPI cards, no collisions with corner icons. */
+  .admin-shell[data-redesign="true"] .rd-page{gap:11px!important}
+  .admin-shell[data-redesign="true"] .rd-page-title{align-items:flex-start!important}
+  .admin-shell[data-redesign="true"] .rd-page-title h2{font-size:22px!important}
+  .admin-shell[data-redesign="true"] .rd-page-title p{font-size:11px!important;line-height:1.4}
+  .admin-shell[data-redesign="true"] .rd-kpis{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+  .admin-shell[data-redesign="true"] .rd-kpis article{
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:flex-start!important;
+    min-width:0!important;
+    min-height:104px!important;
+    padding:12px!important;
+    border-radius:10px!important;
+  }
+  .admin-shell[data-redesign="true"] .rd-kpis article>span{
+    max-width:calc(100% - 25px)!important;
+    font-size:10px!important;
+    line-height:1.25!important;
+    overflow-wrap:anywhere;
+  }
+  .admin-shell[data-redesign="true"] .rd-kpis article>b{
+    top:10px!important;
+    right:10px!important;
+    width:22px!important;
+    height:22px!important;
+    font-size:12px!important;
+  }
+  .admin-shell[data-redesign="true"] .rd-kpis article>strong{
+    margin:10px 0 3px!important;
+    font-size:27px!important;
+    line-height:1!important;
+  }
+  .admin-shell[data-redesign="true"] .rd-kpis article>small{
+    font-size:9px!important;
+    line-height:1.25!important;
+    overflow-wrap:anywhere;
+  }
+  .admin-shell[data-redesign="true"] .rd-overview-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:9px!important;
+  }
+  .admin-shell[data-redesign="true"] .rd-card{padding:13px!important}
+
+  /* Search always gets its own full-width row; filters become usable full-width controls. */
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:8px!important;
+    width:100%!important;
+    margin:0 0 5px!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar .ap-search{
+    grid-column:1/-1!important;
+    display:flex!important;
+    width:100%!important;
+    min-width:0!important;
+    height:46px!important;
+    padding:0 12px!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar .ap-search input{
+    width:100%!important;
+    min-width:0!important;
+    height:100%!important;
+    font-size:14px!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar>select{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:44px!important;
+    padding:0 28px 0 10px!important;
+    font-size:12px!important;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar .ap-toolbar-create{
+    grid-column:1/-1!important;
+    display:flex!important;
+    width:100%!important;
+    min-height:44px!important;
+    justify-content:center!important;
+    font-size:13px!important;
+  }
+  .admin-shell[data-redesign="true"] .companies-prototype .ap-toolbar,
+  .admin-shell[data-redesign="true"] .master-pro-management .ap-toolbar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:8px!important;
+    width:100%!important;
+    margin:0 0 5px!important;
+  }
+  .admin-shell[data-redesign="true"] .companies-prototype .ap-toolbar .ap-search,
+  .admin-shell[data-redesign="true"] .master-pro-management .ap-toolbar .ap-search{
+    display:flex!important;
+    width:100%!important;
+    min-width:0!important;
+    height:46px!important;
+    padding:0 12px!important;
+  }
+  .admin-shell[data-redesign="true"] .companies-prototype .ap-toolbar .ap-search input,
+  .admin-shell[data-redesign="true"] .master-pro-management .ap-toolbar .ap-search input{
+    width:100%!important;
+    min-width:0!important;
+    height:100%!important;
+    font-size:14px!important;
+  }
+  .admin-shell[data-redesign="true"] .companies-prototype .ap-toolbar .ap-toolbar-create{
+    width:100%!important;
+    min-height:44px!important;
+    justify-content:center!important;
+    font-size:13px!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-table{
+    margin-top:4px!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    margin-bottom:9px!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-stats article{
+    min-width:0!important;
+    min-height:88px!important;
+    padding:10px!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-stats article>span{
+    font-size:10px!important;
+    line-height:1.25!important;
+    overflow-wrap:anywhere;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-stats article>strong{
+    font-size:23px!important;
+    line-height:1!important;
+  }
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-stats article>small{
+    font-size:9px!important;
+    line-height:1.25!important;
+    overflow-wrap:anywhere;
+  }
+  .admin-shell[data-redesign="true"] .ap-table{
+    margin-top:5px!important;
+    max-width:100%!important;
+  }
+  .admin-shell[data-redesign="true"] .ap-table-heading{
+    gap:7px!important;
+    padding:10px!important;
+  }
+  .admin-shell[data-redesign="true"] .ap-table-heading strong{font-size:10px!important}
+  .admin-shell[data-redesign="true"] .ap-table-heading>span{font-size:9px!important}
+}
+@media (max-width:360px){
+  .admin-shell[data-redesign="true"] .admin-wide{padding-left:8px!important;padding-right:8px!important}
+  .admin-shell[data-redesign="true"] .rd-kpis article{padding:10px!important}
+  .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:24px!important}
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar{grid-template-columns:minmax(0,1fr)!important}
+  .admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar>select{grid-column:1/-1!important}
+}
