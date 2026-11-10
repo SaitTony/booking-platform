@@ -54,7 +54,6 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
   const [roleFilter, setRoleFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [companyFilter, setCompanyFilter] = useState('')
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
 
   const visibleAccounts = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('ru')
@@ -126,7 +125,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
           : visibleAccounts.length === 0 ? <div className="ap-empty">{accounts.length === 0 ? 'В базе пока нет учётных записей сотрудников.' : 'По заданным условиям ничего не найдено.'}</div>
           : visibleAccounts.map((account, index) => <div className={'ap-grid ap-row ' + (account.disabled_at ? 'is-disabled' : '')} key={account.id}>
             <span className="ap-number">{index + 1}</span>
-            <div className="ap-person"><strong>{account.full_name || 'Без имени'}</strong>{account.force_password_change && <small className="ap-warning">Ожидает смены пароля</small>}<button type="button" className="ap-detail-trigger" onClick={() => setSelectedAccountId(current => current === account.id ? null : account.id)} aria-expanded={selectedAccountId === account.id}>Подробнее</button></div>
+            <div className="ap-person"><strong>{account.full_name || 'Без имени'}</strong>{account.force_password_change && <small className="ap-warning">Ожидает смены пароля</small>}</div>
             <span className="ap-muted">{account.email || '—'}</span>
             <span className="ap-muted">{account.phone_e164 || '—'}</span>
             <span><i className={'ap-role ap-role-' + roleClass(account)}>{roleOf(account)}</i></span>
@@ -138,26 +137,6 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
       </div>
       <footer className="ap-footer">Данные загружаются из Workflows · Supabase · Изменения выполняются через существующие защищённые функции</footer>
     </section>
-    {visibleAccounts.find(account => account.id === selectedAccountId) && (() => {
-      const account = visibleAccounts.find(item => item.id === selectedAccountId)!
-      return <aside className="ap-account-detail" aria-label="Карточка учётной записи">
-        <div className="ap-account-detail-heading">
-          <div><span className="rd-kicker">КАРТОЧКА УЧЁТНОЙ ЗАПИСИ</span><h3>{account.full_name || 'Без имени'}</h3><p>{roleOf(account)} · {account.disabled_at ? 'Доступ отключён' : 'Доступ активен'}</p></div>
-          <button type="button" className="ap-detail-close" onClick={() => setSelectedAccountId(null)} aria-label="Закрыть карточку">×</button>
-        </div>
-        <div className="ap-account-detail-grid">
-          <div><small>Email</small><strong>{account.email || '—'}</strong></div>
-          <div><small>Телефон</small><strong>{account.phone_e164 || '—'}</strong></div>
-          <div><small>Компания</small><strong>{accountCompany(account)}</strong></div>
-          <div><small>Страница</small><strong>{accountPage(account)}</strong></div>
-          <div><small>Первый вход</small><strong>{account.force_password_change ? 'Ожидает смены пароля' : 'Пароль установлен'}</strong></div>
-          <div><small>Статус доступа</small><strong>{account.disabled_at ? 'Отключена' : 'Активна'}</strong></div>
-        </div>
-        <div className="ap-account-detail-actions">
-          <button type="button" className="ap-secondary" disabled={busy} onClick={() => onSettings(account)}>Настройки учётной записи</button>
-          <button type="button" className="ap-secondary" disabled={busy} onClick={() => onToggle(account)}>{account.disabled_at ? 'Включить доступ' : 'Отключить доступ'}</button>
-        </div>
-      </aside>
-    })()}
+
   </section>
 }
