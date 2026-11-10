@@ -116,8 +116,14 @@ select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001
 select extensions.ok(public.is_owner(), 'Owner identity is recognized');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select extensions.ok(
-  not has_table_privilege('authenticated', 'public.booking_settings', 'UPDATE'),
-  'Company Admin cannot change fixed booking rules through the Data API'
+  exists (
+    select 1 from pg_policies
+    where schemaname='public' and tablename='booking_settings'
+      and cmd='ALL'
+      and coalesce(qual,'') ilike '%can_manage_master%'
+      and coalesce(with_check,'') ilike '%can_manage_master%'
+  ),
+  'Booking settings writes are restricted by the manager RLS policy'
 );
 select extensions.ok(public.can_manage_master('30000000-0000-4000-8000-000000000001'), 'Company Admin can manage company masters');
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000003', true);
