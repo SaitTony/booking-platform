@@ -49,7 +49,6 @@ export default function MasterProBuilder() {
   const [device,setDevice] = useState<'desktop'|'mobile'>('desktop')
   const [previewTab,setPreviewTab] = useState<'page'|'booking'>('page')
   const [,setSaved] = useState(false)
-  const [showPublish,setShowPublish] = useState(false)
   const [masterId,setMasterId] = useState<string | null>(null)
   const [masterSlug,setMasterSlug] = useState('')
   const [pageActive,setPageActive] = useState(false)
@@ -237,7 +236,7 @@ export default function MasterProBuilder() {
       <div className="mpb-page-actions"><Link to="/admin" className="mpb-secondary">Вернуться в Админ-панель</Link><button className="mpb-primary" onClick={()=>void savePage()} disabled={loading||saving||!masterId}>{saving?'Сохраняем…':'Сохранить изменения'}</button></div>
     </div>
     {welcomeVisible&&<section className="mpb-welcome"><div><span className="mpb-eyebrow">ДОБРО ПОЖАЛОВАТЬ В WORKFLOWS</span><h2>Здравствуйте, {name||'рады видеть вас'}!</h2><p>Это ваше личное пространство. Здесь вы оформляете индивидуальную страницу, настраиваете рабочее расписание и управляете записями клиентов. Начните с заполнения страницы и добавления услуг.</p></div><button type="button" className="mpb-secondary" onClick={dismissWelcome}>Понятно, начать работу</button></section>}
-    <div className="mpb-workspace">
+    <div className={'mpb-workspace '+((section==='profile'||section==='services')?'has-preview':'')}>
       <aside className="mpb-sidebar">
         
         <nav>{sections.map(item=><button key={item.id} className={section===item.id?'is-active':''} onClick={()=>setSection(item.id)}><span className="mpb-step-symbol" aria-hidden="true">{item.symbol}</span><span className="mpb-step">{item.number}</span><span className="mpb-nav-copy"><strong>{item.title}</strong><small>{item.sub}</small></span></button>)}</nav>
@@ -282,7 +281,7 @@ export default function MasterProBuilder() {
         </div>}
 
       </section>
-      <aside className="mpb-preview-panel">
+      {(section==='profile'||section==='services')&&<aside className="mpb-preview-panel">
         <div className="mpb-preview-head"><div><span className="mpb-eyebrow">LIVE PREVIEW</span><strong>Так увидит клиент</strong></div><div className="mpb-device-switch"><button className={device==='desktop'?'active':''} onClick={()=>setDevice('desktop')} aria-label="Предпросмотр на компьютере"><span className="mpb-device-icon mpb-device-desktop" aria-hidden="true"/><span>ПК</span></button><button className={device==='mobile'?'active':''} onClick={()=>setDevice('mobile')} aria-label="Предпросмотр на телефоне"><span className="mpb-device-icon mpb-device-mobile" aria-hidden="true"/><span>Телефон</span></button></div></div>
         <div className="mpb-preview-caption"><span><i/> Обновляется автоматически</span><div><button className={previewTab==='page'?'active':''} onClick={()=>setPreviewTab('page')}>Страница</button><button className={previewTab==='booking'?'active':''} onClick={()=>setPreviewTab('booking')}>Запись</button></div></div>
         <div className={'mpb-preview-frame '+(device==='mobile'?'is-mobile':'')}><div className={'mpb-public-page theme-'+theme}>
@@ -292,8 +291,8 @@ export default function MasterProBuilder() {
           <div className="mpb-public-footer">ИНДИВИДУАЛЬНАЯ ПРАКТИКА <span>Онлайн-запись без ожидания</span></div>
         </div></div>
         <div className="mpb-preview-note">Предпросмотр обновляется по мере редактирования. Сохраните изменения, чтобы обновить публичную страницу.</div>
-      </aside>
+      </aside>}
     </div>
-    {showPublish&&<div className="mpb-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setShowPublish(false)}}><section className="mpb-publish-modal"><button className="mpb-modal-close" onClick={()=>setShowPublish(false)}>Закрыть</button><span className="mpb-eyebrow">ПУБЛИКАЦИЯ</span><h2>Страница ещё не готова к публикации</h2><p>Сейчас это интерактивный прототип конструктора. Сохранение в Supabase и настоящая публикация будут подключены после согласования интерфейса.</p><button className="mpb-primary" onClick={()=>setShowPublish(false)}>Понятно</button></section></div>}
+
   </main>
 }
