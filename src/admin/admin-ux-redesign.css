@@ -982,3 +982,11 @@
     flex:0 0 auto!important;
   }
 }
+
+/* Reduce the gap between directory search toolbars and their tables by 3x. */
+.admin-shell[data-redesign="true"] .accounts-prototype .ap-toolbar{
+  margin-bottom:4.67px!important;
+}
+.admin-shell[data-redesign="true"] .accounts-prototype .ap-table{
+  margin-top:4.67px!important;
+}
