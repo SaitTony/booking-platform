@@ -191,15 +191,26 @@ export default function AdminApp() {
   }
 
 
-  async function loadProfile() {
+  async function loadProfile(userId?: string) {
     if (!supabase) { setSessionReady(true); return }
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      if (userError) throw userError
-      if (!user) { setProfile(null); return }
+      let resolvedUserId = userId
+      if (!resolvedUserId) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError) {
+          if (userError.name === 'AuthSessionMissingError' || userError.message === 'Auth session missing!') {
+            setProfile(null)
+            setError('')
+            return
+          }
+          throw userError
+        }
+        resolvedUserId = user?.id
+      }
+      if (!resolvedUserId) { setProfile(null); setError(''); return }
       const { data, error: profileError } = await supabase.from('profiles')
         .select('id,full_name,email,phone_e164,platform_role,force_password_change,disabled_at,company_members(role,company_id,master_id)')
-        .eq('id', user.id).maybeSingle()
+        .eq('id', resolvedUserId).maybeSingle()
       if (profileError) throw profileError
       const normalizedProfile = data ? { ...data, company_members: normalizeMembers((data as Profile).company_members) } as Profile : null
       setProfile(normalizedProfile)
@@ -246,9 +257,26 @@ export default function AdminApp() {
 
   useEffect(() => {
     if (!supabase) { setSessionReady(true); return }
-    void loadProfile()
-    const { data: listener } = supabase.auth.onAuthStateChange(() => { void loadProfile() })
-    return () => listener.subscription.unsubscribe()
+    let mounted = true
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Do not start Supabase requests inside the auth callback: the SDK may
+      // still hold its auth lock while notifying subscribers.
+      window.setTimeout(() => {
+        if (!mounted) return
+        if (!session?.user) {
+          setProfile(null)
+          setError('')
+          setSessionReady(true)
+          return
+        }
+        setSessionReady(false)
+        void loadProfile(session.user.id)
+      }, 0)
+    })
+    return () => {
+      mounted = false
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
