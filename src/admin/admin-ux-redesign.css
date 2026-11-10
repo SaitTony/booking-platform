@@ -990,3 +990,63 @@
 .admin-shell[data-redesign="true"] .accounts-prototype .ap-table{
   margin-top:4.67px!important;
 }
+
+
+/* Mobile-first corrective pass: admin workspace */
+@media (max-width:700px){
+  .admin-shell[data-redesign="true"]{overflow-x:clip}
+  .admin-shell[data-redesign="true"] .admin-wide{width:100%!important;max-width:none!important;padding:14px 12px 28px!important}
+  .admin-shell[data-redesign="true"] .admin-top{align-items:flex-start!important;flex-direction:column!important;gap:10px!important;margin-bottom:12px!important;padding-bottom:12px!important}
+  .admin-shell[data-redesign="true"] .admin-top h1{font-size:21px!important;line-height:1.2}
+  .admin-shell[data-redesign="true"] .admin-top p{font-size:12px!important}
+  .admin-shell[data-redesign="true"] .admin-top-actions{width:100%;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important}
+  .admin-shell[data-redesign="true"] .admin-top-actions button{width:100%;min-width:0;min-height:42px!important;padding:7px 9px!important;white-space:normal;font-size:12px!important}
+  .admin-shell[data-redesign="true"] .admin-workspace-layout{gap:10px!important}
+  .admin-shell[data-redesign="true"] .admin-sidebar{display:flex!important;flex-wrap:wrap!important;justify-content:stretch!important;gap:6px!important;overflow:visible!important;padding:7px!important;min-height:0!important}
+  .admin-shell[data-redesign="true"] .admin-sidebar button{flex:1 1 calc(50% - 6px)!important;min-width:0!important;width:auto!important;min-height:43px!important;padding:7px 8px!important;gap:6px!important;font-size:12px!important;white-space:normal!important;line-height:1.2}
+  .admin-shell[data-redesign="true"] .admin-sidebar button span{flex:0 0 18px!important;width:18px!important;height:18px!important;font-size:16px!important}
+  .admin-shell[data-redesign="true"] .admin-main-content{min-width:0!important;width:100%!important}
+  .admin-shell[data-redesign="true"] .rd-page{gap:12px}
+  .admin-shell[data-redesign="true"] .rd-page-title{gap:8px}
+  .admin-shell[data-redesign="true"] .rd-page-title h2{font-size:23px!important}
+  .admin-shell[data-redesign="true"] .rd-page-title p{font-size:12px!important}
+  .admin-shell[data-redesign="true"] .rd-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  .admin-shell[data-redesign="true"] .rd-kpis article{min-width:0;min-height:96px!important;padding:11px!important}
+  .admin-shell[data-redesign="true"] .rd-kpis article>span{font-size:10px!important;line-height:1.3}
+  .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:24px!important;margin:8px 0 3px!important}
+  .admin-shell[data-redesign="true"] .rd-kpis article>small{font-size:9px!important;line-height:1.3}
+  .admin-shell[data-redesign="true"] .rd-overview-grid,.admin-shell[data-redesign="true"] .rd-settings-grid{grid-template-columns:minmax(0,1fr)!important}
+  .admin-shell[data-redesign="true"] .rd-card{padding:14px!important;min-width:0}
+  .admin-shell[data-redesign="true"] .ap-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-bottom:10px!important}
+  .admin-shell[data-redesign="true"] .ap-stats article{min-width:0;min-height:86px!important;padding:10px!important;gap:5px!important}
+  .admin-shell[data-redesign="true"] .ap-stats article>span{font-size:9px!important;line-height:1.25}
+  .admin-shell[data-redesign="true"] .ap-stats article>strong{font-size:22px!important;line-height:1.1}
+  .admin-shell[data-redesign="true"] .ap-stats article>small{font-size:8px!important;line-height:1.25}
+  .admin-shell[data-redesign="true"] .ap-toolbar{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin-bottom:9px!important}
+  .admin-shell[data-redesign="true"] .ap-search{flex:1 1 100%!important;min-width:0!important;height:42px!important}
+  .admin-shell[data-redesign="true"] .ap-toolbar select{flex:1 1 calc(50% - 7px);min-width:0!important;width:100%;height:42px!important;font-size:11px!important}
+  .admin-shell[data-redesign="true"] .ap-toolbar .ap-primary{flex:1 1 100%;min-height:42px}
+  .admin-shell[data-redesign="true"] .ap-table{max-width:100%;margin-top:9px!important;border-radius:9px}
+  .admin-shell[data-redesign="true"] .ap-table-heading{min-height:45px!important;padding:10px 11px!important}
+  .admin-shell[data-redesign="true"] .ap-table-heading strong{font-size:11px!important}
+  .admin-shell[data-redesign="true"] .ap-table-heading>span{font-size:9px!important}
+  .admin-shell[data-redesign="true"] .ap-table-scroll{max-width:100%;overflow-x:auto!important;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .admin-shell[data-redesign="true"] .ap-grid{min-width:900px!important;gap:8px!important;padding:0 10px!important}
+  .admin-shell[data-redesign="true"] .ap-grid-head{min-height:38px!important;font-size:9px!important}
+  .admin-shell[data-redesign="true"] .ap-row{min-height:57px}
+  .admin-shell[data-redesign="true"] .admin-panel-heading{align-items:flex-start!important;flex-wrap:wrap!important}
+  .admin-shell[data-redesign="true"] .admin-panel-heading h2{font-size:20px!important}
+  .admin-shell[data-redesign="true"] .admin-modal-backdrop,.admin-shell[data-redesign="true"] .rd-modal-backdrop{align-items:end!important;padding:8px!important}
+  .admin-shell[data-redesign="true"] .admin-modal,.admin-shell[data-redesign="true"] .rd-modal{width:100%!important;max-width:none!important;max-height:92dvh!important;overflow-y:auto!important;padding:20px 15px!important;border-radius:15px 15px 10px 10px!important}
+  .admin-shell[data-redesign="true"] .admin-modal-actions,.admin-shell[data-redesign="true"] .rd-modal-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+  .admin-shell[data-redesign="true"] .admin-card{width:100%;max-width:none!important;padding:22px 16px!important}
+  .admin-shell[data-redesign="true"] .admin-account-list{max-width:100%;overflow-x:auto}
+  .admin-shell[data-redesign="true"] input,.admin-shell[data-redesign="true"] select,.admin-shell[data-redesign="true"] textarea{max-width:100%;font-size:16px}
+  .admin-shell[data-redesign="true"] .rd-toast{left:12px;right:12px;bottom:12px;text-align:center}
+}
+@media (max-width:390px){
+  .admin-shell[data-redesign="true"] .admin-wide{padding-left:9px!important;padding-right:9px!important}
+  .admin-shell[data-redesign="true"] .admin-sidebar button{font-size:11px!important;padding:7px 5px!important}
+  .admin-shell[data-redesign="true"] .rd-kpis article>strong{font-size:21px!important}
+  .admin-shell[data-redesign="true"] .ap-stats article>strong{font-size:20px!important}
+}
