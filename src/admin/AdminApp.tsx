@@ -679,7 +679,7 @@ export default function AdminApp() {
           loading={accountsLoading}
           busy={busy}
           onTogglePage={page=>void toggleMasterPage(page)}
-          onArchivePage={page=>void archiveMasterPage(page)}
+          onArchivePage={(page,accountId)=>void archiveMasterPage(page,accountId)}
         />
       </section>}
         </div>
