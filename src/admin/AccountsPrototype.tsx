@@ -95,11 +95,6 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
   }
 
   return <section className="accounts-prototype">
-    <header className="ap-heading">
-      <div><h2>Учётные записи</h2><p>Пользователи, роли и управление доступом</p></div>
-      <button type="button" className="ap-primary" onClick={onCreate}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>Создать УЗ</button>
-    </header>
-
     <div className="ap-stats ap-account-overview-stats" aria-label="Статистика учётных записей">
       <article><span>Всего учётных записей</span><strong>{allCount}</strong><small>Все пользователи платформы</small></article>
       <article><span>Активные учётные записи</span><strong>{activeCount}</strong><small>Доступ к панели открыт</small></article>
@@ -119,6 +114,7 @@ export default function AccountsPrototype({ accounts, companies, pages, loading,
       <select value={companyFilter} onChange={event => setCompanyFilter(event.target.value)} aria-label="Фильтр по компании">
         <option value="">Все компании</option>{companies.map(company => <option key={company.id} value={company.id}>{company.name}</option>)}
       </select>
+      <button type="button" className="ap-primary ap-toolbar-create" onClick={onCreate}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.25a.75.75 0 0 1 .75.75v4.25H13a.75.75 0 0 1 0 1.5H8.75V13a.75.75 0 0 1-1.5 0V8.75H3a.75.75 0 0 1 0-1.5h4.25V3A.75.75 0 0 1 8 2.25Z"/></svg>Создать УЗ</button>
     </div>
 
     <nav className="ap-tabs" aria-label="Категории учётных записей">
