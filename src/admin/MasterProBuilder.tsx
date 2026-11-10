@@ -38,6 +38,7 @@ export default function MasterProBuilder() {
   const [masterId,setMasterId] = useState<string | null>(null)
   const [masterSlug,setMasterSlug] = useState('')
   const [pageActive,setPageActive] = useState(false)
+  const [publishing,setPublishing] = useState(false)
   const [loading,setLoading] = useState(true)
   const [saving,setSaving] = useState(false)
   const [saveMessage,setSaveMessage] = useState('')
@@ -105,6 +106,19 @@ export default function MasterProBuilder() {
     return ()=>{cancelled=true}
   },[])
 
+  async function togglePagePublication(){
+    if(!supabase||!masterId||publishing)return
+    setPublishing(true);setSaveMessage('')
+    try{
+      const {data,error}=await supabase.from('masters').update({is_active:!pageActive}).eq('id',masterId).select('id,is_active').maybeSingle()
+      if(error)throw error
+      if(!data)throw new Error('Недостаточно прав для изменения статуса публикации страницы')
+      setPageActive(data.is_active)
+      setSaveMessage(data.is_active?'Страница опубликована.':'Страница отключена.')
+    }catch(error){setSaveMessage(error instanceof Error?error.message:'Не удалось изменить статус страницы')}
+    finally{setPublishing(false)}
+  }
+
   async function savePage(){
     if(!supabase||!masterId)return
     if(!name.trim()){setSaveMessage('Укажите имя и фамилию перед сохранением');setSection('profile');return}
@@ -155,7 +169,7 @@ export default function MasterProBuilder() {
   return <main className="mpb-shell">
     <header className="mpb-topbar">
       <div className="mpb-brand"><span className="mpb-brand-mark">W</span><span>Workflows <small>· Конструктор Master_pro</small></span></div>
-      <div className="mpb-top-actions"><span className={`mpb-draft-status ${pageActive?'is-published':''}`}><i/> {saving?'Сохранение…':pageActive?'Опубликована':'Черновик'}</span></div>
+      <div className="mpb-top-actions"><span className={`mpb-draft-status ${pageActive?'is-published':''}`}><i/> {publishing?'Обновление статуса…':saving?'Сохранение…':pageActive?'Опубликована':'Черновик'}</span><button type="button" className="mpb-publication-toggle" onClick={()=>void togglePagePublication()} disabled={publishing||saving}>{publishing?(pageActive?'Отключаем…':'Публикуем…'):pageActive?'Отключить страницу':'Опубликовать страницу'}</button></div>
     </header>
     <div className="mpb-page-head">
       <div><h1>Создание страницы</h1><p>Настройте свою страницу и сразу посмотрите, как её увидят клиенты.</p></div>
