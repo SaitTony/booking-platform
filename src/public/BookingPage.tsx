@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
-import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'\nimport MasterProPublicPage from './MasterProPublicPage'
+import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
+import MasterProPublicPage from './MasterProPublicPage'
 
 type MasterRecord = {
   id: string; display_name: string; slug: string; public_description: string; timezone: string
