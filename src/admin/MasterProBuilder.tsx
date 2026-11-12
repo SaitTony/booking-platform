@@ -75,7 +75,6 @@ export default function MasterProBuilder() {
   const todayBookings = bookings.filter(item=>new Intl.DateTimeFormat('sv-SE',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(item.starts_at))===todayKey).length
   const moneyTotal = bookings.filter(item=>item.status==='completed').reduce((sum,item)=>sum+Number(item.price_snapshot||0),0)
   const activeServices = services.filter(item=>item.active)
-  const currentService = activeServices.find(item=>item.id===selectedService) ?? activeServices[0]
   const activeDays = useMemo(()=>hours.filter(item=>item.enabled).length,[hours])
   const sections: {id:Section;number:string;symbol:string;title:string;sub:string}[] = [
     {id:'home',number:'01',symbol:'●',title:'Моя страница',sub:'Статус, показатели и управление страницей'},
