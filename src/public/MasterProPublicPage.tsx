@@ -32,13 +32,13 @@ export default function MasterProPublicPage(props:Props){
   const visibleDays=days.slice(dateWindow,dateWindow+7)
   const canGoBack=dateWindow>0
   const canGoForward=dateWindow+7<days.length
-  const visibleSlots=showAllSlots?slots:slots.slice(0,8)
   const selectedId=props.preview?demoService:(props.selectedServiceId??'')
   const selectedService=props.services.find(s=>s.id===selectedId)??props.services[0]
   const selectedDate=props.preview?demoDay:(props.selectedDate??'')
   const selectedSlot=props.preview?demoSlot:(props.selectedSlot??'')
   const sampleSlots=['09:30','10:45','12:00','13:30','15:00','16:15']
   const slots=props.preview?sampleSlots:(props.slots??[])
+  const visibleSlots=showAllSlots?slots:slots.slice(0,8)
   const dateLabel=props.preview?new Date(selectedDate+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}):(props.formattedDate??'')
   const photo=props.photo
   const firstName=props.name.trim().split(/\s+/)[0]||'специалист'
