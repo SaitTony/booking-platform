@@ -2092,3 +2092,161 @@ input,select,textarea,button{max-width:100%}
   .service-card>b{font-size:9px}
   .time-grid{gap:6px}
 }
+
+
+/* Master_pro public template — concept 3: editorial / journal */
+.public-page-editorial{
+  --editorial-ink:#24221f;--editorial-muted:#777168;--editorial-line:#ded8ce;
+  --editorial-paper:#faf8f4;--editorial-accent:#9a7258;
+  width:min(1440px,100%)!important;padding:0 54px!important;
+  background:var(--editorial-paper);
+}
+.public-page-editorial .topbar{
+  height:82px;border-bottom:1px solid var(--editorial-line);
+  text-transform:uppercase;letter-spacing:.16em;
+}
+.public-page-editorial .brand-mark{border-radius:0;background:var(--editorial-ink);width:38px;height:38px}
+.public-page-editorial .demo-label{letter-spacing:.18em;font-size:10px}
+.public-page-editorial .master-cover-photo{
+  height:clamp(280px,34vw,470px);margin:0;border-radius:0;
+  background-color:#b9a99a;background-size:cover;background-position:center;
+  justify-content:flex-end;align-items:flex-start;padding:32px 38px;
+}
+.public-page-editorial .master-cover-photo:before,
+.public-page-editorial .master-cover-photo:after{display:none}
+.public-page-editorial .master-cover-photo span{
+  font:500 clamp(25px,4vw,52px)/1.05 Georgia,serif;letter-spacing:-.035em;
+  max-width:650px;text-transform:none;text-shadow:0 2px 20px #0005;
+}
+.public-page-editorial .master-cover-photo b{
+  font:600 9px 'DM Sans',sans-serif;letter-spacing:.22em;text-shadow:0 1px 8px #0008;
+}
+.public-page-editorial .master-hero{
+  position:relative;display:grid;grid-template-columns:190px minmax(0,1fr);
+  align-items:end;gap:34px;margin:-68px 0 0;padding:0 38px 36px;
+  border-bottom:1px solid var(--editorial-line);z-index:1;
+}
+.public-page-editorial .master-avatar{
+  width:190px;height:230px;flex:none;border:8px solid var(--editorial-paper);
+  border-radius:0;background:#d9d0c5;font:500 66px Georgia,serif;overflow:hidden;
+}
+.public-page-editorial .master-avatar img{width:100%;height:100%;object-fit:cover}
+.public-page-editorial .master-copy{padding:0 0 8px;min-width:0}
+.public-page-editorial .master-copy .eyebrow{color:var(--editorial-accent);letter-spacing:.2em}
+.public-page-editorial .master-copy h1{
+  margin:12px 0 14px;color:var(--editorial-ink);
+  font:500 clamp(42px,6vw,76px)/.98 Georgia,'Times New Roman',serif;
+  letter-spacing:-.055em;
+}
+.public-page-editorial .master-copy p{
+  max-width:690px;color:var(--editorial-muted);font-size:15px;line-height:1.8;
+}
+.public-page-editorial .master-meta{gap:8px;margin-top:20px}
+.public-page-editorial .master-meta span{
+  padding:7px 11px;border:1px solid var(--editorial-line);
+  color:var(--editorial-muted);font-size:10px;letter-spacing:.04em;
+}
+.public-page-editorial .booking-layout{
+  grid-template-columns:minmax(0,1fr) 340px;gap:76px;padding:58px 38px 70px;
+}
+.public-page-editorial .section-heading{margin-bottom:22px}
+.public-page-editorial .section-heading .eyebrow{color:var(--editorial-accent);letter-spacing:.2em}
+.public-page-editorial .section-heading h2{
+  color:var(--editorial-ink);font:500 clamp(28px,3vw,38px)/1.08 Georgia,serif;
+  letter-spacing:-.035em;
+}
+.public-page-editorial .section-caption{color:var(--editorial-muted);font-size:11px}
+.public-page-editorial .service-list{gap:0;border-top:1px solid var(--editorial-line)}
+.public-page-editorial .service-card{
+  min-height:104px;padding:20px 12px;border:0;border-bottom:1px solid var(--editorial-line);
+  border-radius:0;background:transparent;gap:17px;
+}
+.public-page-editorial .service-card.selected{box-shadow:inset 3px 0 0 var(--editorial-accent);background:#f1ede6}
+.public-page-editorial .service-radio{border-color:#b7aa9a;flex:none}
+.public-page-editorial .service-card.selected .service-radio{background:var(--editorial-accent);border-color:var(--editorial-accent)}
+.public-page-editorial .service-info strong{font:600 16px Georgia,serif;color:var(--editorial-ink)}
+.public-page-editorial .service-info small{font-size:11px;line-height:1.55;color:var(--editorial-muted)}
+.public-page-editorial .service-info em{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--editorial-accent)}
+.public-page-editorial .service-card>b{font:600 15px Georgia,serif;color:var(--editorial-ink)}
+.public-page-editorial .date-heading,.public-page-editorial .time-heading{margin-top:44px}
+.public-page-editorial .date-strip{gap:8px}
+.public-page-editorial .date-card{
+  min-width:62px;border:1px solid var(--editorial-line);border-radius:0;
+  background:transparent;color:var(--editorial-muted);
+}
+.public-page-editorial .date-card strong{font:500 25px Georgia,serif;color:var(--editorial-ink)}
+.public-page-editorial .date-card.active{background:var(--editorial-ink);border-color:var(--editorial-ink);color:white}
+.public-page-editorial .date-card.active strong{color:white}
+.public-page-editorial .time-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.public-page-editorial .time-button{
+  border:1px solid var(--editorial-line);border-radius:0;background:transparent;
+  color:var(--editorial-ink);padding:13px 6px;
+}
+.public-page-editorial .time-button.active{background:var(--editorial-ink);border-color:var(--editorial-ink);color:white}
+.public-page-editorial .client-section{border-color:var(--editorial-line)}
+.public-page-editorial .field-label{color:var(--editorial-muted)}
+.public-page-editorial .field-label input{
+  border:1px solid var(--editorial-line);border-radius:0;background:transparent;color:var(--editorial-ink);
+}
+.public-page-editorial .booking-summary{border-radius:0;background:#f0ece5;color:var(--editorial-ink)}
+.public-page-editorial .primary-button{
+  border-radius:0;background:var(--editorial-ink);letter-spacing:.06em;text-transform:uppercase;
+}
+.public-page-editorial .primary-button:hover{background:#51463d}
+.public-page-editorial .booking-aside{padding-top:0}
+.public-page-editorial .aside-card{
+  top:24px;padding:25px;border:1px solid var(--editorial-line);
+  border-radius:0;background:#f4f0e9;box-shadow:none;
+}
+.public-page-editorial .aside-card>.eyebrow{color:var(--editorial-accent);letter-spacing:.18em}
+.public-page-editorial .aside-master strong{font:600 16px Georgia,serif;color:var(--editorial-ink)}
+.public-page-editorial .aside-master small,.public-page-editorial .aside-detail span{color:var(--editorial-muted)}
+.public-page-editorial .aside-card hr{border-color:var(--editorial-line)}
+.public-page-editorial .aside-detail{color:var(--editorial-ink)}
+.public-page-editorial .aside-total strong{font:500 27px Georgia,serif;color:var(--editorial-ink)}
+.public-page-editorial .page-footer{
+  margin:0 38px;border-color:var(--editorial-line);
+  color:var(--editorial-muted);letter-spacing:.08em;text-transform:uppercase;
+}
+.public-page-editorial .success-card{border-radius:0;border-color:var(--editorial-line);background:#fffdfa}
+.public-page-editorial .rules-modal{border-radius:0}
+@media(max-width:900px){
+  .public-page-editorial{padding:0 26px!important}
+  .public-page-editorial .booking-layout{grid-template-columns:minmax(0,1fr) 285px;gap:30px;padding-left:15px;padding-right:15px}
+  .public-page-editorial .master-hero{grid-template-columns:150px minmax(0,1fr);gap:22px;padding-left:15px;padding-right:15px}
+  .public-page-editorial .master-avatar{width:150px;height:190px}
+}
+@media(max-width:650px){
+  .public-page-editorial{padding:0 14px!important}
+  .public-page-editorial .topbar{height:64px}
+  .public-page-editorial .master-cover-photo{height:230px;padding:18px}
+  .public-page-editorial .master-cover-photo span{font-size:29px}
+  .public-page-editorial .master-hero{
+    grid-template-columns:88px minmax(0,1fr);gap:14px;
+    margin-top:-38px;padding:0 8px 24px;align-items:end;
+  }
+  .public-page-editorial .master-avatar{
+    width:88px;height:112px;border:5px solid var(--editorial-paper);
+    font-size:34px;
+  }
+  .public-page-editorial .master-copy{padding-bottom:4px}
+  .public-page-editorial .master-copy h1{font-size:clamp(30px,8vw,42px);margin:8px 0}
+  .public-page-editorial .master-copy .eyebrow{font-size:8px;line-height:1.4}
+  .public-page-editorial .master-copy p{grid-column:1/-1;font-size:12px;line-height:1.6}
+  .public-page-editorial .master-meta{grid-column:1/-1;margin-top:12px;gap:6px}
+  .public-page-editorial .master-meta span{font-size:9px;padding:6px 8px}
+  .public-page-editorial .booking-layout{display:flex;flex-direction:column;gap:18px;padding:30px 8px 42px}
+  .public-page-editorial .booking-aside{order:-1}
+  .public-page-editorial .aside-card{position:static;padding:16px}
+  .public-page-editorial .aside-master{margin:10px 0}
+  .public-page-editorial .aside-detail{display:flex;font-size:10px;margin:8px 0}
+  .public-page-editorial .aside-total strong{font-size:22px}
+  .public-page-editorial .section-heading h2{font-size:27px}
+  .public-page-editorial .service-card{min-height:88px;padding:15px 8px;gap:10px}
+  .public-page-editorial .service-info strong{font-size:14px}
+  .public-page-editorial .service-info small{font-size:10px}
+  .public-page-editorial .service-card>b{font-size:12px}
+  .public-page-editorial .date-heading,.public-page-editorial .time-heading{margin-top:32px}
+  .public-page-editorial .time-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .public-page-editorial .page-footer{margin:0 8px;gap:10px}
+}
