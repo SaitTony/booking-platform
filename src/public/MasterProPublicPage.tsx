@@ -35,7 +35,7 @@ export default function MasterProPublicPage(props:Props){
   const slots=props.preview?sampleSlots:(props.slots??[])
   const dateLabel=props.preview?new Date(selectedDate+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}):(props.formattedDate??'')
   const photo=props.photo
-  const firstName=props.name.trim().split(/\\s+/)[0]||'специалист'
+  const firstName=props.name.trim().split(/\s+/)[0]||'специалист'
   return <main className={'mp-page mp-theme-'+props.theme+(props.preview?' mp-is-preview':'')}>
     <header className="mp-header"><a className="mp-wordmark" href="#mp-top"><span className="mp-mark">W.</span><span>WORKFLOWS<small>PERSONAL PRACTICE</small></span></a><nav><a href="#mp-services">УСЛУГИ</a><a href="#mp-about">ОБО МНЕ</a></nav><a className="mp-header-cta" href="#mp-booking">ЗАПИСАТЬСЯ <b>↗</b></a></header>
     <section id="mp-top" className="mp-hero" style={props.coverImage?{backgroundImage:'linear-gradient(90deg,rgba(9,13,26,.88),rgba(9,13,26,.25)),url('+props.coverImage+')'}:undefined}>
