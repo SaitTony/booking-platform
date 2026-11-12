@@ -130,7 +130,7 @@ export default function BookingPage({ individual = false }: { individual?: boole
   if(bookingId)return <main className="booking-shell"><section className="success-card"><div className="success-icon">✓</div><span className="eyebrow">ЗАПИСЬ ПОДТВЕРЖДЕНА</span><h1>Вы записаны!</h1><p>Спасибо, {clientName}. Запись сохранена.</p><p className="demo-note">Номер записи: {bookingId}</p></section></main>
   if(!master)return null
 
-  return <main className="booking-shell" data-theme={pageTheme}>
+  return <main className={`booking-shell${individual ? " public-page-editorial" : ""}`} data-theme={pageTheme}>
     <header className="topbar"><span className="brand" aria-hidden="true"><span className="brand-mark" aria-hidden="true">✦</span></span><span className="demo-label"><i/> ОНЛАЙН-ЗАПИСЬ</span></header>
     {company && <div className="breadcrumb"><Link to={'/'+company.slug}>{company.name}</Link><span>/</span>{master.display_name}</div>}
     {(master.cover_url||master.theme?.cover_title)&&<div className="master-cover-photo" style={master.cover_url?{backgroundImage:`linear-gradient(115deg,rgba(0,0,0,.12),rgba(0,0,0,.32)),url("${master.cover_url}")`,backgroundSize:'cover',backgroundPosition:'center'}:undefined}>{master.theme?.cover_title&&<span>{master.theme.cover_title}</span>}<b>YOUR TIME · YOUR STYLE</b></div>}
