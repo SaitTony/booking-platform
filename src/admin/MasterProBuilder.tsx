@@ -329,7 +329,7 @@ export default function MasterProBuilder() {
           <div className="mpb-ep-footer"><span>PERSONAL PRACTICE</span><span>ОНЛАЙН-ЗАПИСЬ</span></div>
         </div></div>
         <div className="mpb-preview-note">Предпросмотр повторяет структуру опубликованной страницы. Сохраните изменения, чтобы обновить публичную страницу.</div>
-      </aside>}}
+      </aside>}
     </div>
 
   </main>
