@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
-import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
+import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'\nimport MasterProPublicPage from './MasterProPublicPage'
 
 type MasterRecord = {
   id: string; display_name: string; slug: string; public_description: string; timezone: string
@@ -130,29 +130,36 @@ export default function BookingPage({ individual = false }: { individual?: boole
   if(bookingId)return <main className="booking-shell"><section className="success-card"><div className="success-icon">✓</div><span className="eyebrow">ЗАПИСЬ ПОДТВЕРЖДЕНА</span><h1>Вы записаны!</h1><p>Спасибо, {clientName}. Запись сохранена.</p><p className="demo-note">Номер записи: {bookingId}</p></section></main>
   if(!master)return null
 
-  if(individual) return <main className="showcase-public" data-theme={pageTheme}>
-    <header className="showcase-nav"><a className="showcase-brand" href="#top">WORKFLOWS<span>PERSONAL SPACE</span></a><a href="#booking" className="showcase-nav-link">ОНЛАЙН-ЗАПИСЬ <b>↗</b></a></header>
-    <section id="top" className="showcase-hero" style={master.cover_url?{backgroundImage:"linear-gradient(90deg,rgba(9,13,25,.88),rgba(12,17,34,.42) 58%,rgba(12,17,34,.12)),url(\""+master.cover_url+"\")"}:undefined}>
-      <div className="showcase-hero-content"><span className="showcase-overline">{master.theme?.specialty||"ИНДИВИДУАЛЬНЫЙ СПЕЦИАЛИСТ"} <i/> ЧАСТНАЯ ПРАКТИКА</span><h1>{master.theme?.cover_title||master.display_name}</h1><p>{master.public_description||"Профессиональный подход, внимание к деталям и забота о вашем комфорте."}</p><div className="showcase-hero-actions"><a href="#booking" className="showcase-primary-link">Записаться онлайн <b>↗</b></a><span>Выберите удобное время за пару минут</span></div></div>
-      <div className="showcase-hero-person">{master.photo_url?<img src={master.photo_url} alt={master.display_name}/>:<span>{master.display_name.slice(0,1).toUpperCase()}</span>}<div><b>{master.display_name}</b><small>{master.theme?.specialty||"Ваш специалист"}</small></div></div>
-      <div className="showcase-hero-index">01 <span>—</span> 03</div>
-    </section>
-    <section className="showcase-intro"><span>ПЕРСОНАЛЬНЫЙ ПОДХОД</span><h2>Время, которое<br/><em>принадлежит вам.</em></h2><p>Выберите услугу и подходящий слот — мы позаботились о том, чтобы запись была простой и удобной.</p></section>
-    <div id="booking" className="showcase-booking-layout">
-      <section className="showcase-services">
-        <div className="showcase-section-title"><div><span>01 / ВЫБОР УСЛУГИ</span><h2>Услуги и стоимость</h2></div><small>{services.length} {services.length===1?"УСЛУГА":"УСЛУГ(И)"}</small></div>
-        <div className="showcase-service-list">{services.map((service,index)=><button key={service.id} className={"showcase-service "+(serviceId===service.id?"selected":"")} onClick={()=>{setServiceId(service.id);setSelectedSlot("")}}><span className="showcase-service-index">0{index+1}</span><span className="showcase-service-info"><b>{service.name}</b><small>{service.description||"Индивидуальная услуга"}</small><em>{service.duration} МИН.</em></span><strong>{money(service.price)}</strong><i>↗</i></button>)}{!services.length&&<p className="demo-note">Пока нет доступных услуг.</p>}</div>
-        <div className="showcase-section-title showcase-calendar-title"><div><span>02 / ДАТА И ВРЕМЯ</span><h2>Выберите время</h2></div><small>{formattedDate}</small></div>
-        <div className="showcase-date-list">{days.slice(0,10).map((day,index)=><button key={dateKey(day)} className={selectedDate===dateKey(day)?"selected":""} onClick={()=>{setSelectedDate(dateKey(day));setSelectedSlot("")}}><small>{index===0?"СЕГОДНЯ":day.toLocaleDateString("ru-RU",{weekday:"short"}).toUpperCase()}</small><b>{day.getDate()}</b><small>{day.toLocaleDateString("ru-RU",{month:"short"}).replace(".","").toUpperCase()}</small></button>)}</div>
-        <div className="showcase-time-label"><span>ДОСТУПНЫЕ СЛОТЫ</span><small>{formattedDate}</small></div>
-        <div className="showcase-time-list">{slots.map(slot=><button key={slot} className={selectedSlot===slot?"selected":""} onClick={()=>setSelectedSlot(slot)}>{formatSlot(slot)}</button>)}{!slots.length&&<p className="demo-note">На выбранную дату свободного времени нет. Выберите другой день.</p>}</div>
-        {selectedSlot&&<section className="showcase-contact"><div className="showcase-section-title"><div><span>03 / ПОСЛЕДНИЙ ШАГ</span><h2>Ваши контакты</h2></div></div><label>ВАШЕ ИМЯ<input value={clientName} onChange={e=>setClientName(e.target.value)} placeholder="Как к вам обращаться?"/></label><label>НОМЕР ТЕЛЕФОНА<PhoneInput value={clientPhone} onChange={setClientPhone} required/></label><label className="showcase-rules"><input type="checkbox" checked={rulesAccepted} onChange={e=>setRulesAccepted(e.target.checked)}/>Я ознакомился с правилами записи и отмены</label>{error&&<p className="admin-error">{error}</p>}<button className="showcase-confirm" disabled={!clientName.trim()||!isValidRussianPhone(clientPhone)||!rulesAccepted||saving} onClick={()=>void submitBooking()}>{saving?"Подтверждаем…":"Подтвердить запись"} <b>↗</b></button></section>}
-      </section>
-      <aside className="showcase-booking-card"><div className="showcase-card-top"><span>ВАША ЗАПИСЬ</span><i>✦</i></div><h3>Запланируйте<br/>свою встречу</h3><p>Все детали вашей записи собраны здесь.</p><div className="showcase-card-person">{master.photo_url?<img src={master.photo_url} alt=""/>:<span>{master.display_name.slice(0,1)}</span>}<div><b>{master.display_name}</b><small>{master.theme?.specialty||"Специалист"}</small></div></div><div className="showcase-card-row"><small>УСЛУГА</small><b>{selectedService?.name??"Выберите услугу"}</b></div><div className="showcase-card-row"><small>ДАТА</small><b>{formattedDate||"Не выбрана"}</b></div><div className="showcase-card-row"><small>ВРЕМЯ</small><b>{selectedSlot?formatSlot(selectedSlot):"Не выбрано"}</b></div><div className="showcase-card-total"><span>ИТОГО</span><strong>{money(selectedService?.price??0)}</strong></div><a href="#booking" className="showcase-card-cta">Выбрать дату и время <b>↗</b></a><small className="showcase-card-foot">Без предоплаты · Подтверждение онлайн</small></aside>
-    </div>
-    <section className="showcase-about"><div className="showcase-about-photo">{master.photo_url?<img src={master.photo_url} alt={master.display_name}/>:<span>{master.display_name.slice(0,1)}</span>}</div><div className="showcase-about-copy"><span>О СПЕЦИАЛИСТЕ</span><h2>Знакомство<br/>с {master.display_name.split(" ")[0]}</h2><p>{master.public_description||"Я ценю ваше время и стремлюсь сделать каждую встречу комфортной и результативной."}</p>{Array.isArray(master.theme?.tags)&&master.theme.tags.length>0&&<div>{master.theme.tags.map(tag=><span key={tag}>{tag}</span>)}</div>}</div></section>
-    <footer className="showcase-footer"><b>WORKFLOWS</b><span>ПРОСТРАНСТВО ДЛЯ ВАС</span><span>ОНЛАЙН-ЗАПИСЬ</span></footer>
-  </main>
+  if(individual) return <MasterProPublicPage
+    name={master.display_name}
+    specialty={master.theme?.specialty??''}
+    description={master.public_description??''}
+    photo={master.photo_url??''}
+    coverImage={master.cover_url??''}
+    coverTitle={master.theme?.cover_title??''}
+    tags={master.theme?.tags??[]}
+    theme={pageTheme}
+    services={services}
+    selectedServiceId={serviceId}
+    onServiceChange={id=>{setServiceId(id);setSelectedSlot('')}}
+    days={days}
+    selectedDate={selectedDate}
+    onDateChange={value=>{setSelectedDate(value);setSelectedSlot('')}}
+    slots={slots}
+    selectedSlot={selectedSlot}
+    onSlotChange={setSelectedSlot}
+    formatSlot={formatSlot}
+    formattedDate={formattedDate}
+    clientName={clientName}
+    onClientNameChange={setClientName}
+    clientPhone={clientPhone}
+    onClientPhoneChange={setClientPhone}
+    rulesAccepted={rulesAccepted}
+    onRulesAcceptedChange={setRulesAccepted}
+    saving={saving}
+    error={error}
+    onSubmit={()=>void submitBooking()}
+  />
 
   return <main className={`booking-shell${individual ? " public-page-editorial" : ""}`} data-theme={pageTheme}>
     <header className="topbar"><span className="brand" aria-hidden="true"><span className="brand-mark" aria-hidden="true">✦</span></span><span className="demo-label"><i/> ОНЛАЙН-ЗАПИСЬ</span></header>
