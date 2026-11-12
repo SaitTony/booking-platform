@@ -31,3 +31,27 @@
 .mp-is-preview .mp-about-section{grid-template-columns:.8fr 1.2fr;gap:15px;padding:28px 18px}.mp-is-preview .mp-about-image{height:170px}.mp-is-preview .mp-about-image>span{font-size:50px}.mp-is-preview .mp-about-image>small{padding:5px;font-size:4px}.mp-is-preview .mp-about-copy h2{margin:8px 0;font-size:18px}.mp-is-preview .mp-tag-list{gap:3px;margin-top:8px}.mp-is-preview .mp-tag-list span{padding:4px;font-size:4px}.mp-is-preview .mp-text-link{margin-top:9px;font-size:5px}.mp-is-preview .mp-final-cta{padding:25px 10px}.mp-is-preview .mp-final-cta>span{font-size:5px}.mp-is-preview .mp-final-cta .mp-button{margin-top:8px}.mp-is-preview .mp-footer{padding:10px 15px;font-size:4px}.mp-is-preview .mp-footer .mp-mark{width:20px;height:20px;font-size:9px}
 @media(max-width:760px){.mp-header{height:66px;padding:0 16px}.mp-header nav{display:none}.mp-header-cta{padding:10px;font-size:8px}.mp-hero{grid-template-columns:1fr;min-height:0;padding:50px 22px 65px}.mp-hero:before{background:linear-gradient(180deg,#10131deF 0%,#10131d9c 55%,#10131d55 100%)}.mp-hero-copy{padding:10px 0 30px}.mp-hero h1{font-size:clamp(48px,13vw,76px)}.mp-hero-copy>p{font-size:12px}.mp-hero-visual{justify-self:center;width:78%;height:330px;margin:5px 0 15px}.mp-portrait-caption{left:-22px;bottom:15px}.mp-hero-stamp{right:-15px}.mp-hero-bottom{left:22px;right:22px;bottom:17px;font-size:6px}.mp-intro{grid-template-columns:1fr;gap:16px;padding:55px 22px}.mp-intro h2,.mp-section-head h2,.mp-booking-intro h2,.mp-about-copy h2{font-size:39px}.mp-intro>p{max-width:420px}.mp-services-section,.mp-booking-section{padding:58px 20px}.mp-section-head{display:grid;gap:15px}.mp-service-grid{grid-template-columns:1fr}.mp-service-card{min-height:190px}.mp-service-card>strong{margin-top:22px}.mp-booking-intro{grid-template-columns:1fr;gap:15px}.mp-booking-intro>.mp-kicker,.mp-booking-intro h2,.mp-booking-steps{grid-column:1}.mp-booking-intro>p{justify-self:start}.mp-booking-steps{gap:12px;flex-wrap:wrap}.mp-booking-workspace{grid-template-columns:1fr}.mp-order-card{position:static;grid-row:1}.mp-calendar-panel{grid-row:2;padding:19px 13px}.mp-date-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.mp-slot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mp-about-section{grid-template-columns:1fr;gap:28px;padding:58px 22px}.mp-about-image{height:340px;width:min(100%,420px)}.mp-about-copy h2{font-size:42px}.mp-final-cta{padding:55px 15px}.mp-final-cta h2{font-size:43px}.mp-footer{flex-wrap:wrap;padding:20px}.mp-footer>span{display:none}}
 @media(max-width:390px){.mp-hero-visual{width:86%;height:285px}.mp-date-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mp-panel-title h3{font-size:22px}.mp-calendar-panel{padding:16px 10px}}
+
+/* Phone-sized constructor preview uses the same stacked mobile information hierarchy */
+.mp-is-preview.mp-preview-mobile{width:280px}
+@media(min-width:761px){
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-hero{grid-template-columns:1fr;min-height:0;padding:18px 12px 28px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-hero-copy{padding:5px 0 15px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-hero-visual{justify-self:center;width:76%;height:155px;margin:4px auto 12px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-hero-bottom{left:12px;right:12px;bottom:7px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-intro{grid-template-columns:1fr;gap:7px;padding:17px 12px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-services-section,.mpb-preview-frame.is-mobile .mp-is-preview .mp-booking-section{padding:19px 12px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-section-head{display:grid;gap:6px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-service-grid{grid-template-columns:1fr}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-service-card{min-height:95px;padding:8px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-service-card>strong{margin-top:8px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-service-card>p{margin:3px 0 6px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-booking-intro{grid-template-columns:1fr}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-booking-intro>.mp-kicker,.mpb-preview-frame.is-mobile .mp-is-preview .mp-booking-intro h2,.mpb-preview-frame.is-mobile .mp-is-preview .mp-booking-steps{grid-column:1}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-booking-workspace{grid-template-columns:1fr}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-order-card{position:static;grid-row:1}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-calendar-panel{grid-row:2}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-about-section{grid-template-columns:1fr;gap:10px;padding:19px 12px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-about-image{height:125px}
+ .mpb-preview-frame.is-mobile .mp-is-preview .mp-final-cta{padding:18px 8px}
+}
