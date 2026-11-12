@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { Link } from 'react-router-dom'
-import './MasterProBuilder.css'\nimport MasterProPublicPage from '../public/MasterProPublicPage'
+import './MasterProBuilder.css'
+import MasterProPublicPage from '../public/MasterProPublicPage'
 
 type Section = 'home' | 'profile' | 'design' | 'services' | 'schedule' | 'bookings' | 'settings'
 type Theme = 'natural' | 'graphite' | 'sand' | 'green' | 'blue' | 'dark'
@@ -47,7 +48,6 @@ export default function MasterProBuilder() {
   const [timezone,setTimezone] = useState('Europe/Moscow')
   const [horizon,setHorizon] = useState('30')
   const [device,setDevice] = useState<'desktop'|'mobile'>('desktop')
-  const [previewTab,setPreviewTab] = useState<'page'|'booking'>('page')
   const [,setSaved] = useState(false)
   const [masterId,setMasterId] = useState<string | null>(null)
   const [masterSlug,setMasterSlug] = useState('')
