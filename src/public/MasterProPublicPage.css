@@ -400,3 +400,8 @@
 .mp-booking-intro>.mp-kicker{font-size:9px!important;font-weight:800!important;letter-spacing:.19em!important;line-height:1.2!important}
 @media(max-width:760px){.mp-hero-visual{transform:translate(0,-30px)!important}}
 .mp-is-preview .mp-intro-index,.mp-is-preview .mp-booking-intro>.mp-kicker{font-size:5px!important;letter-spacing:.19em!important}
+
+
+/* Shared typography for the two editorial section indices */
+.mp-page .mp-intro-index,.mp-page .mp-booking-intro>.mp-kicker{font-family:'DM Sans',Arial,sans-serif!important;font-size:9px!important;font-weight:800!important;letter-spacing:.19em!important;line-height:1.2!important;text-transform:uppercase}
+.mp-is-preview .mp-intro-index,.mp-is-preview .mp-booking-intro>.mp-kicker{font-size:5px!important;letter-spacing:.19em!important;line-height:1.2!important}
