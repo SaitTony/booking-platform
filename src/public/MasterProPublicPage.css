@@ -417,3 +417,14 @@
  .mp-page .mp-hero-visual{transform:translate(0,-15px)!important}
  .mp-page .mp-intro>p{margin-left:18px!important}
 }
+
+
+/* Latest Master Pro refinements: smaller portrait, lower placement, dark compact intro title */
+.mp-page .mp-hero-visual{transform:translate(30px,15px) scale(.9)!important}
+.mp-page .mp-intro h2{font-size:calc(clamp(42px,4.5vw,66px) * .85)!important;color:#000!important}
+.mp-page .mp-intro h2 em{color:#000!important}
+@media(max-width:760px){
+ .mp-page .mp-hero-visual{transform:translate(0,15px) scale(.9)!important}
+ .mp-page .mp-intro h2{font-size:calc(39px * .85)!important;color:#000!important}
+ .mp-page .mp-intro h2 em{color:#000!important}
+}
