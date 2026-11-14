@@ -453,3 +453,17 @@
   .mp-page .mp-intro{border-radius:20px!important}
   .mp-page .mp-booking-section{border-radius:20px 20px 0 0!important}
 }
+
+
+/* Latest hero refinements: portrait closer to header edge, lighter photo ring, larger specialty */
+.mp-page .mp-hero-visual{transform:translate(36px,-20px) scale(.9)!important}
+.mp-page .mp-hero-visual>img,.mp-page .mp-photo-placeholder{border-width:8px!important}
+.mp-page .mp-portrait-caption small{font-size:13.2px!important}
+.mp-page .mp-hero-bottom{display:flex;align-items:center;gap:clamp(10px,2vw,26px)}
+.mp-page .mp-hero-tags{display:flex;align-items:center;justify-content:flex-end;gap:clamp(8px,1.5vw,18px);margin-left:auto;text-align:right;flex-wrap:wrap}
+.mp-page .mp-hero-tags span{font:inherit;color:inherit;letter-spacing:inherit;text-transform:uppercase}
+@media(max-width:760px){
+ .mp-page .mp-hero-visual{transform:translate(0,-20px) scale(.9)!important}
+ .mp-page .mp-hero-bottom{gap:8px;flex-wrap:wrap}
+ .mp-page .mp-hero-tags{width:100%;justify-content:flex-end;margin-left:0}
+}
