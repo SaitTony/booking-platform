@@ -313,3 +313,24 @@
 }
 
 @media(min-width:761px){.mp-page{width:min(calc(100% - 48px),1500px)}}
+
+
+/* Stacked booking flow: all three stages remain visible in document flow */
+.mp-booking-workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.72fr);align-items:start;gap:clamp(22px,3vw,46px)}
+.mp-calendar-panel{display:flex;flex-direction:column;gap:34px;min-width:0;min-height:0}
+.mp-booking-step{display:block;min-width:0;padding:0 0 30px;border-bottom:1px solid var(--mp-line);scroll-margin-top:28px}
+.mp-booking-step:last-child{padding-bottom:0;border-bottom:0}
+.mp-booking-step .mp-panel-title{margin-bottom:20px}
+.mp-booking-step .mp-panel-title h3{margin-top:8px}
+.mp-booking-dates .mp-date-grid{margin-top:8px}
+.mp-booking-times .mp-slot-grid.is-disabled{opacity:.45}
+.mp-step-hint{margin:14px 0 0;color:var(--mp-muted);font-size:13px}
+.mp-order-card{position:sticky!important;top:24px;align-self:start;max-height:none!important;overflow:visible!important;overscroll-behavior:auto;z-index:4}
+.mp-order-submit{width:100%;margin-top:20px;justify-content:center}
+.mp-order-submit:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
+@media(max-width:760px){
+ .mp-booking-workspace{display:flex;flex-direction:column}
+ .mp-calendar-panel{width:100%;gap:25px}
+ .mp-booking-step{width:100%;padding-bottom:24px}
+ .mp-order-card{position:relative!important;top:auto;width:100%;max-height:none!important;overflow:visible!important;order:1}
+}
