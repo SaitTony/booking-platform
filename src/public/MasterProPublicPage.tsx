@@ -37,15 +37,21 @@ export default function MasterProPublicPage(props:Props){
     if(!heading||!container)return
     const fitTitle=()=>{
       heading.style.fontSize=''
+      heading.style.maxHeight='none'
+      heading.style.overflow=''
       const baseSize=parseFloat(getComputedStyle(heading).fontSize)||56
       let size=baseSize
-      const minSize=10
+      const minSize=6
       heading.style.fontSize=size+'px'
       let lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
       while(heading.scrollHeight>lineHeight*4+2&&size>minSize){
         size=Math.max(minSize,size-1)
         heading.style.fontSize=size+'px'
         lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
+      }
+      if(heading.scrollHeight>lineHeight*4+2){
+        heading.style.maxHeight=(lineHeight*4)+'px'
+        heading.style.overflow='hidden'
       }
     }
     fitTitle()
