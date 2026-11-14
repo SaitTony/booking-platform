@@ -334,3 +334,22 @@
  .mp-booking-step{width:100%;padding-bottom:24px}
  .mp-order-card{position:relative!important;top:auto;width:100%;max-height:none!important;overflow:visible!important;order:1}
 }
+
+
+/* Final refinements: softened hero transition, distinct booking cards, lower sticky summary */
+@media(min-width:761px){
+ .mp-hero{position:relative;z-index:1}
+ .mp-intro{position:relative;z-index:4;margin-top:-62px;border-radius:24px 24px 0 0;isolation:isolate}
+ .mp-intro:before{content:"";position:absolute;z-index:-1;left:0;right:0;top:-34px;height:54px;pointer-events:none;background:linear-gradient(to bottom,rgba(227,235,241,0),rgba(227,235,241,.72) 55%,#e3ebf1 100%);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);mask-image:linear-gradient(to bottom,transparent 0%,#000 45%)}
+ .mp-hero-visual{z-index:2}
+}
+.mp-calendar-panel{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;gap:26px!important}
+.mp-booking-step{padding:27px 30px 30px!important;border:1px solid var(--mp-line)!important;border-radius:20px!important;background:var(--mp-bg)!important;box-shadow:0 12px 32px rgba(0,0,0,.08)!important}
+.mp-booking-step+.mp-booking-step{margin-top:0}
+.mp-booking-step .mp-panel-title{margin-bottom:20px!important}
+.mp-order-card{top:48px!important}
+@media(max-width:760px){
+ .mp-calendar-panel{gap:18px!important}
+ .mp-booking-step{padding:22px 16px 24px!important;border-radius:17px!important}
+ .mp-intro{position:relative;z-index:3;margin-top:-30px}
+}
