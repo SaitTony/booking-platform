@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import './MasterProPublicPage.css'
 
@@ -43,10 +43,11 @@ export default function MasterProPublicPage(props:Props){
   const selectedSlot=props.preview?demoSlot:(props.selectedSlot??'')
   const sampleSlots=['09:30','10:45','12:00','13:30','15:00','16:15']
   const slots=props.preview?sampleSlots:(props.slots??[])
-  const visibleSlots=showAllSlots?slots:slots.slice(0,8)
+  const visibleSlots=slots
   const dateLabel=props.preview?new Date(selectedDate+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}):(props.formattedDate??'')
   const photo=props.photo
   const firstName=props.name.trim().split(/\s+/)[0]||'специалист'
+  useEffect(()=>{if(selectedSlot)document.getElementById('mp-booking-summary')?.scrollIntoView({behavior:'smooth',block:'center'})},[selectedSlot])
   return <main className={'mp-page mp-theme-'+props.theme+(props.preview?' mp-is-preview':'')}>
     <header className="mp-header"><a className="mp-wordmark" href="#mp-top"><span className="mp-mark">W.</span><span>WORKFLOWS<small>PERSONAL PRACTICE</small></span></a><nav><a href="#mp-services">УСЛУГИ</a><a href="#mp-about">ОБО МНЕ</a></nav><a className="mp-header-cta" href="#mp-booking">ЗАПИСАТЬСЯ <b>↗</b></a></header>
     <section id="mp-top" className="mp-hero" style={props.coverImage?{backgroundImage:'linear-gradient(90deg,rgba(9,13,26,.88),rgba(9,13,26,.25)),url('+props.coverImage+')'}:undefined}>
