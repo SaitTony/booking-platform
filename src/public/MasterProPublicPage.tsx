@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import PhoneInput, { isValidRussianPhone } from '../lib/PhoneInput'
 import './MasterProPublicPage.css'
 
@@ -29,6 +29,30 @@ export default function MasterProPublicPage(props:Props){
   const [dateWindow,setDateWindow]=useState(0)
 
   const [modalOpen,setModalOpen]=useState(false)
+  const coverTitleRef=useRef<HTMLHeadingElement|null>(null)
+  const heroCopyRef=useRef<HTMLDivElement|null>(null)
+  useEffect(()=>{
+    const heading=coverTitleRef.current
+    const container=heroCopyRef.current
+    if(!heading||!container)return
+    const fitTitle=()=>{
+      heading.style.fontSize=''
+      const baseSize=parseFloat(getComputedStyle(heading).fontSize)||56
+      let size=baseSize
+      const minSize=10
+      heading.style.fontSize=size+'px'
+      let lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
+      while(heading.scrollHeight>lineHeight*4+2&&size>minSize){
+        size=Math.max(minSize,size-1)
+        heading.style.fontSize=size+'px'
+        lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
+      }
+    }
+    fitTitle()
+    const observer=new ResizeObserver(fitTitle)
+    observer.observe(container)
+    return ()=>observer.disconnect()
+  },[props.coverTitle,props.preview])
   const days:Day[]=(props.days??(props.preview?previewDays:[])).map((date,index)=>({key:keyOf(date),date,label:index===0?'СЕГОДНЯ':date.toLocaleDateString('ru-RU',{weekday:'short'}).toUpperCase(),weekday:date.toLocaleDateString('ru-RU',{weekday:'short'}).toUpperCase(),month:date.toLocaleDateString('ru-RU',{month:'short'}).replace('.','').toUpperCase()}))
   const baseMonth=days[0]?.date??previewDays[0]
   const calendarMonth=new Date(baseMonth.getFullYear(),baseMonth.getMonth()+dateWindow,1,12)
@@ -49,7 +73,7 @@ export default function MasterProPublicPage(props:Props){
   return <main className={'mp-page mp-theme-'+props.theme+(props.preview?' mp-is-preview':'')}>
     
     <section id="mp-top" className="mp-hero" style={props.coverImage?{backgroundImage:'linear-gradient(90deg,rgba(9,13,26,.88),rgba(9,13,26,.25)),url('+props.coverImage+')'}:undefined}>
-      <a className="mp-hero-wordmark" href="#mp-top"><span>W.</span><b>WORKFLOWS<small>PERSONAL PRACTICE</small></b></a><div className="mp-hero-copy"><span className="mp-kicker"><i/> {props.specialty||'НЕЗАВИСИМЫЙ СПЕЦИАЛИСТ'}</span><h1>{props.coverTitle.trim()||'Время для себя.'}<em>{props.coverTitle.trim()?'':'Искусство быть собой.'}</em></h1></div>
+      <a className="mp-hero-wordmark" href="#mp-top"><span>W.</span><b>WORKFLOWS<small>PERSONAL PRACTICE</small></b></a><div className="mp-hero-copy" ref={heroCopyRef}><span className="mp-kicker"><i/> {props.specialty||'НЕЗАВИСИМЫЙ СПЕЦИАЛИСТ'}</span><h1 ref={coverTitleRef}>{props.coverTitle.trim()||'Время для себя.'}<em>{props.coverTitle.trim()?'':'Искусство быть собой.'}</em></h1></div>
       <div className="mp-hero-visual">{photo?<img src={photo} alt={props.name}/>:<div className="mp-photo-placeholder">{(props.name||'W').slice(0,1)}</div>}<div className="mp-portrait-caption"><b>{props.name||'Ваше имя'}</b><small>{props.specialty||'Индивидуальная практика'}</small></div><div className="mp-hero-stamp">01 <i>/</i> PERSONAL SPACE</div></div>
       <div className="mp-hero-bottom"><span>ПРОСТРАНСТВО ДЛЯ ВАС</span><span>SCROLL TO EXPLORE ↓</span><span>01 — 04</span></div>
     </section>
