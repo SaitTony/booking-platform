@@ -237,3 +237,26 @@
  .mp-date-grid button b{font-size:21px}.mp-date-grid button small{font-size:8px}
  .mp-slot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* Guided booking calendar, selected summary and contact modal */
+.mp-calendar-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin:8px 0 10px;text-align:center;color:var(--mp-muted);font-size:10px;font-weight:800;letter-spacing:.12em}
+.mp-date-toolbar{margin-bottom:14px}.mp-date-toolbar span{text-transform:capitalize;font-size:15px;font-weight:700;color:var(--mp-ink)}
+.mp-calendar-blank{min-height:68px}
+.mp-date-grid button:disabled,.mp-date-grid button.is-past{opacity:.28;cursor:not-allowed;background:transparent;border-color:transparent}
+.mp-date-grid button:disabled b{color:var(--mp-muted)}
+.mp-booking-summary{margin-top:28px;padding:30px;border:1px solid var(--mp-line);border-radius:24px;background:var(--mp-card);box-shadow:0 18px 55px #0002;scroll-margin-top:35px}
+.mp-booking-summary h3{margin:10px 0 22px;font:500 34px 'Playfair Display',Georgia,serif}
+.mp-summary-line{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-bottom:1px solid var(--mp-line)}
+.mp-summary-line span{color:var(--mp-muted);font-size:13px}.mp-summary-line b{font-size:15px;text-align:right}
+.mp-summary-total{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+.mp-summary-total span{color:var(--mp-muted);font-size:13px}.mp-summary-total b{font:500 30px 'Playfair Display',Georgia,serif}
+.mp-modal-backdrop{position:fixed;z-index:1000;inset:0;display:grid;place-items:center;padding:20px;background:#090d16b8;backdrop-filter:blur(8px)}
+.mp-booking-modal{position:relative;width:min(100%,520px);max-height:min(90vh,760px);overflow:auto;padding:42px;border:1px solid var(--mp-line);border-radius:28px;background:var(--mp-panel);color:var(--mp-ink);box-shadow:0 30px 100px #0008}
+.mp-booking-modal h3{margin:13px 0;font:500 38px/1.05 'Playfair Display',Georgia,serif}
+.mp-booking-modal>p{margin:0 0 25px;color:var(--mp-muted);font-size:14px;line-height:1.6}
+.mp-booking-modal>label:not(.mp-check){display:grid;gap:9px;margin:18px 0;color:var(--mp-muted);font-size:11px;font-weight:800;letter-spacing:.12em}
+.mp-booking-modal input:not([type=checkbox]){width:100%;padding:16px 17px;border:1px solid var(--mp-line);border-radius:13px;background:var(--mp-bg);color:var(--mp-ink);font:16px 'DM Sans',sans-serif}
+.mp-booking-modal .mp-check{font-size:12px;margin:20px 0}
+.mp-modal-close{position:absolute;right:18px;top:15px;width:38px;height:38px;border:0;border-radius:50%;background:var(--mp-card);color:var(--mp-ink);font-size:25px}
+@media(max-width:760px){.mp-calendar-weekdays{gap:4px;font-size:9px}.mp-calendar-blank{min-height:54px}.mp-booking-summary{padding:22px 16px;border-radius:20px}.mp-booking-modal{padding:35px 22px 24px;border-radius:23px}.mp-booking-modal h3{font-size:31px}}
