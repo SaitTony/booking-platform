@@ -89,7 +89,7 @@ export default function MasterProPublicPage(props:Props){
   const photo=props.photo
   return <main className={'mp-page mp-theme-'+props.theme+(props.preview?' mp-is-preview':'')}>
     
-    <section id="mp-top" className="mp-hero" style={props.coverImage?{backgroundImage:'linear-gradient(90deg,rgba(9,13,26,.88),rgba(9,13,26,.25)),url('+props.coverImage+')'}:undefined}>
+    <section id="mp-top" className="mp-hero" style={props.coverImage?{backgroundImage:'url('+props.coverImage+')'}:undefined}>
       <a className="mp-hero-wordmark" href="#mp-top"><span>W.</span><b>WORKFLOWS<small>PERSONAL PRACTICE</small></b></a><div className="mp-hero-copy" ref={heroCopyRef}><span className="mp-kicker"><i/> {props.specialty||'НЕЗАВИСИМЫЙ СПЕЦИАЛИСТ'}</span><h1 ref={coverTitleRef}>{props.coverTitle.trim()||'Время для себя.'}<em>{props.coverTitle.trim()?'':'Искусство быть собой.'}</em></h1></div>
       <div className="mp-hero-visual">{photo?<img src={photo} alt={props.name}/>:<div className="mp-photo-placeholder">{(props.name||'W').slice(0,1)}</div>}<div className="mp-portrait-caption"><b>{props.name||'Ваше имя'}</b><small>{props.specialty||'Индивидуальная практика'}</small></div><div className="mp-hero-stamp">01 <i>/</i> PERSONAL SPACE</div></div>
       <div className="mp-hero-bottom"><span>ПРОСТРАНСТВО ДЛЯ ВАС</span><span>SCROLL TO EXPLORE ↓</span><span>01 — 04</span>{props.tags.length>0&&<div className="mp-hero-tags">{props.tags.map((tag,index)=><span key={index}>{tag}</span>)}</div>}</div>
