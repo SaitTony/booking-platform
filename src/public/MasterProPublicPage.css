@@ -477,3 +477,19 @@
  .mp-page .mp-hero-bottom{gap:8px;flex-wrap:wrap}
  .mp-page .mp-hero-tags{width:100%;justify-content:flex-end;margin-left:0}
 }
+
+
+/* Final requested hero adjustments: theme-tinted translucent overlay, clean title and tags */
+.mp-page .mp-hero:before{
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--mp-accent2) 30%,transparent) 0%,
+    color-mix(in srgb,var(--mp-accent2) 22%,transparent) 48%,
+    color-mix(in srgb,var(--mp-accent2) 7%,transparent) 100%)!important;
+}
+.mp-page .mp-hero h1,.mp-page .mp-hero h1 em{color:#fff!important}
+.mp-page .mp-hero-visual{transform:translate(36px,-5px) scale(.9)!important}
+.mp-page .mp-hero-bottom{justify-content:flex-end!important}
+.mp-page .mp-hero-tags{margin-left:auto!important}
+@media(max-width:760px){
+  .mp-page .mp-hero-visual{transform:translate(36px,-5px) scale(.9)!important}
+}
