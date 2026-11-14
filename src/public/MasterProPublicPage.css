@@ -405,3 +405,15 @@
 /* Shared typography for the two editorial section indices */
 .mp-page .mp-intro-index,.mp-page .mp-booking-intro>.mp-kicker{font-family:'DM Sans',Arial,sans-serif!important;font-size:11px!important;font-weight:800!important;letter-spacing:.19em!important;line-height:1.2!important;text-transform:uppercase}
 .mp-is-preview .mp-intro-index,.mp-is-preview .mp-booking-intro>.mp-kicker{font-size:11px!important;letter-spacing:.19em!important;line-height:1.2!important}
+
+
+/* Master Pro information section: heading first, profile text below */
+.mp-page .mp-intro{display:block!important}
+.mp-page .mp-intro h2{margin:20px 0 0!important}
+.mp-page .mp-intro h2 em{display:inline!important}
+.mp-page .mp-intro>p{margin:22px 0 0 clamp(18px,3vw,42px)!important;max-width:900px}
+.mp-page .mp-hero-visual{transform:translate(30px,-15px)!important}
+@media(max-width:760px){
+ .mp-page .mp-hero-visual{transform:translate(0,-15px)!important}
+ .mp-page .mp-intro>p{margin-left:18px!important}
+}
