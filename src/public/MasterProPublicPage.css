@@ -371,3 +371,12 @@
 
 /* Clear 12px breathing space between the hero header and the following content */
 .mp-hero{margin-bottom:12px}
+
+
+/* Theme-driven page surround and fixed hero height */
+.mp-page{box-shadow:0 0 0 100vmax var(--mp-bg),0 18px 70px #18233412!important}
+.mp-hero{height:650px!important;min-height:650px!important;max-height:650px!important;overflow:hidden}
+.mp-hero-copy>.mp-button{display:none!important}
+@media(max-width:760px){
+ .mp-hero{height:auto!important;min-height:0!important;max-height:650px!important}
+}
