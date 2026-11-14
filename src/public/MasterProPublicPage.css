@@ -367,3 +367,7 @@
  .mp-intro:before{display:none!important;content:none!important}
  .mp-order-card{top:auto!important}
 }
+
+
+/* Clear 12px breathing space between the hero header and the following content */
+.mp-hero{margin-bottom:12px}
