@@ -260,3 +260,6 @@
 .mp-booking-modal .mp-check{font-size:12px;margin:20px 0}
 .mp-modal-close{position:absolute;right:18px;top:15px;width:38px;height:38px;border:0;border-radius:50%;background:var(--mp-card);color:var(--mp-ink);font-size:25px}
 @media(max-width:760px){.mp-calendar-weekdays{gap:4px;font-size:9px}.mp-calendar-blank{min-height:54px}.mp-booking-summary{padding:22px 16px;border-radius:20px}.mp-booking-modal{padding:35px 22px 24px;border-radius:23px}.mp-booking-modal h3{font-size:31px}}
+
+/* Portrait overlaps the transition between hero backing and page content */
+@media(min-width:761px){.mp-hero-visual{z-index:3;transform:translateY(92px)}.mp-intro{position:relative;z-index:1}}
