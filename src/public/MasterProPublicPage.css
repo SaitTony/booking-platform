@@ -428,3 +428,10 @@
  .mp-page .mp-intro h2{font-size:calc(39px * .85)!important;color:#000!important}
  .mp-page .mp-intro h2 em{color:#000!important}
 }
+
+/* Theme-aware information panel and final specialist portrait position */
+.mp-page .mp-hero-visual{transform:translate(36px,-36px) scale(.9)!important}
+.mp-page .mp-intro{background:var(--mp-panel)!important}
+@media(max-width:760px){
+ .mp-page .mp-hero-visual{transform:translate(36px,-36px) scale(.9)!important}
+}
