@@ -353,3 +353,17 @@
  .mp-booking-step{padding:22px 16px 24px!important;border-radius:17px!important}
  .mp-intro{position:relative;z-index:3;margin-top:-30px}
 }
+
+/* User-approved crisp separation between hero header and following section */
+@media(min-width:761px){
+ .mp-hero{border-radius:0 0 26px 26px;overflow:hidden;z-index:2}
+ .mp-intro{margin-top:0!important;border-radius:26px 26px 0 0!important;z-index:3}
+ .mp-intro:before{display:none!important;content:none!important}
+ .mp-order-card{top:90px!important}
+}
+@media(max-width:760px){
+ .mp-hero{border-radius:0 0 20px 20px;overflow:hidden}
+ .mp-intro{margin-top:0!important;border-radius:20px 20px 0 0!important}
+ .mp-intro:before{display:none!important;content:none!important}
+ .mp-order-card{top:auto!important}
+}
