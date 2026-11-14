@@ -27,7 +27,7 @@ export default function MasterProPublicPage(props:Props){
   const [demoPhone,setDemoPhone]=useState('')
   const [demoRules,setDemoRules]=useState(false)
   const [dateWindow,setDateWindow]=useState(0)
-  const [showAllSlots,setShowAllSlots]=useState(false)
+
   const [modalOpen,setModalOpen]=useState(false)
   const days:Day[]=(props.days??(props.preview?previewDays:[])).map((date,index)=>({key:keyOf(date),date,label:index===0?'СЕГОДНЯ':date.toLocaleDateString('ru-RU',{weekday:'short'}).toUpperCase(),weekday:date.toLocaleDateString('ru-RU',{weekday:'short'}).toUpperCase(),month:date.toLocaleDateString('ru-RU',{month:'short'}).replace('.','').toUpperCase()}))
   const baseMonth=days[0]?.date??previewDays[0]
