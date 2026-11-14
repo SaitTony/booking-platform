@@ -393,3 +393,10 @@
  .mp-intro-index{font-size:9px!important}
 }
 .mp-is-preview .mp-intro-index{font-size:5px!important;letter-spacing:.19em!important}
+
+/* Hero cleanup and portrait positioning */
+.mp-hero-visual{transform:translate(30px,-30px)!important}
+.mp-intro-index{font-family:inherit!important;font-size:9px!important;font-weight:800!important;letter-spacing:.19em!important;line-height:1.2!important;text-transform:uppercase}
+.mp-booking-intro>.mp-kicker{font-size:9px!important;font-weight:800!important;letter-spacing:.19em!important;line-height:1.2!important}
+@media(max-width:760px){.mp-hero-visual{transform:translate(0,-30px)!important}}
+.mp-is-preview .mp-intro-index,.mp-is-preview .mp-booking-intro>.mp-kicker{font-size:5px!important;letter-spacing:.19em!important}
