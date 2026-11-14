@@ -380,3 +380,16 @@
 @media(max-width:760px){
  .mp-hero{height:auto!important;min-height:0!important;max-height:650px!important}
 }
+
+/* Final alignment: 620px hero, theme-matched page surround, and balanced intro columns */
+.mp-page{overflow:visible!important}
+.mp-hero{height:620px!important;min-height:620px!important;max-height:620px!important}
+.mp-intro{grid-template-columns:.65fr .9fr 1.5fr!important}
+.mp-intro-index{font-family:'DM Sans',Arial,sans-serif!important;font-size:9px!important;font-weight:800!important;letter-spacing:.19em!important;line-height:1!important}
+.mp-booking-intro{display:block!important;margin-bottom:34px!important}
+@media(max-width:760px){
+ .mp-hero{height:auto!important;min-height:0!important;max-height:620px!important}
+ .mp-intro{grid-template-columns:1fr!important}
+ .mp-intro-index{font-size:9px!important}
+}
+.mp-is-preview .mp-intro-index{font-size:5px!important;letter-spacing:.19em!important}
