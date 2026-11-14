@@ -311,3 +311,5 @@
  .mp-service-bottom{grid-column:2;grid-row:3;display:flex;justify-content:space-between;border:0;padding:8px 0 0}
  .mp-calendar-panel .mp-date-grid button{max-height:48px}
 }
+
+@media(min-width:761px){.mp-page{width:min(calc(100% - 48px),1500px)}}
