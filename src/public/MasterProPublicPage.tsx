@@ -21,7 +21,7 @@ const keyOf=(date:Date)=>[date.getFullYear(),String(date.getMonth()+1).padStart(
 export default function MasterProPublicPage(props:Props){
   const previewDays=useMemo(()=>Array.from({length:30},(_,i)=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+i);return d}),[])
   const [demoService,setDemoService]=useState(props.services[0]?.id??'')
-  const [demoDay,setDemoDay]=useState(keyOf(previewDays[0]))
+  const [demoDay,setDemoDay]=useState(keyOf(new Date()))
   const [demoSlot,setDemoSlot]=useState('')
   const [demoName,setDemoName]=useState('')
   const [demoPhone,setDemoPhone]=useState('')
