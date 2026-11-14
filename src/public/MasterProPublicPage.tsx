@@ -35,29 +35,40 @@ export default function MasterProPublicPage(props:Props){
     const heading=coverTitleRef.current
     const container=heroCopyRef.current
     if(!heading||!container)return
+    let frame=0
     const fitTitle=()=>{
-      heading.style.fontSize=''
-      heading.style.maxHeight='none'
-      heading.style.overflow=''
-      const baseSize=parseFloat(getComputedStyle(heading).fontSize)||56
-      let size=baseSize
-      const minSize=6
-      heading.style.fontSize=size+'px'
-      let lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
-      while(heading.scrollHeight>lineHeight*4+2&&size>minSize){
-        size=Math.max(minSize,size-1)
+      cancelAnimationFrame(frame)
+      frame=requestAnimationFrame(()=>{
+        heading.style.fontSize=''
+        heading.style.maxHeight='none'
+        heading.style.overflow='visible'
+        const baseSize=parseFloat(getComputedStyle(heading).fontSize)||56
+        let size=baseSize
+        const minSize=8
+        const fits=()=>{
+          const lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
+          return heading.scrollHeight<=lineHeight*4+2
+        }
         heading.style.fontSize=size+'px'
-        lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
-      }
-      if(heading.scrollHeight>lineHeight*4+2){
+        while(!fits()&&size>minSize){
+          size=Math.max(minSize,size-.5)
+          heading.style.fontSize=size+'px'
+        }
+        const lineHeight=parseFloat(getComputedStyle(heading).lineHeight)||size
         heading.style.maxHeight=(lineHeight*4)+'px'
         heading.style.overflow='hidden'
-      }
+      })
     }
     fitTitle()
     const observer=new ResizeObserver(fitTitle)
     observer.observe(container)
-    return ()=>observer.disconnect()
+    observer.observe(heading)
+    window.addEventListener('load',fitTitle)
+    return ()=>{
+      observer.disconnect()
+      window.removeEventListener('load',fitTitle)
+      cancelAnimationFrame(frame)
+    }
   },[props.coverTitle,props.preview])
   const days:Day[]=(props.days??(props.preview?previewDays:[])).map((date,index)=>({key:keyOf(date),date,label:index===0?'СЕГОДНЯ':date.toLocaleDateString('ru-RU',{weekday:'short'}).toUpperCase(),weekday:date.toLocaleDateString('ru-RU',{weekday:'short'}).toUpperCase(),month:date.toLocaleDateString('ru-RU',{month:'short'}).replace('.','').toUpperCase()}))
   const baseMonth=days[0]?.date??previewDays[0]
